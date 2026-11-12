@@ -1,0 +1,73 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 900" role="img" aria-labelledby="title desc">
+  <title id="title">UV curing station</title>
+  <desc id="desc">A professional UV curing chamber with a rotating platform and violet-cyan light treatment.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#071321"/><stop offset=".55" stop-color="#0d1e30"/><stop offset="1" stop-color="#181f3d"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0" stop-color="#8b5cf6" stop-opacity=".35"/><stop offset=".55" stop-color="#22d3ee" stop-opacity=".15"/><stop offset="1" stop-color="#22d3ee" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="body" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#20364c"/><stop offset=".6" stop-color="#102337"/><stop offset="1" stop-color="#081625"/>
+    </linearGradient>
+    <linearGradient id="door" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#4c1d95" stop-opacity=".7"/><stop offset=".55" stop-color="#0e2b44" stop-opacity=".85"/><stop offset="1" stop-color="#0891b2" stop-opacity=".6"/>
+    </linearGradient>
+    <linearGradient id="uv" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#8b5cf6" stop-opacity=".15"/><stop offset=".5" stop-color="#c4b5fd"/><stop offset="1" stop-color="#8b5cf6" stop-opacity=".15"/>
+    </linearGradient>
+    <pattern id="grid" width="46" height="46" patternUnits="userSpaceOnUse">
+      <path d="M46 0H0V46" fill="none" stroke="#7fb9d8" stroke-opacity=".07"/>
+    </pattern>
+    <filter id="blur"><feGaussianBlur stdDeviation="24"/></filter>
+    <filter id="shadow" x="-30%" y="-30%" width="160%" height="180%">
+      <feDropShadow dx="0" dy="32" stdDeviation="26" flood-color="#010812" flood-opacity=".8"/>
+    </filter>
+  </defs>
+  <rect width="1200" height="900" fill="url(#bg)"/>
+  <rect width="1200" height="900" fill="url(#grid)"/>
+  <circle cx="600" cy="380" r="450" fill="url(#glow)"/>
+  <path d="M60 700h1080l54 92H6z" fill="#081522" stroke="#2a4d67"/>
+  <ellipse cx="600" cy="740" rx="380" ry="44" fill="#010812" opacity=".75" filter="url(#blur)"/>
+
+  <g filter="url(#shadow)">
+    <rect x="330" y="172" width="540" height="540" rx="26" fill="url(#body)" stroke="#355d7b" stroke-width="2"/>
+    <rect x="330" y="172" width="540" height="48" rx="22" fill="#1b3248" stroke="#3e6888"/>
+    <rect x="372" y="248" width="456" height="342" rx="16" fill="#06121f" stroke="#447292"/>
+    <rect x="388" y="264" width="424" height="310" rx="12" fill="url(#door)"/>
+    <!-- internal light bars -->
+    <rect x="406" y="282" width="388" height="7" rx="3.5" fill="url(#uv)"/>
+    <rect x="406" y="550" width="388" height="7" rx="3.5" fill="url(#uv)"/>
+    <!-- rotating platform -->
+    <ellipse cx="600" cy="518" rx="170" ry="42" fill="#0b1e30" stroke="#5b8ba9"/>
+    <ellipse cx="600" cy="506" rx="152" ry="32" fill="#123049"/>
+    <ellipse cx="600" cy="500" rx="112" ry="20" fill="#183d58"/>
+    <!-- printed part on platform -->
+    <g>
+      <path d="M560 498l40-22 42 22-42 22z" fill="#67e8f9" opacity=".8"/>
+      <path d="M560 498v-42l42-22v42z" fill="#0e7490"/>
+      <path d="M642 498v-42l-42-22v42z" fill="#155e75"/>
+      <path d="M576 470l24-13 26 13-26 13z" fill="#a5f3fc" opacity=".8"/>
+      <path d="M600 454v-18" stroke="#c4b5fd" stroke-width="2"/>
+    </g>
+    <!-- light rays -->
+    <g stroke="#c4b5fd" stroke-opacity=".12">
+      <path d="M430 282l90 216M520 282l74 205M700 282l-64 205M786 282l-92 216"/>
+    </g>
+    <!-- controls -->
+    <rect x="394" y="612" width="412" height="66" rx="10" fill="#0a1a2a" stroke="#335a77"/>
+    <circle cx="436" cy="645" r="17" fill="#081624" stroke="#67e8f9" stroke-opacity=".6"/>
+    <circle cx="436" cy="645" r="5" fill="#22d3ee"/>
+    <rect x="478" y="632" width="130" height="8" rx="4" fill="#1f4762"/>
+    <rect x="478" y="650" width="84" height="6" rx="3" fill="#2e5f7e"/>
+    <path d="M732 630v30M756 630v30" stroke="#3f6c8a" stroke-width="3"/>
+    <rect x="648" y="630" width="56" height="30" rx="6" fill="#101f30" stroke="#3b6482"/>
+  </g>
+  <g fill="none" stroke="#c4b5fd" stroke-opacity=".28">
+    <circle cx="1000" cy="230" r="26"/>
+    <circle cx="1000" cy="230" r="4" fill="#c4b5fd"/>
+    <path d="M1000 204v-18M1000 256v18M974 230h-18M1026 230h18"/>
+    <path d="M196 250h-40v40"/>
+  </g>
+</svg>

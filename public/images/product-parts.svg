@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 900" role="img" aria-labelledby="title desc">
+  <title id="title">Precision 3D printed engineering parts</title>
+  <desc id="desc">A collection of functional 3D printed parts including gears, a bracket and a lattice structure.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#071321"/><stop offset=".6" stop-color="#0c1e30"/><stop offset="1" stop-color="#132f45"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0" stop-color="#22d3ee" stop-opacity=".28"/><stop offset="1" stop-color="#22d3ee" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="part" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#4f7f9f"/><stop offset=".5" stop-color="#24445e"/><stop offset="1" stop-color="#0f2437"/>
+    </linearGradient>
+    <linearGradient id="partLight" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#7dd3fc"/><stop offset="1" stop-color="#1d6f96"/>
+    </linearGradient>
+    <linearGradient id="surface" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0d2336"/><stop offset="1" stop-color="#081522"/>
+    </linearGradient>
+    <pattern id="grid" width="46" height="46" patternUnits="userSpaceOnUse">
+      <path d="M46 0H0V46" fill="none" stroke="#7fb9d8" stroke-opacity=".07"/>
+    </pattern>
+    <filter id="blur"><feGaussianBlur stdDeviation="22"/></filter>
+    <filter id="shadow" x="-30%" y="-30%" width="160%" height="180%">
+      <feDropShadow dx="0" dy="24" stdDeviation="20" flood-color="#010812" flood-opacity=".75"/>
+    </filter>
+  </defs>
+  <rect width="1200" height="900" fill="url(#bg)"/>
+  <rect width="1200" height="900" fill="url(#grid)"/>
+  <circle cx="620" cy="380" r="440" fill="url(#glow)"/>
+  <path d="M110 706h980l80 84H30z" fill="url(#surface)" stroke="#2d506a"/>
+  <ellipse cx="600" cy="740" rx="420" ry="50" fill="#010812" opacity=".7" filter="url(#blur)"/>
+
+  <g filter="url(#shadow)">
+    <!-- lattice cube -->
+    <g transform="translate(420 350)">
+      <path d="M0 80L120 20l120 60-120 60z" fill="#1a3b53" stroke="#4c80a0"/>
+      <path d="M0 80v140l120 60V140z" fill="url(#part)" stroke="#4c80a0"/>
+      <path d="M240 80v140l-120 60V140z" fill="#16344a" stroke="#4c80a0"/>
+      <path d="M0 80l120-60 120 60M0 140l120-60 120 60M0 200l120-60 120 60M0 260l120-60 120 60" fill="none" stroke="#67e8f9" stroke-opacity=".38"/>
+      <path d="M60 50v140M120 20v200M180 50v140M60 190v80M180 190v80" fill="none" stroke="#7dd3fc" stroke-opacity=".25"/>
+      <path d="M0 80v140M120 140v140M240 80v140" fill="none" stroke="#67e8f9" stroke-opacity=".32" stroke-width="2"/>
+    </g>
+
+    <!-- gear -->
+    <g transform="translate(790 380)">
+      <path d="M0-110l18-9 15 16 18-1 6 20 17 8-4 20 12 14-13 16 4 20-18 8-7 20-19-1-14 15-18-9-18 9-14-15-19 1-7-20-18-8 4-20-13-16 12-14-4-20 17-8 6-20 18 1 15-16z" fill="url(#partLight)" opacity=".95"/>
+      <circle r="74" fill="#0b2033" stroke="#67e8f9" stroke-opacity=".5"/>
+      <circle r="32" fill="#07131f" stroke="#4c80a0"/>
+      <circle r="74" fill="none" stroke="#dff7ff" stroke-opacity=".18"/>
+      <path d="M-74 0H74M0-74V74" stroke="#dff7ff" stroke-opacity=".12"/>
+    </g>
+
+    <!-- bracket -->
+    <g transform="translate(760 590)">
+      <path d="M0 0h150v32H100v90H0z" fill="#1b3b52" stroke="#4c80a0"/>
+      <circle cx="28" cy="28" r="10" fill="#0a1a28" stroke="#67e8f9" stroke-opacity=".6"/>
+      <circle cx="28" cy="94" r="10" fill="#0a1a28" stroke="#67e8f9" stroke-opacity=".6"/>
+      <circle cx="120" cy="16" r="7" fill="#0a1a28" stroke="#67e8f9" stroke-opacity=".6"/>
+    </g>
+
+    <!-- small printed housings -->
+    <g transform="translate(250 540)">
+      <path d="M0 60l60-30 60 30-60 34z" fill="#20445e" stroke="#4c80a0"/>
+      <path d="M0 60v54l60 34V94z" fill="#11293d" stroke="#4c80a0"/>
+      <path d="M120 60v54l-60 34V94z" fill="#0e2234" stroke="#4c80a0"/>
+      <path d="M22 94l38 18M38 70l38 18" stroke="#67e8f9" stroke-opacity=".3"/>
+    </g>
+  </g>
+  <g fill="none" stroke="#67e8f9" stroke-opacity=".3">
+    <path d="M176 276h-38v38M1012 600h38v38"/>
+    <circle cx="1010" cy="222" r="24"/>
+    <path d="M1010 198v-16"/>
+  </g>
+</svg>

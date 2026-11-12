@@ -1,0 +1,146 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1000" role="img" aria-labelledby="title desc">
+  <title id="title">Industrial 3D printer illustration</title>
+  <desc id="desc">A precision enclosed 3D printer producing a layered component in a dark technical environment.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#06111f"/>
+      <stop offset=".55" stop-color="#0a1929"/>
+      <stop offset="1" stop-color="#0d2237"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0" stop-color="#22d3ee" stop-opacity=".42"/>
+      <stop offset=".55" stop-color="#0ea5e9" stop-opacity=".12"/>
+      <stop offset="1" stop-color="#0ea5e9" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="metal" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#22364d"/>
+      <stop offset=".35" stop-color="#152a40"/>
+      <stop offset="1" stop-color="#0a1726"/>
+    </linearGradient>
+    <linearGradient id="metalTop" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#2b4562"/>
+      <stop offset="1" stop-color="#14283c"/>
+    </linearGradient>
+    <linearGradient id="glass" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#143047" stop-opacity=".9"/>
+      <stop offset=".55" stop-color="#0b1c2c" stop-opacity=".88"/>
+      <stop offset="1" stop-color="#0f2b42" stop-opacity=".9"/>
+    </linearGradient>
+    <linearGradient id="cyan" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#0ea5e9" stop-opacity=".2"/>
+      <stop offset=".5" stop-color="#67e8f9"/>
+      <stop offset="1" stop-color="#0ea5e9" stop-opacity=".2"/>
+    </linearGradient>
+    <linearGradient id="part" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#38bdf8"/>
+      <stop offset="1" stop-color="#0369a1"/>
+    </linearGradient>
+    <pattern id="grid" width="54" height="54" patternUnits="userSpaceOnUse">
+      <path d="M54 0H0V54" fill="none" stroke="#80b7d8" stroke-opacity=".09" stroke-width="1"/>
+    </pattern>
+    <filter id="soft" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="18"/>
+    </filter>
+    <filter id="shadow" x="-30%" y="-30%" width="160%" height="180%">
+      <feDropShadow dx="0" dy="30" stdDeviation="28" flood-color="#020912" flood-opacity=".75"/>
+    </filter>
+    <linearGradient id="fade" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#22d3ee" stop-opacity=".8"/>
+      <stop offset="1" stop-color="#22d3ee" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1200" height="1000" fill="url(#bg)"/>
+  <rect width="1200" height="1000" fill="url(#grid)" opacity=".7"/>
+  <circle cx="850" cy="330" r="430" fill="url(#glow)"/>
+  <path d="M0 870h1200" stroke="#4f8fb3" stroke-opacity=".18" stroke-width="1"/>
+  <path d="M120 900h960" stroke="#4f8fb3" stroke-opacity=".08" stroke-width="1"/>
+
+  <ellipse cx="700" cy="900" rx="360" ry="46" fill="#020a14" opacity=".75" filter="url(#soft)"/>
+
+  <!-- printer body -->
+  <g filter="url(#shadow)">
+    <rect x="374" y="238" width="652" height="572" rx="30" fill="url(#metal)" stroke="#2c4a67" stroke-width="2"/>
+    <rect x="374" y="238" width="652" height="58" rx="28" fill="url(#metalTop)" stroke="#335671" stroke-width="1.5"/>
+    <rect x="404" y="318" width="592" height="418" rx="18" fill="url(#glass)" stroke="#3d6c8d" stroke-width="1.5"/>
+    <!-- frame highlights -->
+    <path d="M418 340h560" stroke="#7dd3fc" stroke-opacity=".25" stroke-width="2"/>
+    <path d="M404 700h592" stroke="#22d3ee" stroke-opacity=".7" stroke-width="2"/>
+    <rect x="500" y="716" width="400" height="5" rx="2.5" fill="url(#cyan)"/>
+    <!-- vent details -->
+    <g stroke="#4c7797" stroke-opacity=".45" stroke-width="2">
+      <path d="M390 270h20M390 284h20M390 298h20"/>
+      <path d="M990 270h-20M990 284h-20M990 298h-20"/>
+    </g>
+    <!-- side control panel -->
+    <rect x="942" y="352" width="30" height="132" rx="8" fill="#0b1a29" stroke="#3b6483"/>
+    <circle cx="957" cy="380" r="5" fill="#22d3ee"/>
+    <circle cx="957" cy="404" r="3" fill="#3f6f8f"/>
+    <circle cx="957" cy="424" r="3" fill="#3f6f8f"/>
+    <rect x="950" y="448" width="14" height="22" rx="3" fill="#123b58"/>
+  </g>
+
+  <!-- gantry and print head -->
+  <g>
+    <rect x="446" y="386" width="20" height="254" rx="5" fill="#1c3a55" stroke="#417494"/>
+    <rect x="934" y="386" width="20" height="254" rx="5" fill="#1c3a55" stroke="#417494"/>
+    <rect x="446" y="392" width="508" height="20" rx="6" fill="#244866" stroke="#4d83a5"/>
+    <rect x="638" y="404" width="72" height="66" rx="9" fill="#0d2133" stroke="#5ba9c9"/>
+    <path d="M662 470h24l-8 26h-8z" fill="#8fb8cc"/>
+    <circle cx="674" cy="434" r="7" fill="#22d3ee"/>
+    <circle cx="674" cy="434" r="13" fill="none" stroke="#22d3ee" stroke-opacity=".25"/>
+    <path d="M674 496v40" stroke="#7dd3fc" stroke-opacity=".55" stroke-width="2" stroke-dasharray="4 7"/>
+  </g>
+
+  <!-- print bed and layered part -->
+  <g>
+    <rect x="494" y="658" width="412" height="24" rx="7" fill="#1b354c" stroke="#4b7897"/>
+    <rect x="508" y="650" width="384" height="10" rx="4" fill="#2d506b"/>
+    <g>
+      <path d="M608 650h104l-10-26H618z" fill="#15415e" stroke="#2b7ba6"/>
+      <path d="M622 624h76l-8-24h-60z" fill="url(#part)" opacity=".92"/>
+      <path d="M636 600h48l-7-22h-34z" fill="#7dd3fc" opacity=".9"/>
+      <path d="M648 578h24l-5-18h-14z" fill="#e0f7ff"/>
+      <path d="M596 650h128" stroke="#67e8f9" stroke-opacity=".6" stroke-width="2"/>
+      <path d="M622 624h76M636 600h48M648 578h24" stroke="#e0f7ff" stroke-opacity=".35" stroke-width="1.5"/>
+    </g>
+    <path d="M494 682h412" stroke="#67e8f9" stroke-opacity=".28" stroke-width="2"/>
+  </g>
+
+  <!-- base -->
+  <g>
+    <rect x="350" y="758" width="700" height="102" rx="20" fill="url(#metal)" stroke="#2c4a67" stroke-width="1.5"/>
+    <rect x="380" y="784" width="170" height="8" rx="4" fill="#22d3ee" opacity=".65"/>
+    <rect x="380" y="802" width="90" height="6" rx="3" fill="#4b7897" opacity=".5"/>
+    <circle cx="980" cy="806" r="18" fill="#0b1b2a" stroke="#3a6483"/>
+    <circle cx="980" cy="806" r="6" fill="#22d3ee" opacity=".8"/>
+    <rect x="410" y="860" width="60" height="18" rx="6" fill="#0a1624"/>
+    <rect x="930" y="860" width="60" height="18" rx="6" fill="#0a1624"/>
+  </g>
+
+  <!-- filament spool -->
+  <g>
+    <circle cx="214" cy="600" r="86" fill="#0a1726" stroke="#2d4f6b" stroke-width="2"/>
+    <circle cx="214" cy="600" r="64" fill="#122b40" stroke="#3e6d8c" stroke-width="1.5"/>
+    <circle cx="214" cy="600" r="26" fill="#071320" stroke="#2a4a63"/>
+    <circle cx="214" cy="600" r="54" fill="none" stroke="#22d3ee" stroke-opacity=".55" stroke-width="7" stroke-dasharray="230 110"/>
+    <path d="M296 580c66-26 94 12 130 62" fill="none" stroke="#67e8f9" stroke-opacity=".65" stroke-width="3"/>
+    <path d="M296 580c66-26 94 12 130 62" fill="none" stroke="#22d3ee" stroke-opacity=".18" stroke-width="10"/>
+    <path d="M132 664h164" stroke="#4b7897" stroke-opacity=".45" stroke-width="2"/>
+  </g>
+
+  <!-- floating technical markers -->
+  <g fill="none" stroke="#67e8f9" stroke-opacity=".45">
+    <circle cx="1052" cy="250" r="32"/>
+    <circle cx="1052" cy="250" r="4" fill="#67e8f9"/>
+    <path d="M1052 218v-26M1052 282v26M1020 250h-26M1084 250h26"/>
+    <path d="M340 210v-34h34M1030 730v34h-34"/>
+  </g>
+  <g fill="#67e8f9">
+    <circle cx="112" cy="322" r="3" opacity=".7"/>
+    <circle cx="298" cy="196" r="2" opacity=".5"/>
+    <circle cx="1106" cy="610" r="2.5" opacity=".6"/>
+    <circle cx="972" cy="140" r="2" opacity=".4"/>
+  </g>
+  <path d="M90 760c80-8 130-44 150-104" fill="none" stroke="#22d3ee" stroke-opacity=".18" stroke-width="1.5" stroke-dasharray="5 9"/>
+</svg>
