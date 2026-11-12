@@ -1,11 +1,11 @@
-import { render, screen, waitFor } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
+import { render, screen } from "@testing-library/react";
 import { NextIntlClientProvider } from "next-intl";
 import { describe, expect, it, vi } from "vitest";
 
 import { ProductCatalog } from "@/components/public/product-catalog";
 import { seedCategories } from "@/data/seed/categories";
 import { seedProducts } from "@/data/seed/products";
+import type { Product } from "@/domain/product";
 
 import enMessages from "../../messages/en.json";
 
@@ -15,15 +15,10 @@ vi.mock("@/components/public/product-card", () => ({
   ),
 }));
 
-function renderCatalog(initialCategoryId: string | null = null) {
+function renderCatalog(products: Product[] = seedProducts) {
   return render(
     <NextIntlClientProvider locale="en" messages={enMessages}>
-      <ProductCatalog
-        products={seedProducts}
-        categories={seedCategories}
-        locale="en"
-        initialCategoryId={initialCategoryId}
-      />
+      <ProductCatalog products={products} categories={seedCategories} locale="en" />
     </NextIntlClientProvider>,
   );
 }
@@ -33,49 +28,25 @@ function expectedCountLabel(count: number): RegExp {
 }
 
 describe("ProductCatalog", () => {
-  it("renders all products initially", () => {
+  it("renders every product with the catalog count", () => {
     renderCatalog();
 
     expect(screen.getByText(expectedCountLabel(seedProducts.length))).toBeInTheDocument();
     expect(screen.getAllByTestId("product-card")).toHaveLength(seedProducts.length);
   });
 
-  it("filters products as the visitor types", async () => {
-    const user = userEvent.setup();
+  it("does not render search or category filter controls", () => {
     renderCatalog();
 
-    await user.type(screen.getByLabelText(enMessages.products.searchLabel), "TEL-FDM-001");
-
-    await waitFor(() => {
-      expect(screen.getByText(expectedCountLabel(1))).toBeInTheDocument();
-    });
-    expect(screen.getByTestId("product-card")).toHaveTextContent("Tello Forge X1");
+    expect(screen.queryByRole("searchbox")).not.toBeInTheDocument();
+    expect(screen.queryByRole("combobox")).not.toBeInTheDocument();
   });
 
-  it("shows an empty state and can clear the search", async () => {
-    const user = userEvent.setup();
-    renderCatalog();
+  it("shows an empty state when the catalog has no products", () => {
+    renderCatalog([]);
 
-    await user.type(screen.getByLabelText(enMessages.products.searchLabel), "no-such-item");
-
-    expect(await screen.findByText(enMessages.products.emptyTitle)).toBeInTheDocument();
-
-    await user.click(screen.getAllByRole("button", { name: enMessages.products.clearFilters })[0]!);
-
-    await waitFor(() => {
-      expect(screen.getAllByTestId("product-card")).toHaveLength(seedProducts.length);
-    });
-  });
-
-  it("respects an initial category filter", () => {
-    const category = seedCategories.find((candidate) =>
-      seedProducts.some((product) => product.categoryId === candidate.id),
-    )!;
-    const count = seedProducts.filter((product) => product.categoryId === category.id).length;
-
-    renderCatalog(category.id);
-
-    expect(screen.getByText(expectedCountLabel(count))).toBeInTheDocument();
-    expect(screen.getAllByTestId("product-card")).toHaveLength(count);
+    expect(screen.getByText(enMessages.products.emptyTitle)).toBeInTheDocument();
+    expect(screen.getByText(enMessages.products.emptyDescription)).toBeInTheDocument();
+    expect(screen.queryAllByTestId("product-card")).toHaveLength(0);
   });
 });

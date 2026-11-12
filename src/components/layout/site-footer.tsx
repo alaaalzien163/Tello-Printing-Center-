@@ -1,24 +1,13 @@
-import { Camera, Mail, MapPin, MessageCircle, Phone, AtSign, Briefcase } from "lucide-react";
+import { Mail, MapPin, MessageCircle, Phone } from "lucide-react";
 import { getLocale, getTranslations } from "next-intl/server";
 
 import { Logo } from "@/components/brand/logo";
-import { siteConfig, type SocialLink } from "@/config/site";
+import { SocialLinks } from "@/components/shared/social-links";
+import { siteConfig } from "@/config/site";
 import { Link } from "@/i18n/navigation";
 import { pickLocalized } from "@/lib/format";
 import { buildWhatsAppContactUrl, externalLinkProps } from "@/lib/whatsapp";
 import { getPublicCatalog } from "@/repositories/public-catalog";
-
-const socialIcons: Record<SocialLink["key"], typeof Mail> = {
-  instagram: Camera,
-  linkedin: Briefcase,
-  x: AtSign,
-};
-
-const socialLabels: Record<SocialLink["key"], string> = {
-  instagram: "Instagram",
-  linkedin: "LinkedIn",
-  x: "X",
-};
 
 export async function SiteFooter() {
   const [t, tNav, tContact, locale, catalog] = await Promise.all([
@@ -43,20 +32,7 @@ export async function SiteFooter() {
               <span className="text-xs font-medium tracking-wide text-white/50 uppercase">
                 {t("follow")}
               </span>
-              {siteConfig.socialLinks.map((social) => {
-                const Icon = socialIcons[social.key];
-                return (
-                  <a
-                    key={social.key}
-                    href={social.href}
-                    {...externalLinkProps}
-                    aria-label={socialLabels[social.key]}
-                    className="flex size-8 items-center justify-center rounded-lg bg-white/8 text-white/70 transition-colors hover:bg-white/15 hover:text-white"
-                  >
-                    <Icon className="size-4" aria-hidden="true" />
-                  </a>
-                );
-              })}
+              <SocialLinks links={siteConfig.socialLinks} />
             </div>
           ) : null}
         </div>
@@ -102,7 +78,7 @@ export async function SiteFooter() {
             {categories.map((category) => (
               <li key={category.id}>
                 <Link
-                  href={`/products?category=${category.slug}`}
+                  href="/products#catalog"
                   className="text-white/70 transition-colors hover:text-white"
                 >
                   {pickLocalized(category.name, locale)}

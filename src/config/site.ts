@@ -27,13 +27,15 @@ function isPublicHttpUrl(value: string): boolean {
 }
 
 export interface SocialLink {
-  key: "linkedin" | "instagram" | "x";
+  key: "facebook" | "instagram" | "telegram" | "linkedin" | "x";
   href: string;
 }
 
 const socialCandidates: Array<{ key: SocialLink["key"]; value: string | undefined }> = [
-  { key: "linkedin", value: process.env.NEXT_PUBLIC_SOCIAL_LINKEDIN },
   { key: "instagram", value: process.env.NEXT_PUBLIC_SOCIAL_INSTAGRAM },
+  { key: "facebook", value: process.env.NEXT_PUBLIC_SOCIAL_FACEBOOK },
+  { key: "telegram", value: process.env.NEXT_PUBLIC_SOCIAL_TELEGRAM },
+  { key: "linkedin", value: process.env.NEXT_PUBLIC_SOCIAL_LINKEDIN },
   { key: "x", value: process.env.NEXT_PUBLIC_SOCIAL_X },
 ];
 

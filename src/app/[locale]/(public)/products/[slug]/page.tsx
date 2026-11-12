@@ -1,10 +1,11 @@
-import { ArrowLeft, CheckCircle2, ChevronRight, Package } from "lucide-react";
+import { ArrowLeft, CheckCircle2, Package } from "lucide-react";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
 import { ProductCard } from "@/components/public/product-card";
 import { WhatsAppOrderButton } from "@/components/public/whatsapp-order-button";
+import { Breadcrumbs, type BreadcrumbItem } from "@/components/shared/breadcrumbs";
 import { ProductMedia } from "@/components/shared/product-media";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -66,11 +67,12 @@ export default async function ProductPage({ params }: ProductPageProps) {
   const { locale, slug } = await params;
   setRequestLocale(locale);
 
-  const [product, catalog, t, tNav] = await Promise.all([
+  const [product, catalog, t, tNav, tCommon] = await Promise.all([
     getPublicProductBySlug(slug),
     getPublicCatalog(),
     getTranslations("products"),
     getTranslations("nav"),
+    getTranslations("common"),
   ]);
 
   if (!product) notFound();
@@ -79,8 +81,18 @@ export default async function ProductPage({ params }: ProductPageProps) {
   const description = pickLocalized(product.description, locale);
   const imageAlt = pickLocalized(product.image.alt, locale);
   const price = formatPrice(product.price, product.currency, locale);
+  const category = catalog.categories.find((item) => item.id === product.categoryId) ?? null;
   const categoryName = getCategoryName(catalog.categories, product.categoryId, locale);
   const related = getRelatedProducts(catalog.products, product, 3);
+
+  // Missing or unavailable category data is omitted rather than shown as a broken link.
+  const breadcrumbs: BreadcrumbItem[] = [
+    { label: tNav("home"), href: "/" },
+    ...(category
+      ? [{ label: pickLocalized(category.name, locale), href: "/products#catalog" }]
+      : []),
+    { label: name },
+  ];
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -117,29 +129,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
       <div className="border-b border-border/70 bg-muted/30">
         <div className="container-page py-4">
-          <nav aria-label="Breadcrumb">
-            <ol className="flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground">
-              <li>
-                <Link href="/" className="transition-colors hover:text-foreground">
-                  {tNav("home")}
-                </Link>
-              </li>
-              <li aria-hidden="true">
-                <ChevronRight className="size-3.5 rtl:rotate-180" />
-              </li>
-              <li>
-                <Link href="/products" className="transition-colors hover:text-foreground">
-                  {t("eyebrow")}
-                </Link>
-              </li>
-              <li aria-hidden="true">
-                <ChevronRight className="size-3.5 rtl:rotate-180" />
-              </li>
-              <li aria-current="page" className="max-w-[16rem] truncate font-medium text-foreground">
-                {name}
-              </li>
-            </ol>
-          </nav>
+          <Breadcrumbs label={tCommon("breadcrumb")} items={breadcrumbs} />
         </div>
       </div>
 

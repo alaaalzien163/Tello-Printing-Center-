@@ -1,7 +1,7 @@
 import { getTranslations } from "next-intl/server";
 
 import { ContactChannels } from "@/components/public/contact-channels";
-import { ContactForm } from "@/components/public/contact-form";
+import { ContactWhatsApp } from "@/components/public/contact-whatsapp";
 import { SectionHeading } from "@/components/shared/section-heading";
 
 interface ContactSectionProps {
@@ -38,7 +38,7 @@ export async function ContactSection({
           }
         >
           <ContactChannels />
-          <ContactForm />
+          <ContactWhatsApp />
         </div>
       </div>
     </section>

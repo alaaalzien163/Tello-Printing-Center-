@@ -26,25 +26,23 @@ test.describe("public website", () => {
     ).toBeVisible();
   });
 
-  test("searches the product catalog", async ({ page }) => {
-    await page.goto("/en/products");
+  test("does not render the former industry trust bar", async ({ page }) => {
+    await page.goto("/en");
 
-    await page.getByLabel(en.products.searchLabel).fill("TEL-FDM-001");
-
-    await expect(page.getByText("1 product", { exact: true })).toBeVisible();
-    await expect(page.getByRole("heading", { name: "Tello Forge X1" })).toBeVisible();
-    await expect(page.getByText("Extruder Maintenance Kit", { exact: true })).toHaveCount(0);
+    await expect(page.getByText("Equipment for professional environments")).toHaveCount(0);
+    for (const label of ["Manufacturing", "Architecture", "Healthcare", "Education", "Automotive"]) {
+      await expect(page.getByText(label, { exact: true })).toHaveCount(0);
+    }
   });
 
-  test("filters the catalog by category", async ({ page }) => {
+  test("shows the catalog without search or filter controls", async ({ page }) => {
     await page.goto("/en/products");
-
-    await page.getByRole("combobox").click();
-    await page.getByRole("option", { name: "3D Printers" }).click();
 
     await expect(page.getByRole("heading", { name: "Tello Forge X1" })).toBeVisible();
     await expect(page.getByRole("heading", { name: "Tello Forge Pro 600" })).toBeVisible();
-    await expect(page.getByText("3 products", { exact: true })).toBeVisible();
+    await expect(page.getByRole("searchbox")).toHaveCount(0);
+    await expect(page.getByRole("combobox")).toHaveCount(0);
+    await expect(page.locator("#catalog").getByText(/^\d+ products?$/)).toBeVisible();
   });
 
   test("switches language while preserving path, query and hash", async ({ page }) => {
@@ -75,33 +73,52 @@ test.describe("public website", () => {
     await expect(page.locator("html")).not.toHaveClass(/dark/);
   });
 
-  test("shows WhatsApp configuration guidance instead of a broken link", async ({ page }) => {
+  test("links to WhatsApp only with a valid configured number", async ({ page }) => {
     await page.goto("/en/products/forge-x1");
 
-    await expect(
-      page.getByRole("button", { name: en.whatsapp.unavailableShort, exact: true }),
-    ).toBeVisible();
-    await expect(page.locator('a[href*="wa.me"]')).toHaveCount(0);
+    const whatsappLinks = page.locator('a[href*="wa.me/"]');
+    const linkCount = await whatsappLinks.count();
 
-    await page.getByRole("button", { name: en.whatsapp.unavailableShort, exact: true }).click();
+    if (linkCount > 0) {
+      for (let index = 0; index < linkCount; index += 1) {
+        await expect(whatsappLinks.nth(index)).toHaveAttribute(
+          "href",
+          /^https:\/\/wa\.me\/\d{8,15}\?text=/,
+        );
+      }
+      return;
+    }
+
+    const unavailable = page.getByRole("button", {
+      name: en.whatsapp.unavailableShort,
+      exact: true,
+    });
+    await expect(unavailable.first()).toBeVisible();
+    await unavailable.first().click();
     await expect(
       page.getByRole("dialog", { name: en.whatsapp.configTitle }),
     ).toBeVisible();
   });
 
-  test("validates and completes the contact form locally", async ({ page }) => {
+  test("offers WhatsApp contact instead of an email form", async ({ page }) => {
     await page.goto("/en/contact");
 
-    await page.getByRole("button", { name: en.contact.submit }).click();
-    await expect(page.getByText(en.validation.nameRequired)).toBeVisible();
-    await expect(page.getByText(en.validation.emailRequired)).toBeVisible();
+    const contact = page.locator("#contact");
+    await expect(contact.getByRole("heading", { name: en.contact.whatsappTitle })).toBeVisible();
+    await expect(contact.locator("form")).toHaveCount(0);
+    await expect(contact.locator('input[type="email"]')).toHaveCount(0);
 
-    await page.getByLabel(en.contact.name).fill("E2E Visitor");
-    await page.getByLabel(en.contact.email).fill("visitor@example.com");
-    await page.getByLabel(en.contact.message).fill("I would like a quote for a production printer.");
-    await page.getByRole("button", { name: en.contact.submit }).click();
+    const whatsappLinks = contact.locator('a[href*="wa.me/"]');
 
-    await expect(page.getByRole("heading", { name: en.contact.successTitle })).toBeVisible();
+    if ((await whatsappLinks.count()) > 0) {
+      await expect(whatsappLinks.first()).toHaveAttribute(
+        "href",
+        /^https:\/\/wa\.me\/\d{8,15}\?text=/,
+      );
+      await expect(contact.getByText(en.contact.whatsappNumberLabel)).toBeVisible();
+    } else {
+      await expect(contact.getByText(en.contact.whatsappNotConfigured)).toBeVisible();
+    }
   });
 
   test("renders the localized not-found page", async ({ page }) => {

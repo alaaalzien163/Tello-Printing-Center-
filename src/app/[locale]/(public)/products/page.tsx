@@ -8,11 +8,6 @@ import { getPublicCatalog } from "@/repositories/public-catalog";
 
 interface ProductsPageProps {
   params: Promise<{ locale: Locale }>;
-  searchParams: Promise<{ category?: string | string[]; q?: string | string[] }>;
-}
-
-function firstValue(value: string | string[] | undefined): string | undefined {
-  return Array.isArray(value) ? value[0] : value;
 }
 
 export async function generateMetadata({ params }: ProductsPageProps): Promise<Metadata> {
@@ -26,20 +21,11 @@ export async function generateMetadata({ params }: ProductsPageProps): Promise<M
   };
 }
 
-export default async function ProductsPage({ params, searchParams }: ProductsPageProps) {
+export default async function ProductsPage({ params }: ProductsPageProps) {
   const { locale } = await params;
   setRequestLocale(locale);
 
-  const [catalog, t, query] = await Promise.all([
-    getPublicCatalog(),
-    getTranslations("products"),
-    searchParams,
-  ]);
-
-  const categorySlug = firstValue(query.category);
-  const initialCategoryId =
-    catalog.categories.find((category) => category.slug === categorySlug)?.id ?? null;
-  const initialQuery = firstValue(query.q) ?? "";
+  const [catalog, t] = await Promise.all([getPublicCatalog(), getTranslations("products")]);
 
   return (
     <>
@@ -61,8 +47,6 @@ export default async function ProductsPage({ params, searchParams }: ProductsPag
             products={catalog.products}
             categories={catalog.categories}
             locale={locale}
-            initialCategoryId={initialCategoryId}
-            initialQuery={initialQuery}
           />
         </div>
       </section>

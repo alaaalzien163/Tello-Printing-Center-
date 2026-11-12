@@ -6,7 +6,6 @@ import { CategoriesSection } from "@/components/public/categories-section";
 import { ContactSection } from "@/components/public/contact-section";
 import { FeaturedProductsSection } from "@/components/public/featured-products-section";
 import { HeroSection } from "@/components/public/hero-section";
-import { TrustBar } from "@/components/public/trust-bar";
 import type { Locale } from "@/i18n/routing";
 import { localizedAlternates } from "@/lib/metadata";
 import { getPublicCatalog } from "@/repositories/public-catalog";
@@ -38,7 +37,6 @@ export default async function HomePage({ params }: HomePageProps) {
   return (
     <>
       <HeroSection />
-      <TrustBar />
       <AboutSection />
       <CategoriesSection
         categories={catalog.categories}

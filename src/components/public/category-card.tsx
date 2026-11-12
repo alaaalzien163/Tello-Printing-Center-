@@ -27,7 +27,7 @@ export async function CategoryCard({
 
   return (
     <Link
-      href={`/products?category=${category.slug}`}
+      href="/products#catalog"
       className={cn(
         "group relative flex flex-col overflow-hidden rounded-2xl border border-border bg-card ring-1 ring-transparent transition-[border-color,box-shadow,transform] duration-300 hover:-translate-y-1 hover:border-primary/25 hover:shadow-lift",
         className,

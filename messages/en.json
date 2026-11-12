@@ -46,7 +46,8 @@
     "openInNewTab": "Opens in a new tab",
     "results": "{count, plural, =0 {No products} one {# product} other {# products}}",
     "unavailable": "Unavailable",
-    "demo": "Demo"
+    "demo": "Demo",
+    "breadcrumb": "Breadcrumb"
   },
   "theme": {
     "label": "Theme",
@@ -92,32 +93,97 @@
     "metricSupport": "Order support",
     "metricSupportValue": "Product inquiries"
   },
-  "trust": {
-    "label": "Equipment for professional environments",
-    "items": {
-      "manufacturing": "Manufacturing",
-      "architecture": "Architecture",
-      "healthcare": "Healthcare",
-      "education": "Education",
-      "automotive": "Automotive"
-    }
-  },
   "about": {
-    "eyebrow": "About Tello",
-    "title": "A retail supplier focused on printing equipment.",
-    "description": "Tello Printing Center is a retail store and supplier of professional printing equipment. We bring together printers, materials, consumables and accessories in one catalog so customers can compare product options and buy with confidence.",
-    "imageAlt": "Professional printing equipment and materials displayed for customers",
-    "badge": "Product information and purchasing support",
-    "body": "Our catalog covers 3D printers, filaments and materials, DTF and UV equipment, industrial printing machines, inks and consumables, and printer parts and accessories. Our team helps customers understand product options and choose equipment that suits their work.",
-    "points": {
-      "precisionTitle": "Equipment selection",
-      "precisionDescription": "Printers and production equipment organized into clear product categories.",
-      "materialsTitle": "Materials and consumables",
-      "materialsDescription": "Filaments, resins, inks and everyday supplies to keep printing equipment running.",
-      "supportTitle": "Purchasing guidance",
-      "supportDescription": "Product information and ordering support to help customers choose suitable equipment."
+    "eyebrow": "About Tello Printing Center",
+    "title": "Tello Printing Center: Your Destination for 3D Printing Solutions and Industrial Equipment in Syria",
+    "description": "Founded in 1985 in the heart of Damascus, on Amin Al-Rihani Street, Tello Library / Tello Printing Center has grown into a leading technology partner and a trusted supplier of office and engineering equipment and services.",
+    "imageAlt": "Digital calipers measuring a precision 3D printed lattice component on a dark workbench",
+    "badge": "Precision manufacturing since 1985",
+    "facts": {
+      "foundedLabel": "Founded",
+      "foundedValue": "1985",
+      "locationLabel": "Location",
+      "locationValue": "Damascus, Syria",
+      "experienceLabel": "Experience",
+      "experienceValue": "40 years"
     },
-    "cta": "Ask about a product"
+    "story": {
+      "eyebrow": "Our story",
+      "title": "Four decades of experience, built on precision.",
+      "paragraphs": {
+        "experience": "Over 40 years of experience and excellence, we have built a bridge between innovative ideas and practical delivery, placing our deep technical expertise at the service of Syria's engineering community, students and industrial sectors.",
+        "choice": "Whether you are looking for a professional team to execute your project with exceptional precision, or you want to purchase advanced industrial machinery and equipment for your company, Tello Printing Center is your ideal choice."
+      },
+      "location": "Damascus — Amin Al-Rihani Street"
+    },
+    "services": {
+      "eyebrow": "Professional services",
+      "title": "Professional services: printing your ideas with precision",
+      "description": "At Tello, we operate an advanced, fully equipped technology facility built to handle the most demanding engineering requirements and student projects.",
+      "items": {
+        "printing": {
+          "title": "Custom 3D Printing",
+          "description": "We transform your CAD and 3D files into precise, tangible architectural and engineering models."
+        },
+        "scanning": {
+          "title": "3D Scanning",
+          "description": "Professional digital scanning of physical objects for reverse engineering."
+        },
+        "industrial": {
+          "title": "DTF & UV Printing",
+          "description": "Direct-to-film thermal printing on woven fabrics (DTF) and high-resolution printing on solid surfaces (UV)."
+        },
+        "documents": {
+          "title": "Engineering Plotting & Documents",
+          "description": "Large-format engineering plotting, plus fast, high-precision document scanning and copying."
+        }
+      }
+    },
+    "materials": {
+      "eyebrow": "Materials and consumables",
+      "title": "Materials and consumables: everything you need in one place",
+      "description": "Tello Printing Center stocks a diverse range of raw materials for self-production and custom projects.",
+      "filaments": {
+        "title": "3D Filaments",
+        "description": "More than 100 colors across PLA, PETG, TPU and ABS, plus durable carbon fiber filament.",
+        "chips": {
+          "pla": "PLA",
+          "petg": "PETG",
+          "tpu": "TPU",
+          "abs": "ABS",
+          "carbon": "Carbon Fiber"
+        }
+      },
+      "industrial": {
+        "title": "Industrial Materials",
+        "description": "Available as standard rolls or plastic pellets to meet the needs of workshops and factories."
+      },
+      "consumables": {
+        "title": "Industrial Consumables",
+        "description": "Longlu UV ink, DTF inks, PET rolls and thermal TPU powder."
+      }
+    },
+    "why": {
+      "eyebrow": "Why Tello",
+      "title": "Why choose Tello Printing Center?",
+      "description": "Because we combine four decades of proven experience with the latest digital manufacturing technologies, bringing high quality and competitive pricing to the Syrian market.",
+      "points": {
+        "heritage": {
+          "title": "Four decades of experience",
+          "description": "Since 1985, we have built deep expertise across office, engineering and industrial equipment and services."
+        },
+        "technology": {
+          "title": "Advanced digital manufacturing",
+          "description": "We work with the latest digital manufacturing technologies to deliver precise, reliable results."
+        },
+        "value": {
+          "title": "Quality with competitive pricing",
+          "description": "Our aim is to offer the Syrian market high quality at competitive prices."
+        }
+      },
+      "cta": "Talk to our team",
+      "secondaryCta": "Explore products"
+    }
   },
   "categories": {
     "eyebrow": "Product categories",
@@ -131,14 +197,9 @@
     "eyebrow": "Product catalog",
     "title": "Printing equipment, materials and supplies.",
     "description": "Browse professional printing machines, consumables, parts and accessories. Product pages include SKU, pricing and direct ordering.",
-    "searchLabel": "Search products",
-    "searchPlaceholder": "Search by product name or SKU…",
-    "filterLabel": "Filter by category",
-    "allCategories": "All categories",
-    "resultsCount": "{count, plural, =0 {No products found} one {# product} other {# products}}",
-    "emptyTitle": "No products match your search",
-    "emptyDescription": "Try a different search term or clear the category filter.",
-    "clearFilters": "Clear filters",
+    "resultsCount": "{count, plural, =0 {No products available} one {# product} other {# products}}",
+    "emptyTitle": "No products available yet",
+    "emptyDescription": "Products are being added to the catalog. Please check back soon.",
     "sku": "SKU",
     "price": "Price",
     "category": "Category",
@@ -173,32 +234,19 @@
     "eyebrow": "Contact us",
     "title": "Questions about a product or your next purchase?",
     "description": "Ask about product availability, pricing, specifications or choosing the right printing equipment. Our team will help with product information and ordering.",
-    "formTitle": "Send a product inquiry",
-    "formDescription": "Tell us which product or equipment you are interested in and we will get back to you.",
-    "name": "Full name",
-    "namePlaceholder": "Your name",
-    "email": "Email address",
-    "emailPlaceholder": "you@company.com",
-    "phone": "Phone number",
-    "phonePlaceholder": "Include your country code",
-    "message": "What are you looking for?",
-    "messagePlaceholder": "Ask about a product, availability, pricing or equipment selection…",
-    "submit": "Send message",
-    "submitting": "Sending…",
-    "successTitle": "Message ready to send",
-    "successDescription": "This is a Phase 1 demo. Your message passed validation, but it was not delivered. Email and WhatsApp delivery will be connected with Supabase in Phase 2.",
-    "sendAnother": "Send another message",
-    "errorTitle": "Message could not be submitted",
-    "errorDescription": "Please try again. If the problem continues, use one of the contact channels listed on this page.",
-    "demoNotice": "Demo form: submissions are validated locally and are not delivered yet.",
+    "whatsappTitle": "Contact us on WhatsApp",
+    "whatsappDescription": "Send us a message on WhatsApp for product availability, pricing, specifications or help choosing the right printing equipment.",
+    "whatsappNumberLabel": "WhatsApp number",
+    "whatsappCta": "Start a WhatsApp chat",
+    "whatsappNotConfigured": "WhatsApp contact is not configured yet. Set NEXT_PUBLIC_WHATSAPP_NUMBER to publish the business number.",
+    "whatsappHint": "Opens WhatsApp in a new tab.",
+    "followLabel": "Follow us",
     "infoTitle": "Direct contact",
-    "infoDescription": "Contact details appear here once configured for this deployment.",
+    "infoDescription": "Reach us directly by email or phone, or visit us in Damascus.",
     "emailLabel": "Email",
     "phoneLabel": "Phone",
-    "whatsappLabel": "WhatsApp",
     "addressLabel": "Location",
     "notConfigured": "Not configured for this demo",
-    "whatsappCta": "Chat about a product",
     "responseTime": "We aim to respond within one business day.",
     "configHint": "Set the public contact environment variables to publish real details."
   },
