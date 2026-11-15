@@ -56,7 +56,7 @@ export function Hero3DScene({ active, onReady, onError }: Hero3DSceneProps) {
         far={4}
         resolution={256}
         frames={1}
-        color="#020812"
+        color="#000000"
       />
     </Canvas>
   );

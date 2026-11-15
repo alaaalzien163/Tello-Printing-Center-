@@ -158,7 +158,7 @@ export function AdminOverview() {
           <div key={key} className="rounded-xl border border-border bg-card p-5 shadow-soft">
             <div className="flex items-center justify-between gap-3">
               <span className="text-xs font-medium text-muted-foreground">{label}</span>
-              <span className="flex size-8 items-center justify-center rounded-lg bg-primary/8 text-primary">
+              <span className="flex size-8 items-center justify-center rounded-lg bg-primary/8 text-primary-text">
                 <Icon className="size-4" aria-hidden="true" />
               </span>
             </div>

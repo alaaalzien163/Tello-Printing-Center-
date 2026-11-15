@@ -58,13 +58,15 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import type { Product } from "@/domain/product";
+import type { AdminProduct } from "@/domain/admin-catalog";
 import type { Locale } from "@/i18n/routing";
+import {
+  deleteAdminProduct,
+  setAdminProductActive,
+  setAdminProductFeatured,
+} from "@/lib/actions/admin-catalog";
 import { formatDate, formatPrice, pickLocalized } from "@/lib/format";
-import { getRepositories } from "@/repositories";
 import { getCategoryName } from "@/services/catalog";
-
-const repositories = getRepositories();
 
 type StatusFilter = "all" | "active" | "inactive";
 
@@ -84,8 +86,8 @@ export function ProductsManager() {
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [editing, setEditing] = useState<Product | null>(null);
-  const [deleting, setDeleting] = useState<Product | null>(null);
+  const [editing, setEditing] = useState<AdminProduct | null>(null);
+  const [deleting, setDeleting] = useState<AdminProduct | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -128,7 +130,7 @@ export function ProductsManager() {
     setDialogOpen(true);
   }
 
-  function openEdit(product: Product) {
+  function openEdit(product: AdminProduct) {
     setEditing(product);
     setDialogOpen(true);
   }
@@ -139,10 +141,11 @@ export function ProductsManager() {
     setStatusFilter("all");
   }
 
-  async function toggleActive(product: Product) {
+  async function toggleActive(product: AdminProduct) {
     setBusyId(product.id);
     try {
-      await repositories.products.setActive(product.id, !product.active);
+      const result = await setAdminProductActive(product.id, !product.active);
+      if (!result.ok) throw new Error(result.error);
       await reload();
       toast.success(t("updateSuccess"));
     } catch {
@@ -152,10 +155,11 @@ export function ProductsManager() {
     }
   }
 
-  async function toggleFeatured(product: Product) {
+  async function toggleFeatured(product: AdminProduct) {
     setBusyId(product.id);
     try {
-      await repositories.products.setFeatured(product.id, !product.featured);
+      const result = await setAdminProductFeatured(product.id, !product.featured);
+      if (!result.ok) throw new Error(result.error);
       await reload();
       toast.success(t("updateSuccess"));
     } catch {
@@ -169,7 +173,8 @@ export function ProductsManager() {
     if (!deleting) return;
     setBusyId(deleting.id);
     try {
-      await repositories.products.delete(deleting.id);
+      const result = await deleteAdminProduct(deleting.id);
+      if (!result.ok) throw new Error(result.error);
       await reload();
       toast.success(t("deleteSuccess"));
       setDeleting(null);
@@ -486,7 +491,7 @@ export function ProductsManager() {
 }
 
 interface ProductRowActionsProps {
-  product: Product;
+  product: AdminProduct;
   busy: boolean;
   onEdit: () => void;
   onToggleActive: () => void;

@@ -4,6 +4,8 @@ export interface WhatsAppOrderDetails {
   formattedPrice: string;
   productUrl: string;
   locale: "en" | "ar";
+  /** Selected size/measurement, when the product has variants. */
+  variantLabel?: string;
 }
 
 export interface WhatsAppLink {
@@ -37,12 +39,15 @@ export function isWhatsAppConfigured(): boolean {
 }
 
 export function buildWhatsAppOrderMessage(details: WhatsAppOrderDetails): string {
+  const variant = details.variantLabel?.trim();
+
   if (details.locale === "ar") {
     return [
       "مرحباً مركز تيلو للطباعة،",
       "",
       "أرغب في طلب المنتج التالي:",
       `• المنتج: ${details.productName}`,
+      ...(variant ? [`• الخيار: ${variant}`] : []),
       `• رمز المنتج: ${details.sku}`,
       `• السعر: ${details.formattedPrice}`,
       `• رابط المنتج: ${details.productUrl}`,
@@ -58,6 +63,7 @@ export function buildWhatsAppOrderMessage(details: WhatsAppOrderDetails): string
     "",
     "I would like to order the following product:",
     `• Product: ${details.productName}`,
+    ...(variant ? [`• Option: ${variant}`] : []),
     `• SKU: ${details.sku}`,
     `• Price: ${details.formattedPrice}`,
     `• Product link: ${details.productUrl}`,
@@ -98,6 +104,23 @@ export function buildWhatsAppContactUrl(
     locale === "ar"
       ? "مرحباً مركز تيلو للطباعة،\n\nأرغب في الاستفسار عن منتجاتكم وخيارات الطلب.\n\nشكراً لكم."
       : "Hello Tello Printing Center,\n\nI would like to ask about your products and ordering options.\n\nThank you.";
+
+  return `https://wa.me/${normalized}?text=${encodeURIComponent(message)}`;
+}
+
+/** Opens a WhatsApp chat with the customer who submitted a print request. */
+export function buildWhatsAppCustomerUrl(
+  phone: string | null | undefined,
+  details: { locale: "en" | "ar"; requestNumber: string; customerName: string },
+): string | null {
+  const normalized = normalizeWhatsAppNumber(phone);
+  if (!normalized) return null;
+
+  const name = details.customerName.trim() || (details.locale === "ar" ? "عميلنا" : "there");
+  const message =
+    details.locale === "ar"
+      ? `مرحباً ${name}،\n\nنتواصل معك بخصوص طلب الطباعة ${details.requestNumber} في مركز تيلو للطباعة.\n\nشكراً لكم.`
+      : `Hello ${name},\n\nI am contacting you about print request ${details.requestNumber} at Tello Printing Center.\n\nThank you.`;
 
   return `https://wa.me/${normalized}?text=${encodeURIComponent(message)}`;
 }

@@ -2,7 +2,7 @@ import type { MetadataRoute } from "next";
 
 import { siteConfig } from "@/config/site";
 import { locales } from "@/i18n/routing";
-import { getPublicProductSlugs } from "@/repositories/public-catalog";
+import { getPublicCategorySlugs, getPublicProductSlugs } from "@/repositories/public-catalog";
 
 const staticPaths = ["", "/products", "/contact"] as const;
 
@@ -18,7 +18,10 @@ function languageAlternates(path: string): Record<string, string> {
 }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const productSlugs = await getPublicProductSlugs();
+  const [productSlugs, categorySlugs] = await Promise.all([
+    getPublicProductSlugs(),
+    getPublicCategorySlugs(),
+  ]);
   const lastModified = new Date();
 
   const staticEntries: MetadataRoute.Sitemap = locales.flatMap((locale) =>
@@ -44,5 +47,18 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }),
   );
 
-  return [...staticEntries, ...productEntries];
+  const categoryEntries: MetadataRoute.Sitemap = locales.flatMap((locale) =>
+    categorySlugs.map((slug) => {
+      const path = `/products/category/${slug}`;
+      return {
+        url: localizedUrl(locale, path),
+        lastModified,
+        changeFrequency: "weekly",
+        priority: 0.7,
+        alternates: { languages: languageAlternates(path) },
+      };
+    }),
+  );
+
+  return [...staticEntries, ...categoryEntries, ...productEntries];
 }

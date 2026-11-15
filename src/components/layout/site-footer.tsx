@@ -22,7 +22,7 @@ export async function SiteFooter() {
   const year = new Date().getFullYear();
 
   return (
-    <footer className="border-t border-border bg-brand-navy text-white/80">
+    <footer className="border-t border-brand-primary/30 bg-brand-black text-white/80">
       <div className="container-page grid gap-10 py-14 md:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1.1fr] lg:gap-12">
         <div>
           <Logo className="[&_span]:text-white [&_span:last-child]:text-white/55" />
@@ -38,27 +38,35 @@ export async function SiteFooter() {
         </div>
 
         <div>
-          <h2 className="text-xs font-semibold tracking-[0.18em] text-white/50 uppercase">
+          <h2 className="text-[0.68rem] font-semibold tracking-[0.18em] text-brand-pink-soft uppercase">
             {t("explore")}
           </h2>
           <ul className="mt-4 space-y-3 text-sm">
             <li>
-              <Link href="/" className="text-white/70 transition-colors hover:text-white">
+              <Link href="/" className="text-white/70 transition-colors hover:text-brand-pink-soft">
                 {tNav("home")}
               </Link>
             </li>
             <li>
-              <Link href="/#about" className="text-white/70 transition-colors hover:text-white">
+              <Link href="/#about" className="text-white/70 transition-colors hover:text-brand-pink-soft">
                 {tNav("about")}
               </Link>
             </li>
             <li>
-              <Link href="/products" className="text-white/70 transition-colors hover:text-white">
+              <Link href="/products" className="text-white/70 transition-colors hover:text-brand-pink-soft">
                 {tNav("products")}
               </Link>
             </li>
             <li>
-              <Link href="/contact" className="text-white/70 transition-colors hover:text-white">
+              <Link
+                href="/print-request"
+                className="text-white/70 transition-colors hover:text-brand-pink-soft"
+              >
+                {tNav("printRequest")}
+              </Link>
+            </li>
+            <li>
+              <Link href="/contact" className="text-white/70 transition-colors hover:text-brand-pink-soft">
                 {tContact("title")}
               </Link>
             </li>
@@ -71,15 +79,15 @@ export async function SiteFooter() {
         </div>
 
         <div>
-          <h2 className="text-xs font-semibold tracking-[0.18em] text-white/50 uppercase">
+          <h2 className="text-[0.68rem] font-semibold tracking-[0.18em] text-brand-pink-soft uppercase">
             {t("productAreas")}
           </h2>
           <ul className="mt-4 space-y-3 text-sm">
             {categories.map((category) => (
               <li key={category.id}>
                 <Link
-                  href="/products#catalog"
-                  className="text-white/70 transition-colors hover:text-white"
+                  href={`/products/category/${category.slug}`}
+                  className="text-white/70 transition-colors hover:text-brand-pink-soft"
                 >
                   {pickLocalized(category.name, locale)}
                 </Link>
@@ -89,7 +97,7 @@ export async function SiteFooter() {
         </div>
 
         <div>
-          <h2 className="text-xs font-semibold tracking-[0.18em] text-white/50 uppercase">
+          <h2 className="text-[0.68rem] font-semibold tracking-[0.18em] text-brand-pink-soft uppercase">
             {t("contact")}
           </h2>
           <ul className="mt-4 space-y-3 text-sm">

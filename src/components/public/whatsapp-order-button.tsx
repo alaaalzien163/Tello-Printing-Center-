@@ -29,6 +29,7 @@ interface WhatsAppOrderButtonProps {
   sku: string;
   formattedPrice: string;
   productPath: string;
+  variantLabel?: string;
   variant?: VariantProps<typeof buttonVariants>["variant"];
   size?: VariantProps<typeof buttonVariants>["size"];
   compact?: boolean;
@@ -46,6 +47,7 @@ export function WhatsAppOrderButton({
   sku,
   formattedPrice,
   productPath,
+  variantLabel,
   variant = "whatsapp",
   size = "default",
   compact = false,
@@ -60,6 +62,7 @@ export function WhatsAppOrderButton({
     formattedPrice,
     productUrl: absoluteUrl(productPath),
     locale,
+    variantLabel,
   });
 
   const label = compact || iconOnly ? t("orderShort") : t("order");

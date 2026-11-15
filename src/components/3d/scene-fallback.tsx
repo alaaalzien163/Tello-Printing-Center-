@@ -19,7 +19,7 @@ export function SceneFallback({ alt, className, priority = false }: SceneFallbac
     <div
       data-testid="hero-scene-fallback"
       className={cn(
-        "absolute inset-0 overflow-hidden bg-[radial-gradient(circle_at_50%_28%,#17324e_0%,#0a1727_52%,#050b14_100%)]",
+        "absolute inset-0 overflow-hidden bg-[radial-gradient(circle_at_50%_28%,#2a1019_0%,#0b0608_52%,#000000_100%)]",
         className,
       )}
     >
@@ -32,7 +32,7 @@ export function SceneFallback({ alt, className, priority = false }: SceneFallbac
         className="object-cover"
       />
       <div
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_45%,transparent_38%,rgb(2_8_16/0.34)_100%)]"
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_45%,transparent_38%,rgb(0_0_0/0.34)_100%)]"
         aria-hidden="true"
       />
     </div>

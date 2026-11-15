@@ -1,13 +1,12 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ImagePlus, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useMemo, useState } from "react";
-import { Controller, useForm, useWatch } from "react-hook-form";
+import { useMemo } from "react";
+import { Controller, useForm } from "react-hook-form";
 import { toast } from "sonner";
 
-import { ProductMedia } from "@/components/shared/product-media";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -22,21 +21,14 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import type { Category } from "@/domain/category";
+import { createAdminCategory, updateAdminCategory } from "@/lib/actions/admin-catalog";
 import {
-  fileToDemoImageDataUrl,
-  IMAGE_ACCEPT_ATTRIBUTE,
-  ImageUploadError,
-} from "@/lib/image-file";
-import { getRepositories, RepositoryError } from "@/repositories";
-import {
-  categoryFormToInput,
-  categoryToFormValues,
-  createCategorySchema,
-  emptyCategoryFormValues,
-  type CategoryFormValues,
-} from "@/schemas/category";
-
-const repositories = getRepositories();
+  adminCategoryFormToInput,
+  adminCategoryToFormValues,
+  createAdminCategorySchema,
+  emptyAdminCategoryFormValues,
+  type AdminCategoryFormValues,
+} from "@/schemas/admin-category";
 
 interface CategoryFormDialogProps {
   open: boolean;
@@ -64,64 +56,41 @@ function CategoryForm({
   const tf = useTranslations("admin.categories.fields");
   const tv = useTranslations("validation");
   const tc = useTranslations("common");
-  const schema = useMemo(() => createCategorySchema(tv), [tv]);
-  const [uploading, setUploading] = useState(false);
+  const schema = useMemo(() => createAdminCategorySchema(tv), [tv]);
 
   const {
     register,
     handleSubmit,
     control,
-    setValue,
     setError,
     formState: { errors, isSubmitting },
-  } = useForm<CategoryFormValues>({
+  } = useForm<AdminCategoryFormValues>({
     resolver: zodResolver(schema),
-    defaultValues: category ? categoryToFormValues(category) : emptyCategoryFormValues(),
+    defaultValues: category ? adminCategoryToFormValues(category) : emptyAdminCategoryFormValues(),
     mode: "onBlur",
   });
 
-  const imageUrl = useWatch({ control, name: "imageUrl" });
-  const imageAltEn = useWatch({ control, name: "imageAltEn" });
+  async function onSubmit(values: AdminCategoryFormValues) {
+    const input = adminCategoryFormToInput(values);
 
-  async function handleImageFile(file: File | undefined) {
-    if (!file) return;
-    setUploading(true);
     try {
-      const dataUrl = await fileToDemoImageDataUrl(file);
-      setValue("imageUrl", dataUrl, { shouldValidate: true, shouldDirty: true });
-    } catch (error) {
-      if (error instanceof ImageUploadError) {
-        const message =
-          error.code === "TYPE"
-            ? t("imageTypeError")
-            : error.code === "SIZE"
-              ? t("imageSizeError")
-              : t("imageUploadError");
-        toast.error(message);
-      } else {
-        toast.error(t("imageUploadError"));
-      }
-    } finally {
-      setUploading(false);
-    }
-  }
+      const result = category
+        ? await updateAdminCategory(category.id, input)
+        : await createAdminCategory(input);
 
-  async function onSubmit(values: CategoryFormValues) {
-    try {
-      const input = categoryFormToInput(values);
-      if (category) {
-        await repositories.categories.update(category.id, input);
-      } else {
-        await repositories.categories.create(input);
+      if (!result.ok) {
+        if (result.error === "SLUG_TAKEN") {
+          setError("slug", { message: t("slugTaken") });
+          return;
+        }
+        toast.error(category ? t("updateError") : t("createError"));
+        return;
       }
+
       toast.success(category ? t("updateSuccess") : t("createSuccess"));
       await onSaved();
       onOpenChange(false);
-    } catch (error) {
-      if (error instanceof RepositoryError && error.code === "SLUG_TAKEN") {
-        setError("slug", { message: t("slugTaken") });
-        return;
-      }
+    } catch {
       toast.error(category ? t("updateError") : t("createError"));
     }
   }
@@ -212,79 +181,6 @@ function CategoryForm({
 
       <section className="space-y-4 border-t border-border pt-5">
         <h3 className="text-xs font-semibold tracking-[0.16em] text-muted-foreground uppercase">
-          {t("sections.media")}
-        </h3>
-        <div className="grid gap-4 sm:grid-cols-[9rem_1fr]">
-          <div className="relative aspect-square overflow-hidden rounded-xl border border-border bg-muted">
-            <ProductMedia src={imageUrl} alt={imageAltEn || tf("image")} sizes="144px" />
-          </div>
-          <div className="space-y-4">
-            <div className="grid gap-2">
-              <Label htmlFor="category-image-url">{tf("imageUrl")}</Label>
-              <Input
-                id="category-image-url"
-                dir="ltr"
-                placeholder={tf("imageUrlPlaceholder")}
-                aria-invalid={Boolean(errors.imageUrl)}
-                aria-describedby={errors.imageUrl ? "category-image-url-error" : undefined}
-                {...register("imageUrl")}
-              />
-              <FieldError id="category-image-url-error" message={errors.imageUrl?.message} />
-            </div>
-            <div className="grid gap-2">
-              <Label
-                htmlFor="category-image-upload"
-                className="inline-flex w-fit cursor-pointer items-center gap-2 rounded-lg border border-border px-3 py-2 text-xs font-medium hover:bg-muted"
-              >
-                {uploading ? (
-                  <Loader2 className="size-3.5 animate-spin" aria-hidden="true" />
-                ) : (
-                  <ImagePlus className="size-3.5" aria-hidden="true" />
-                )}
-                {tf("upload")}
-              </Label>
-              <input
-                id="category-image-upload"
-                type="file"
-                accept={IMAGE_ACCEPT_ATTRIBUTE}
-                className="sr-only"
-                onChange={(event) => {
-                  void handleImageFile(event.target.files?.[0]);
-                  event.target.value = "";
-                }}
-              />
-              <p className="text-xs text-muted-foreground">{tf("imageHint")}</p>
-            </div>
-          </div>
-        </div>
-        <div className="grid gap-4 sm:grid-cols-2">
-          <div className="grid gap-2">
-            <Label htmlFor="category-image-alt-en">{tf("imageAltEn")}</Label>
-            <Input
-              id="category-image-alt-en"
-              dir="ltr"
-              aria-invalid={Boolean(errors.imageAltEn)}
-              aria-describedby={errors.imageAltEn ? "category-image-alt-en-error" : undefined}
-              {...register("imageAltEn")}
-            />
-            <FieldError id="category-image-alt-en-error" message={errors.imageAltEn?.message} />
-          </div>
-          <div className="grid gap-2">
-            <Label htmlFor="category-image-alt-ar">{tf("imageAltAr")}</Label>
-            <Input
-              id="category-image-alt-ar"
-              dir="rtl"
-              aria-invalid={Boolean(errors.imageAltAr)}
-              aria-describedby={errors.imageAltAr ? "category-image-alt-ar-error" : undefined}
-              {...register("imageAltAr")}
-            />
-            <FieldError id="category-image-alt-ar-error" message={errors.imageAltAr?.message} />
-          </div>
-        </div>
-      </section>
-
-      <section className="space-y-4 border-t border-border pt-5">
-        <h3 className="text-xs font-semibold tracking-[0.16em] text-muted-foreground uppercase">
           {t("sections.visibility")}
         </h3>
         <Controller
@@ -306,7 +202,7 @@ function CategoryForm({
         <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
           {tc("cancel")}
         </Button>
-        <Button type="submit" disabled={isSubmitting || uploading}>
+        <Button type="submit" disabled={isSubmitting}>
           {isSubmitting ? <Loader2 className="size-4 animate-spin" aria-hidden="true" /> : null}
           {isSubmitting ? tc("saving") : category ? tc("save") : tc("create")}
         </Button>

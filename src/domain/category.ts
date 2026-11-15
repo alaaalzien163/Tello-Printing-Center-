@@ -1,11 +1,14 @@
-import type { LocalizedImage, LocalizedText } from "./common";
+import type { LocalizedText } from "./common";
 
+/**
+ * Categories are intentionally image-free: the catalog presents them with
+ * typography only, and no category image column exists in the database.
+ */
 export interface Category {
   id: string;
   slug: string;
   name: LocalizedText;
   description: LocalizedText;
-  image: LocalizedImage;
   active: boolean;
   createdAt: string;
   updatedAt: string;

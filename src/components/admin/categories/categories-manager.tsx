@@ -18,7 +18,6 @@ import { toast } from "sonner";
 import { useDemoData } from "@/components/admin/demo-data-provider";
 import { CategoryFormDialog } from "@/components/admin/categories/category-form-dialog";
 import { EmptyState } from "@/components/shared/empty-state";
-import { ProductMedia } from "@/components/shared/product-media";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -58,15 +57,16 @@ import {
 } from "@/components/ui/table";
 import type { Category } from "@/domain/category";
 import type { Locale } from "@/i18n/routing";
+import {
+  deleteAdminCategory,
+  setAdminCategoryActive,
+} from "@/lib/actions/admin-catalog";
 import { pickLocalized } from "@/lib/format";
-import { getRepositories } from "@/repositories";
 import {
   getCategoryProductCounts,
   searchAndSortCategories,
   type CategorySort,
 } from "@/services/catalog";
-
-const repositories = getRepositories();
 
 const sortOptions: Array<{ value: CategorySort; labelKey: "sortNameAsc" | "sortNameDesc" | "sortNewest" | "sortActive" }> = [
   { value: "name-asc", labelKey: "sortNameAsc" },
@@ -127,7 +127,8 @@ export function CategoriesManager() {
   async function toggleActive(category: Category) {
     setBusyId(category.id);
     try {
-      await repositories.categories.setActive(category.id, !category.active);
+      const result = await setAdminCategoryActive(category.id, !category.active);
+      if (!result.ok) throw new Error(result.error);
       await reload();
       toast.success(category.active ? t("deactivateSuccess") : t("activateSuccess"));
     } catch {
@@ -141,7 +142,8 @@ export function CategoriesManager() {
     if (!deleting) return;
     setBusyId(deleting.id);
     try {
-      await repositories.categories.delete(deleting.id);
+      const result = await deleteAdminCategory(deleting.id);
+      if (!result.ok) throw new Error(result.error);
       await reload();
       toast.success(t("deleteSuccess"));
       setDeleting(null);
@@ -277,12 +279,8 @@ export function CategoriesManager() {
                     <TableRow key={category.id}>
                       <TableCell>
                         <div className="flex items-center gap-3">
-                          <div className="relative size-10 shrink-0 overflow-hidden rounded-lg bg-muted">
-                            <ProductMedia
-                              src={category.image.url}
-                              alt={pickLocalized(category.image.alt, locale)}
-                              sizes="40px"
-                            />
+                          <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
+                            <Tags className="size-5" aria-hidden="true" />
                           </div>
                           <div className="min-w-0">
                             <p className="truncate text-sm font-medium text-foreground">{name}</p>
@@ -334,12 +332,8 @@ export function CategoriesManager() {
                   className="rounded-xl border border-border bg-card p-4 shadow-soft"
                 >
                   <div className="flex items-start gap-3">
-                    <div className="relative size-14 shrink-0 overflow-hidden rounded-lg bg-muted">
-                      <ProductMedia
-                        src={category.image.url}
-                        alt={pickLocalized(category.image.alt, locale)}
-                        sizes="56px"
-                      />
+                    <div className="flex size-14 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
+                      <Tags className="size-6" aria-hidden="true" />
                     </div>
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-sm font-semibold text-foreground">{name}</p>

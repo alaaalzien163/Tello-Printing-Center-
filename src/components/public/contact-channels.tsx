@@ -31,7 +31,7 @@ export async function ContactChannels() {
                 </span>
                 <a
                   href={`mailto:${siteConfig.contact.email}`}
-                  className="mt-0.5 block truncate font-medium text-foreground hover:text-primary"
+                  className="mt-0.5 block truncate font-medium text-foreground hover:text-primary-text"
                 >
                   {siteConfig.contact.email}
                 </a>
@@ -50,7 +50,7 @@ export async function ContactChannels() {
                 </span>
                 <a
                   href={`tel:${siteConfig.contact.phone.replace(/[^\d+]/g, "")}`}
-                  className="mt-0.5 block font-medium text-foreground hover:text-primary"
+                  className="mt-0.5 block font-medium text-foreground hover:text-primary-text"
                   dir="ltr"
                 >
                   {siteConfig.contact.phone}
@@ -89,7 +89,7 @@ export async function ContactChannels() {
           <SocialLinks
             links={siteConfig.socialLinks}
             className="mt-3 flex-wrap"
-            linkClassName="size-9 rounded-lg border border-border bg-background text-muted-foreground hover:border-primary/30 hover:bg-background hover:text-primary"
+            linkClassName="size-9 rounded-lg border border-border bg-background text-muted-foreground hover:border-primary/30 hover:bg-background hover:text-primary-text"
           />
         </div>
       ) : null}

@@ -57,6 +57,39 @@ describe("buildWhatsAppOrderUrl", () => {
     expect(message).toContain("Tello Forge X1");
     expect(message).toContain("رابط المنتج");
   });
+
+  it("includes the selected variant in the English order message", () => {
+    const message = buildWhatsAppOrderMessage({
+      ...orderDetails,
+      variantLabel: "P - large",
+    });
+
+    expect(message).toContain("• Option: P - large");
+    expect(message).toContain("• Product: Tello Forge X1");
+  });
+
+  it("includes the selected variant in the Arabic order message", () => {
+    const message = buildWhatsAppOrderMessage({
+      ...orderDetails,
+      locale: "ar",
+      variantLabel: "كبير",
+    });
+
+    expect(message).toContain("• الخيار: كبير");
+  });
+
+  it("omits the option line when no variant is selected", () => {
+    const message = buildWhatsAppOrderMessage(orderDetails);
+
+    expect(message).not.toContain("Option:");
+    expect(message).not.toContain("الخيار:");
+  });
+
+  it("ignores a blank variant label", () => {
+    const message = buildWhatsAppOrderMessage({ ...orderDetails, variantLabel: "   " });
+
+    expect(message).not.toContain("Option:");
+  });
 });
 
 describe("buildWhatsAppContactUrl", () => {

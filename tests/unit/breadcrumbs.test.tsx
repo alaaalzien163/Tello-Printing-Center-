@@ -22,7 +22,7 @@ vi.mock("@/i18n/navigation", () => ({
 
 const items = [
   { label: "Home", href: "/" },
-  { label: "3D Printers", href: "/products#catalog" },
+  { label: "3D Printers", href: "/products/category/3d-printers" },
   { label: "Tello Forge X1" },
 ];
 
@@ -37,7 +37,7 @@ describe("Breadcrumbs", () => {
     expect(screen.getByRole("link", { name: "Home" })).toHaveAttribute("href", "/");
     expect(screen.getByRole("link", { name: "3D Printers" })).toHaveAttribute(
       "href",
-      "/products#catalog",
+      "/products/category/3d-printers",
     );
 
     const current = screen.getByText("Tello Forge X1");

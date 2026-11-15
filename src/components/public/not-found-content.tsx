@@ -10,10 +10,10 @@ export async function NotFoundContent() {
   return (
     <section className="surface-glow flex min-h-[70vh] items-center">
       <div className="container-page py-16 text-center">
-        <span className="mx-auto flex size-14 items-center justify-center rounded-2xl border border-primary/15 bg-primary/5 text-primary">
+        <span className="mx-auto flex size-14 items-center justify-center rounded-2xl border border-primary/15 bg-primary/5 text-primary-text">
           <Compass className="size-6" aria-hidden="true" />
         </span>
-        <p className="mt-6 text-xs font-semibold tracking-[0.2em] text-primary uppercase">
+        <p className="mt-6 text-xs font-semibold tracking-[0.2em] text-primary-text uppercase">
           {t("eyebrow")}
         </p>
         <h1 className="mx-auto mt-3 max-w-xl text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">

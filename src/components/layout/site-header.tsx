@@ -4,7 +4,7 @@ import { Menu } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 
-import { Logo } from "@/components/brand/logo";
+import { BrandLogo } from "@/components/brand/brand-logo";
 import { LocaleSwitcher } from "@/components/layout/locale-switcher";
 import { ThemeSwitcher } from "@/components/layout/theme-switcher";
 import { Button } from "@/components/ui/button";
@@ -23,12 +23,13 @@ import { cn } from "@/lib/utils";
 
 interface NavItem {
   href: string;
-  labelKey: "home" | "products" | "about" | "contact";
+  labelKey: "home" | "products" | "printRequest" | "about" | "contact";
 }
 
 const navItems: NavItem[] = [
   { href: "/", labelKey: "home" },
   { href: "/products", labelKey: "products" },
+  { href: "/print-request", labelKey: "printRequest" },
   { href: "/#about", labelKey: "about" },
   { href: "/contact", labelKey: "contact" },
 ];
@@ -62,10 +63,10 @@ export function SiteHeader() {
       <div className="container-page flex h-(--header-height) items-center justify-between gap-3">
         <Link
           href="/admin/login"
-          className="rounded-lg focus-visible:outline-2 focus-visible:outline-offset-4"
           aria-label={t("adminLogin")}
+          className="shrink-0 rounded-lg focus-visible:outline-2 focus-visible:outline-offset-4"
         >
-          <Logo />
+          <BrandLogo priority className="w-[min(45vw,13rem)]" />
         </Link>
 
         <nav aria-label={t("mainNav")} className="hidden items-center gap-1 lg:flex">
@@ -76,7 +77,8 @@ export function SiteHeader() {
                 aria-current={isActivePath(pathname, item.href) ? "page" : undefined}
                 className={cn(
                   "text-[0.82rem] text-muted-foreground",
-                  isActivePath(pathname, item.href) && "bg-muted text-foreground",
+                  isActivePath(pathname, item.href) &&
+                    "bg-primary/10 text-primary-text hover:bg-primary/10 hover:text-primary-text",
                 )}
               >
                 {t(item.labelKey)}
@@ -118,7 +120,8 @@ export function SiteHeader() {
                       aria-current={isActivePath(pathname, item.href) ? "page" : undefined}
                       className={cn(
                         "rounded-lg px-3 py-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground",
-                        isActivePath(pathname, item.href) && "bg-muted text-foreground",
+                        isActivePath(pathname, item.href) &&
+                          "bg-primary/10 text-primary-text hover:bg-primary/10 hover:text-primary-text",
                       )}
                     >
                       {t(item.labelKey)}

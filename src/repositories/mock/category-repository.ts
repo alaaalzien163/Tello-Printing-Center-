@@ -11,10 +11,6 @@ function normalizeInput(input: CategoryInput): CategoryInput {
     slug: input.slug.trim().toLowerCase(),
     name: { en: input.name.en.trim(), ar: input.name.ar.trim() },
     description: { en: input.description.en.trim(), ar: input.description.ar.trim() },
-    image: {
-      url: input.image.url.trim(),
-      alt: { en: input.image.alt.en.trim(), ar: input.image.alt.ar.trim() },
-    },
   };
 }
 

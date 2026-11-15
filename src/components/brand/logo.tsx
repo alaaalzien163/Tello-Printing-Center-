@@ -32,7 +32,7 @@ export function Logo({ className, markClassName, showWordmark = true }: LogoProp
         <path
           d="M4 27.6 20 36.2 36 27.6"
           fill="none"
-          className="stroke-brand-cyan"
+          className="stroke-brand-secondary"
           strokeWidth="2.4"
           strokeLinecap="round"
           strokeLinejoin="round"

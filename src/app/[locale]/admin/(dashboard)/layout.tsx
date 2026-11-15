@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
+import { notFound, redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 
 import { AdminShell } from "@/components/admin/admin-shell";
-import type { Locale } from "@/i18n/routing";
+import { isLocale, type Locale } from "@/i18n/routing";
+import { getAdminAccess } from "@/lib/auth/admin";
 
 export async function generateMetadata({
   params,
@@ -18,6 +20,22 @@ export async function generateMetadata({
   };
 }
 
-export default function DashboardLayout({ children }: { children: React.ReactNode }) {
-  return <AdminShell>{children}</AdminShell>;
+export default async function DashboardLayout({
+  children,
+  params,
+}: {
+  children: React.ReactNode;
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  if (!isLocale(locale)) notFound();
+
+  const access = await getAdminAccess();
+
+  if (access.status !== "authorized") {
+    const query = access.status === "forbidden" ? "?reason=forbidden" : "";
+    redirect(`/${locale}/admin/login${query}`);
+  }
+
+  return <AdminShell session={access.session}>{children}</AdminShell>;
 }

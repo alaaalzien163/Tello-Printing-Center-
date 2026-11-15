@@ -25,7 +25,7 @@ export function SplashScreen() {
     <div
       aria-hidden="true"
       data-testid="splash-screen"
-      className="splash-overlay pointer-events-none fixed inset-0 z-100 flex flex-col items-center justify-center gap-6 bg-brand-navy text-white"
+      className="splash-overlay pointer-events-none fixed inset-0 z-100 flex flex-col items-center justify-center gap-6 bg-brand-black text-white"
     >
       <div className="splash-logo">
         <Logo
@@ -33,7 +33,7 @@ export function SplashScreen() {
           markClassName="size-12"
         />
       </div>
-      <div className="splash-rule h-px w-28 bg-gradient-to-r from-transparent via-brand-cyan to-transparent" />
+      <div className="splash-rule h-px w-28 bg-gradient-to-r from-transparent via-brand-primary to-transparent" />
       <p className="splash-tagline text-[0.65rem] font-medium tracking-[0.34em] text-white/70 uppercase">
         {t("tagline")}
       </p>

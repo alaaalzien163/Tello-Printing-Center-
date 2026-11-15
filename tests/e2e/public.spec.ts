@@ -2,6 +2,7 @@ import { expect, test } from "@playwright/test";
 
 import ar from "../../messages/ar.json";
 import en from "../../messages/en.json";
+import { getFirstCategory, getFirstPublishedProduct } from "./catalog-helpers";
 
 test.describe("public website", () => {
   test("renders the homepage sections", async ({ page }) => {
@@ -16,14 +17,29 @@ test.describe("public website", () => {
   });
 
   test("opens the admin sign-in page from the header logo", async ({ page }) => {
-    await page.goto("/en");
+    await page.goto("/en/products");
 
-    await page.getByRole("link", { name: en.nav.adminLogin }).click();
+    const logo = page.getByRole("link", { name: en.nav.adminLogin });
+    const image = logo.getByRole("img");
+    await expect(image).toHaveAttribute("alt", en.common.logoAlt);
+    await expect(image).toHaveAttribute("src", /logo-tello\.png/);
+    await expect(image).toHaveJSProperty("complete", true);
+    expect(
+      await image.evaluate((node) => (node as HTMLImageElement).naturalWidth),
+    ).toBeGreaterThan(0);
 
+    await logo.click();
     await expect(page).toHaveURL(/\/en\/admin\/login$/);
     await expect(
       page.getByRole("heading", { level: 1, name: en.admin.login.title }),
     ).toBeVisible();
+
+    await page.goto("/ar/products");
+    const arabicLogo = page.getByRole("link", { name: ar.nav.adminLogin });
+    await expect(arabicLogo.getByRole("img")).toHaveAttribute("alt", ar.common.logoAlt);
+
+    await arabicLogo.click();
+    await expect(page).toHaveURL(/\/ar\/admin\/login$/);
   });
 
   test("does not render the former industry trust bar", async ({ page }) => {
@@ -35,18 +51,32 @@ test.describe("public website", () => {
     }
   });
 
-  test("shows the catalog without search or filter controls", async ({ page }) => {
+  test("shows categories instead of listing every product", async ({ page }) => {
     await page.goto("/en/products");
 
-    await expect(page.getByRole("heading", { name: "Tello Forge X1" })).toBeVisible();
-    await expect(page.getByRole("heading", { name: "Tello Forge Pro 600" })).toBeVisible();
+    const categoryLinks = page.locator('#catalog a[href*="/products/category/"]');
+    if ((await categoryLinks.count()) === 0) {
+      await expect(page.getByText(en.categories.emptyTitle)).toBeVisible();
+      return;
+    }
+
+    await expect(categoryLinks.first()).toBeVisible();
+    await expect(page.locator('#catalog h3 a[href*="/products/"]')).toHaveCount(0);
     await expect(page.getByRole("searchbox")).toHaveCount(0);
     await expect(page.getByRole("combobox")).toHaveCount(0);
-    await expect(page.locator("#catalog").getByText(/^\d+ products?$/)).toBeVisible();
+    await expect(
+      page.locator("#catalog").getByText(/^\d+ categor(y|ies)$/),
+    ).toBeVisible();
   });
 
-  test("switches language while preserving path, query and hash", async ({ page }) => {
-    await page.goto("/en/products?category=cat-3d-printers#catalog");
+  test("switches language while preserving category path and hash", async ({ page }) => {
+    const category = await getFirstCategory(page);
+    if (!category) {
+      test.skip(true, "No published categories in Supabase.");
+      return;
+    }
+
+    await page.goto(`${category.href}#catalog`);
 
     await page
       .getByRole("button", {
@@ -56,9 +86,11 @@ test.describe("public website", () => {
       .click();
     await page.getByRole("menuitem", { name: "العربية" }).click();
 
-    await expect(page).toHaveURL(/\/ar\/products\?category=cat-3d-printers#catalog$/);
+    await expect(page).toHaveURL(
+      new RegExp(`/ar/products/category/${category.slug}#catalog$`),
+    );
     await expect(page.locator("html")).toHaveAttribute("dir", "rtl");
-    await expect(page.getByRole("heading", { level: 1 })).toHaveText(ar.products.title);
+    await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
   });
 
   test("applies light and dark theme preferences", async ({ page }) => {
@@ -74,7 +106,13 @@ test.describe("public website", () => {
   });
 
   test("links to WhatsApp only with a valid configured number", async ({ page }) => {
-    await page.goto("/en/products/forge-x1");
+    const product = await getFirstPublishedProduct(page);
+    if (!product) {
+      test.skip(true, "No published products in Supabase.");
+      return;
+    }
+
+    await page.goto(product.href);
 
     const whatsappLinks = page.locator('a[href*="wa.me/"]');
     const linkCount = await whatsappLinks.count();

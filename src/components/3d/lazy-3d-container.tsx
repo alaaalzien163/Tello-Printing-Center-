@@ -164,7 +164,7 @@ export function Lazy3DContainer({
       data-testid="hero-3d-container"
       data-scene-mode={sceneMode}
       className={cn(
-        "absolute inset-0 bg-[radial-gradient(circle_at_50%_28%,#17324e_0%,#0a1727_52%,#050b14_100%)] dark:bg-[radial-gradient(circle_at_50%_30%,#0d2036_0%,#071322_55%,#03070d_100%)]",
+        "absolute inset-0 bg-[radial-gradient(circle_at_50%_28%,#2a1019_0%,#0b0608_52%,#000000_100%)] dark:bg-[radial-gradient(circle_at_50%_30%,#1a0a10_0%,#080405_55%,#000000_100%)]",
         className,
       )}
     >

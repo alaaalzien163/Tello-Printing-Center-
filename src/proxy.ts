@@ -1,10 +1,11 @@
-import createMiddleware from "next-intl/middleware";
+import type { NextRequest } from "next/server";
 
-import { routing } from "@/i18n/routing";
+import { updateSupabaseSession } from "@/lib/supabase/proxy";
 
-export default createMiddleware(routing);
+export async function proxy(request: NextRequest) {
+  return updateSupabaseSession(request);
+}
 
 export const config = {
-  // Match every path except Next.js internals, API routes and static files.
-  matcher: "/((?!api|trpc|_next|_vercel|.*\\..*).*)",
+  matcher: ["/en/admin", "/ar/admin", "/en/admin/:path*", "/ar/admin/:path*"],
 };

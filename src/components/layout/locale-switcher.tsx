@@ -72,7 +72,7 @@ export function LocaleSwitcher({ className, compact = false }: LocaleSwitcherPro
             lang={value}
           >
             <span>{localeNames[value]}</span>
-            {value === locale ? <Check className="size-4 text-primary" /> : null}
+            {value === locale ? <Check className="size-4 text-primary-text" /> : null}
           </DropdownMenuItem>
         ))}
       </DropdownMenuContent>

@@ -42,9 +42,6 @@ const validCategory = {
   descriptionEn: "Printer parts, maintenance kits and accessories.",
   descriptionAr: "قطع غيار وأطقم صيانة وملحقات للطابعات.",
   slug: "printer-parts-accessories",
-  imageUrl: "/images/consumables.svg",
-  imageAltEn: "Printer parts and accessories",
-  imageAltAr: "قطع غيار وملحقات طابعات",
   active: true,
 };
 
@@ -110,8 +107,8 @@ describe("category schema", () => {
     expect(firstIssueMessage(schema.safeParse({ ...validCategory, slug: "bad slug" }))).toBe(
       "slugInvalid",
     );
-    expect(firstIssueMessage(schema.safeParse({ ...validCategory, imageUrl: "" }))).toBe(
-      "imageRequired",
+    expect(schema.safeParse({ ...validCategory, imageUrl: "/images/consumables.svg" }).success).toBe(
+      true,
     );
   });
 
@@ -120,11 +117,13 @@ describe("category schema", () => {
   });
 
   it("maps category form values to the repository input shape", () => {
-    expect(categoryFormToInput(validCategory)).toMatchObject({
+    const input = categoryFormToInput(validCategory);
+    expect(input).toMatchObject({
       slug: "printer-parts-accessories",
       name: { en: "Printer Parts and Accessories", ar: "قطع غيار وملحقات الطابعات" },
       active: true,
     });
+    expect(input).not.toHaveProperty("image");
   });
 });
 

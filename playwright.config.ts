@@ -1,5 +1,13 @@
 import { defineConfig, devices } from "@playwright/test";
 
+// Load local Playwright credentials without logging or overriding real
+// environment variables. Real values stay in the gitignored .env.local.
+try {
+  process.loadEnvFile(".env.local");
+} catch {
+  // The file is optional; credential-dependent tests skip when it is absent.
+}
+
 const baseURL = process.env.PLAYWRIGHT_BASE_URL ?? "http://localhost:3000";
 
 export default defineConfig({

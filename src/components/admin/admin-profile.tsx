@@ -8,7 +8,9 @@ import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
+import { AdminPasswordForm } from "@/components/admin/admin-password-form";
 import { useDemoData } from "@/components/admin/demo-data-provider";
+import { useAdminSession } from "@/components/admin/admin-session-provider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -17,8 +19,7 @@ import { usePathname, useRouter } from "@/i18n/navigation";
 import { localeNames, locales, type Locale } from "@/i18n/routing";
 import { getRepositories } from "@/repositories";
 import { createProfileSchema, type ProfileFormValues } from "@/schemas/contact";
-import { demoAdminAuth } from "@/services/demo-admin-auth";
-import { useAdminAuthStore } from "@/stores/admin-auth-store";
+import { signOutAdmin } from "@/lib/actions/admin-auth";
 
 const repositories = getRepositories();
 
@@ -39,8 +40,7 @@ export function AdminProfile() {
   const router = useRouter();
   const { profile, loading, reload } = useDemoData();
   const { theme, setTheme } = useTheme();
-  const session = useAdminAuthStore((state) => state.session);
-  const clearSession = useAdminAuthStore((state) => state.clearSession);
+  const session = useAdminSession();
 
   const {
     register,
@@ -74,9 +74,9 @@ export function AdminProfile() {
   }
 
   async function signOut() {
-    await demoAdminAuth.signOut();
-    clearSession();
+    await signOutAdmin();
     router.replace("/admin/login");
+    router.refresh();
   }
 
   const initials = profile?.name
@@ -99,14 +99,14 @@ export function AdminProfile() {
         <div className="space-y-5">
           <section className="rounded-xl border border-border bg-card p-5 shadow-soft sm:p-6">
             <div className="flex items-center gap-4">
-              <span className="flex size-16 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-xl font-semibold text-primary">
+              <span className="flex size-16 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-xl font-semibold text-primary-text">
                 {initials}
               </span>
               <div className="min-w-0">
                 <h3 className="truncate text-base font-semibold text-foreground">
                   {profile?.name ?? t("name")}
                 </h3>
-                <p className="mt-0.5 truncate text-sm text-muted-foreground">{session?.email}</p>
+                <p className="mt-0.5 truncate text-sm text-muted-foreground">{session.email}</p>
                 <p className="mt-1 text-xs text-muted-foreground">{t("avatarHint")}</p>
               </div>
             </div>
@@ -133,7 +133,7 @@ export function AdminProfile() {
                 <Label htmlFor="profile-email">{t("email")}</Label>
                 <Input
                   id="profile-email"
-                  value={profile?.email ?? ""}
+                  value={session.email}
                   readOnly
                   disabled
                   dir="ltr"
@@ -159,6 +159,8 @@ export function AdminProfile() {
               </div>
             </form>
           </section>
+
+          <AdminPasswordForm />
 
           <section className="rounded-xl border border-border bg-card p-5 shadow-soft sm:p-6" aria-labelledby="preferences-title">
             <h3 id="preferences-title" className="text-base font-semibold text-foreground">

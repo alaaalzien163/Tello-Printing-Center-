@@ -36,8 +36,13 @@
   --color-warning-foreground: var(--warning-foreground);
   --color-whatsapp: var(--whatsapp);
   --color-whatsapp-foreground: var(--whatsapp-foreground);
-  --color-brand-cyan: var(--brand-cyan);
-  --color-brand-navy: var(--brand-navy);
+  --color-brand-black: var(--brand-black);
+  --color-brand-primary: var(--brand-primary);
+  --color-brand-hover: var(--brand-hover);
+  --color-brand-active: var(--brand-active);
+  --color-brand-secondary: var(--brand-secondary);
+  --color-brand-pink-soft: var(--brand-pink-soft);
+  --color-primary-text: var(--primary-text);
   --color-accent-foreground: var(--accent-foreground);
   --color-accent: var(--accent);
   --color-muted-foreground: var(--muted-foreground);
@@ -57,8 +62,8 @@
   --radius-2xl: calc(var(--radius) * 1.7);
   --radius-3xl: calc(var(--radius) * 2.1);
   --radius-4xl: calc(var(--radius) * 2.5);
-  --shadow-soft: 0 1px 2px rgb(8 20 38 / 0.05), 0 12px 32px -20px rgb(8 20 38 / 0.22);
-  --shadow-lift: 0 2px 4px rgb(8 20 38 / 0.05), 0 24px 48px -24px rgb(8 20 38 / 0.28);
+  --shadow-soft: 0 1px 2px rgb(0 0 0 / 0.04), 0 12px 32px -20px rgb(0 0 0 / 0.18);
+  --shadow-lift: 0 2px 4px rgb(0 0 0 / 0.05), 0 24px 48px -24px rgb(0 0 0 / 0.24);
   --animate-fade-up: fade-up 0.65s cubic-bezier(0.22, 1, 0.36, 1) both;
   --animate-fade-in: fade-in 0.5s ease-out both;
   --animate-scale-in: scale-in 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
@@ -68,46 +73,59 @@
 :root {
   --radius: 0.75rem;
 
-  --background: oklch(0.985 0.004 247);
-  --foreground: oklch(0.235 0.032 257);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.235 0.032 257);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.235 0.032 257);
-  --primary: oklch(0.535 0.185 255);
-  --primary-foreground: oklch(0.99 0 0);
-  --secondary: oklch(0.955 0.009 247);
-  --secondary-foreground: oklch(0.3 0.035 257);
-  --muted: oklch(0.962 0.007 247);
-  --muted-foreground: oklch(0.485 0.022 256);
-  --accent: oklch(0.945 0.025 223);
-  --accent-foreground: oklch(0.32 0.07 245);
-  --destructive: oklch(0.555 0.21 27);
-  --destructive-foreground: oklch(0.99 0 0);
-  --success: oklch(0.53 0.13 153);
-  --success-foreground: oklch(0.99 0 0);
-  --warning: oklch(0.76 0.14 76);
-  --warning-foreground: oklch(0.25 0.04 76);
-  --whatsapp: oklch(0.495 0.12 153);
-  --whatsapp-foreground: oklch(0.99 0 0);
-  --brand-cyan: oklch(0.71 0.13 213);
-  --brand-navy: oklch(0.21 0.04 257);
-  --border: oklch(0.902 0.01 250);
-  --input: oklch(0.888 0.012 250);
-  --ring: oklch(0.57 0.16 255);
-  --chart-1: oklch(0.56 0.18 255);
-  --chart-2: oklch(0.7 0.13 210);
-  --chart-3: oklch(0.52 0.12 153);
-  --chart-4: oklch(0.62 0.15 60);
-  --chart-5: oklch(0.55 0.08 280);
-  --sidebar: oklch(0.975 0.006 247);
-  --sidebar-foreground: oklch(0.3 0.03 257);
-  --sidebar-primary: oklch(0.535 0.185 255);
-  --sidebar-primary-foreground: oklch(0.99 0 0);
-  --sidebar-accent: oklch(0.94 0.022 230);
-  --sidebar-accent-foreground: oklch(0.32 0.07 245);
-  --sidebar-border: oklch(0.905 0.01 250);
-  --sidebar-ring: oklch(0.57 0.16 255);
+  /*
+   * Official Tello palette, extracted from the logo. These exact values are
+   * brand constants and must not be approximated.
+   */
+  --brand-black: #000000;
+  --brand-primary: #cc1e5d;
+  --brand-hover: #b41f54;
+  --brand-active: #a72353;
+  --brand-secondary: #bb3665;
+  /* Derived tint for accents that sit on always-dark surfaces. */
+  --brand-pink-soft: #f5a3c0;
+
+  --background: #fbfafa;
+  --foreground: #0b0b0c;
+  --card: #ffffff;
+  --card-foreground: #0b0b0c;
+  --popover: #ffffff;
+  --popover-foreground: #0b0b0c;
+  /* Fills, active states and paid emphasis use the exact brand pink. */
+  --primary: var(--brand-primary);
+  --primary-foreground: #ffffff;
+  /* Small text/icons that need AA contrast on light surfaces. */
+  --primary-text: #cc1e5d;
+  --secondary: #f6f1f3;
+  --secondary-foreground: #1c1417;
+  --muted: #f7f4f5;
+  --muted-foreground: #6a5c62;
+  --accent: #fbedf2;
+  --accent-foreground: #8a1036;
+  --destructive: #c41e3a;
+  --destructive-foreground: #ffffff;
+  --success: #0f7a40;
+  --success-foreground: #ffffff;
+  --warning: #9a5b00;
+  --warning-foreground: #ffffff;
+  --whatsapp: #0f7a40;
+  --whatsapp-foreground: #ffffff;
+  --border: #eae3e6;
+  --input: #ddd3d7;
+  --ring: var(--brand-primary);
+  --chart-1: #cc1e5d;
+  --chart-2: #bb3665;
+  --chart-3: #a72353;
+  --chart-4: #c98a9f;
+  --chart-5: #6a5c62;
+  --sidebar: #f8f5f6;
+  --sidebar-foreground: #2a2225;
+  --sidebar-primary: var(--brand-primary);
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #fbedf2;
+  --sidebar-accent-foreground: #cc1e5d;
+  --sidebar-border: #eae3e6;
+  --sidebar-ring: var(--brand-primary);
 
   --font-arabic-stack:
     var(--font-ibm-plex-arabic), "Segoe UI", Tahoma, "Noto Sans Arabic", sans-serif;
@@ -115,49 +133,50 @@
 }
 
 .dark {
-  --background: oklch(0.16 0.026 257);
-  --foreground: oklch(0.95 0.008 245);
-  --card: oklch(0.198 0.027 257);
-  --card-foreground: oklch(0.95 0.008 245);
-  --popover: oklch(0.205 0.028 257);
-  --popover-foreground: oklch(0.95 0.008 245);
-  --primary: oklch(0.71 0.145 245);
-  --primary-foreground: oklch(0.17 0.03 257);
-  --secondary: oklch(0.245 0.025 257);
-  --secondary-foreground: oklch(0.93 0.01 245);
-  --muted: oklch(0.238 0.024 257);
-  --muted-foreground: oklch(0.73 0.02 250);
-  --accent: oklch(0.28 0.04 235);
-  --accent-foreground: oklch(0.9 0.03 225);
-  --destructive: oklch(0.66 0.19 25);
-  --destructive-foreground: oklch(0.14 0.02 25);
-  --success: oklch(0.7 0.14 153);
-  --success-foreground: oklch(0.14 0.03 153);
-  --warning: oklch(0.8 0.14 80);
-  --warning-foreground: oklch(0.2 0.04 80);
-  --whatsapp: oklch(0.73 0.16 152);
-  --whatsapp-foreground: oklch(0.14 0.035 152);
-  --brand-cyan: oklch(0.77 0.12 210);
-  --brand-navy: oklch(0.14 0.03 257);
-  --border: oklch(1 0 0 / 11%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.67 0.145 245);
-  --chart-1: oklch(0.7 0.15 245);
-  --chart-2: oklch(0.77 0.12 210);
-  --chart-3: oklch(0.72 0.14 153);
-  --chart-4: oklch(0.78 0.13 80);
-  --chart-5: oklch(0.68 0.1 285);
-  --sidebar: oklch(0.185 0.027 257);
-  --sidebar-foreground: oklch(0.92 0.01 245);
-  --sidebar-primary: oklch(0.71 0.145 245);
-  --sidebar-primary-foreground: oklch(0.17 0.03 257);
-  --sidebar-accent: oklch(0.26 0.035 240);
-  --sidebar-accent-foreground: oklch(0.92 0.02 230);
-  --sidebar-border: oklch(1 0 0 / 9%);
-  --sidebar-ring: oklch(0.67 0.145 245);
+  --background: #000000;
+  --foreground: #f6f2f3;
+  --card: #0d0b0c;
+  --card-foreground: #f6f2f3;
+  --popover: #141011;
+  --popover-foreground: #f6f2f3;
+  /* The exact brand pink is kept for every filled control. */
+  --primary: var(--brand-primary);
+  --primary-foreground: #ffffff;
+  /* #CC1E5D on black is only 3.9:1, so small text uses a brand-derived tint. */
+  --primary-text: #f26f9e;
+  --secondary: #1a1517;
+  --secondary-foreground: #f2edef;
+  --muted: #191416;
+  --muted-foreground: #a99ca2;
+  --accent: #241b1e;
+  --accent-foreground: #fbe7ee;
+  --destructive: #ff8296;
+  --destructive-foreground: #22050a;
+  --success: #4ade80;
+  --success-foreground: #052012;
+  --warning: #f0b84b;
+  --warning-foreground: #241503;
+  --whatsapp: #3ed07a;
+  --whatsapp-foreground: #041a0c;
+  --border: #2a2225;
+  --input: #3a3134;
+  --ring: var(--brand-primary);
+  --chart-1: #f26f9e;
+  --chart-2: #cc1e5d;
+  --chart-3: #bb3665;
+  --chart-4: #a72353;
+  --chart-5: #a99ca2;
+  --sidebar: #0b0909;
+  --sidebar-foreground: #efe9eb;
+  --sidebar-primary: var(--brand-primary);
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #201a1c;
+  --sidebar-accent-foreground: #f26f9e;
+  --sidebar-border: #241f21;
+  --sidebar-ring: var(--brand-primary);
 
-  --shadow-soft: 0 1px 2px rgb(0 0 0 / 0.24), 0 16px 40px -24px rgb(0 0 0 / 0.6);
-  --shadow-lift: 0 2px 4px rgb(0 0 0 / 0.3), 0 28px 64px -28px rgb(0 0 0 / 0.7);
+  --shadow-soft: 0 1px 2px rgb(0 0 0 / 0.5), 0 16px 40px -24px rgb(0 0 0 / 0.8);
+  --shadow-lift: 0 2px 4px rgb(0 0 0 / 0.55), 0 28px 64px -28px rgb(0 0 0 / 0.9);
 }
 
 @keyframes fade-up {
@@ -273,6 +292,11 @@
     background: color-mix(in oklab, var(--primary) 24%, transparent);
   }
 
+  .dark ::selection {
+    background: color-mix(in oklab, var(--primary) 46%, transparent);
+    color: #ffffff;
+  }
+
   input[type="number"]::-webkit-inner-spin-button,
   input[type="number"]::-webkit-outer-spin-button {
     margin: 0;
@@ -319,7 +343,7 @@
     line-height: 1.2;
     letter-spacing: 0.18em;
     text-transform: uppercase;
-    color: var(--primary);
+    color: var(--primary-text);
   }
 
   [dir="rtl"] .eyebrow {
@@ -369,7 +393,7 @@
       ),
       radial-gradient(
         45% 55% at 90% 25%,
-        color-mix(in oklab, var(--brand-cyan) 12%, transparent),
+        color-mix(in oklab, var(--brand-secondary) 12%, transparent),
         transparent 72%
       );
   }

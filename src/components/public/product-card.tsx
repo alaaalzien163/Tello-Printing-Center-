@@ -25,6 +25,8 @@ export function ProductCard({ product, categoryName, locale, className }: Produc
   const name = pickLocalized(product.name, locale);
   const description = pickLocalized(product.description, locale);
   const price = formatPrice(product.price, product.currency, locale);
+  const brand = product.brand ? pickLocalized(product.brand, locale) : "";
+  const identity = [brand, product.model].filter(Boolean).join(" · ");
   const href = `/products/${product.slug}`;
 
   return (
@@ -45,7 +47,7 @@ export function ProductCard({ product, categoryName, locale, className }: Produc
           sizes="(min-width: 1280px) 22rem, (min-width: 768px) 33vw, 90vw"
           imageClassName="transition-transform duration-500 ease-out group-hover:scale-[1.04]"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-brand-navy/35 via-transparent to-transparent opacity-70" />
+        <div className="absolute inset-0 bg-gradient-to-t from-brand-black/35 via-transparent to-transparent opacity-70" />
         {product.featured ? (
           <Badge className="absolute start-3 top-3 gap-1 bg-card/90 text-foreground shadow-sm backdrop-blur">
             <Star className="size-3 fill-warning text-warning" aria-hidden="true" />
@@ -56,7 +58,7 @@ export function ProductCard({ product, categoryName, locale, className }: Produc
 
       <CardContent className="flex flex-1 flex-col gap-3 p-5">
         <div className="flex items-center justify-between gap-2">
-          <span className="text-[0.68rem] font-semibold tracking-[0.14em] text-primary uppercase">
+          <span className="text-[0.68rem] font-semibold tracking-[0.14em] text-primary-text uppercase">
             {categoryName}
           </span>
           <span className="font-mono text-[0.68rem] tracking-wide text-muted-foreground" dir="ltr">
@@ -65,10 +67,15 @@ export function ProductCard({ product, categoryName, locale, className }: Produc
         </div>
 
         <h3 className="text-[1.05rem] leading-snug font-semibold text-foreground">
-          <Link href={href} className="transition-colors hover:text-primary">
+          <Link href={href} className="transition-colors hover:text-primary-text">
             {name}
           </Link>
         </h3>
+        {identity ? (
+          <p className="-mt-1 text-xs font-medium text-muted-foreground" dir="auto">
+            {identity}
+          </p>
+        ) : null}
         <p className="line-clamp-2 text-sm leading-6 text-muted-foreground">{description}</p>
 
         <div className="mt-auto flex items-end justify-between gap-3 pt-3">

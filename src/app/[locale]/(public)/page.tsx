@@ -6,6 +6,7 @@ import { CategoriesSection } from "@/components/public/categories-section";
 import { ContactSection } from "@/components/public/contact-section";
 import { FeaturedProductsSection } from "@/components/public/featured-products-section";
 import { HeroSection } from "@/components/public/hero-section";
+import { PrintRequestCta } from "@/components/public/print-request-cta";
 import type { Locale } from "@/i18n/routing";
 import { localizedAlternates } from "@/lib/metadata";
 import { getPublicCatalog } from "@/repositories/public-catalog";
@@ -44,6 +45,7 @@ export default async function HomePage({ params }: HomePageProps) {
         locale={locale}
       />
       <FeaturedProductsSection products={featured} categories={catalog.categories} locale={locale} />
+      <PrintRequestCta />
       <ContactSection />
     </>
   );

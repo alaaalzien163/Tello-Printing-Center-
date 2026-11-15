@@ -8,7 +8,8 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground hover:bg-primary/80",
+        default:
+          "bg-brand-primary text-primary-foreground hover:bg-brand-hover active:bg-brand-active",
         outline:
           "border-border bg-background hover:bg-muted hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground dark:border-input dark:bg-input/30 dark:hover:bg-input/50",
         secondary:
@@ -21,7 +22,7 @@ const buttonVariants = cva(
           "bg-whatsapp text-whatsapp-foreground shadow-sm hover:bg-whatsapp/90 focus-visible:border-whatsapp/50 focus-visible:ring-whatsapp/30",
         success:
           "bg-success text-success-foreground hover:bg-success/90 focus-visible:border-success/40 focus-visible:ring-success/25",
-        link: "text-primary underline-offset-4 hover:underline",
+        link: "text-primary-text underline-offset-4 hover:underline",
       },
       size: {
         default:

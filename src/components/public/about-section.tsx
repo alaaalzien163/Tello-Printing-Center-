@@ -131,7 +131,7 @@ export async function AboutSection() {
           </div>
 
           <div className="relative">
-            <div className="relative overflow-hidden rounded-3xl border border-border/80 bg-brand-navy shadow-lift">
+            <div className="relative overflow-hidden rounded-3xl border border-border/80 bg-brand-black shadow-lift">
               <div className="relative aspect-[4/3] w-full">
                 <Image
                   src="/images/about-inspection.svg"
@@ -140,17 +140,17 @@ export async function AboutSection() {
                   sizes="(min-width: 1024px) 36rem, 92vw"
                   className="object-cover"
                 />
-                <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-brand-navy/70 via-transparent to-transparent" />
+                <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-brand-black/70 via-transparent to-transparent" />
               </div>
 
-              <div className="absolute start-4 top-4 inline-flex items-center gap-2 rounded-full border border-white/15 bg-brand-navy/55 px-3 py-1.5 text-[0.68rem] font-medium text-white backdrop-blur-md">
-                <BadgeCheck className="size-3.5 text-brand-cyan" aria-hidden="true" />
+              <div className="absolute start-4 top-4 inline-flex items-center gap-2 rounded-full border border-white/15 bg-brand-black/55 px-3 py-1.5 text-[0.68rem] font-medium text-white backdrop-blur-md">
+                <BadgeCheck className="size-3.5 text-brand-pink-soft" aria-hidden="true" />
                 {t("badge")}
               </div>
             </div>
 
             <div className="absolute -bottom-4 end-5 hidden items-center gap-2 rounded-xl border border-border bg-card px-3.5 py-2.5 shadow-soft sm:flex">
-              <MapPin className="size-4 text-primary" aria-hidden="true" />
+              <MapPin className="size-4 text-primary-text" aria-hidden="true" />
               <span className="text-xs font-semibold text-foreground">{t("story.location")}</span>
             </div>
           </div>
@@ -195,7 +195,7 @@ export async function AboutSection() {
                 className="group relative overflow-hidden rounded-2xl border border-border bg-card p-6 shadow-soft transition-[border-color,box-shadow] duration-300 hover:border-primary/30 hover:shadow-lift"
               >
                 <div className="flex items-center justify-between">
-                  <span className="flex size-11 items-center justify-center rounded-xl border border-primary/15 bg-primary/5 text-primary">
+                  <span className="flex size-11 items-center justify-center rounded-xl border border-primary/15 bg-primary/5 text-primary-text">
                     <Icon className="size-5" aria-hidden="true" />
                   </span>
                   <span className="font-mono text-[0.65rem] font-medium tracking-widest text-muted-foreground/70">
@@ -228,7 +228,7 @@ export async function AboutSection() {
             <div className="grid gap-4">
               <article className="rounded-2xl border border-border bg-card p-5 shadow-soft">
                 <div className="flex items-start gap-3">
-                  <span className="flex size-9 shrink-0 items-center justify-center rounded-lg border border-primary/15 bg-primary/5 text-primary">
+                  <span className="flex size-9 shrink-0 items-center justify-center rounded-lg border border-primary/15 bg-primary/5 text-primary-text">
                     <Layers className="size-4" aria-hidden="true" />
                   </span>
                   <div>
@@ -258,7 +258,7 @@ export async function AboutSection() {
                     key={key}
                     className="rounded-2xl border border-border bg-card p-5 shadow-soft"
                   >
-                    <span className="flex size-9 items-center justify-center rounded-lg border border-primary/15 bg-primary/5 text-primary">
+                    <span className="flex size-9 items-center justify-center rounded-lg border border-primary/15 bg-primary/5 text-primary-text">
                       <Icon className="size-4" aria-hidden="true" />
                     </span>
                     <h4 className="mt-3 text-sm font-semibold text-foreground">{title}</h4>
@@ -270,19 +270,19 @@ export async function AboutSection() {
           </div>
         </div>
 
-        <div className="relative mt-16 overflow-hidden rounded-3xl border border-white/10 bg-brand-navy p-6 text-white md:mt-20 md:p-10">
+        <div className="relative mt-16 overflow-hidden rounded-3xl border border-white/10 bg-brand-black p-6 text-white md:mt-20 md:p-10">
           <div
             className="surface-grid pointer-events-none absolute inset-0 opacity-20"
             aria-hidden="true"
           />
           <div
-            className="pointer-events-none absolute -end-24 -top-24 size-72 rounded-full bg-brand-cyan/10 blur-3xl"
+            className="pointer-events-none absolute -end-24 -top-24 size-72 rounded-full bg-brand-primary/10 blur-3xl"
             aria-hidden="true"
           />
 
           <div className="relative grid gap-10 lg:grid-cols-[1fr_1.15fr] lg:items-center lg:gap-16">
             <div>
-              <span className="eyebrow text-brand-cyan">{t("why.eyebrow")}</span>
+              <span className="eyebrow text-brand-pink-soft">{t("why.eyebrow")}</span>
               <h3 className="mt-3 text-2xl font-semibold tracking-tight sm:text-3xl">
                 {t("why.title")}
               </h3>
@@ -291,7 +291,7 @@ export async function AboutSection() {
               </p>
 
               <div className="mt-7 flex flex-col gap-3 sm:flex-row">
-                <Button asChild size="lg" className="bg-white text-brand-navy hover:bg-white/90">
+                <Button asChild size="lg">
                   <Link href="/contact">
                     <MessageSquare aria-hidden="true" />
                     {t("why.cta")}
@@ -317,7 +317,7 @@ export async function AboutSection() {
                   key={key}
                   className="flex gap-4 rounded-2xl border border-white/10 bg-white/[0.04] p-4"
                 >
-                  <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-white/10 text-brand-cyan">
+                  <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-white/10 text-brand-pink-soft">
                     <Icon className="size-4" aria-hidden="true" />
                   </span>
                   <div>

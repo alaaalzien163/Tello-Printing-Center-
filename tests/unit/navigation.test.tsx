@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { NextIntlClientProvider } from "next-intl";
 import { describe, expect, it, vi } from "vitest";
@@ -102,10 +102,9 @@ describe("SiteHeader", () => {
       </NextIntlClientProvider>,
     );
 
-    expect(screen.getByRole("link", { name: enMessages.nav.adminLogin })).toHaveAttribute(
-      "href",
-      "/admin/login",
-    );
+    const logo = screen.getByRole("link", { name: enMessages.nav.adminLogin });
+    expect(logo).toHaveAttribute("href", "/admin/login");
+    expect(within(logo).getByRole("img", { name: enMessages.common.logoAlt })).toBeInTheDocument();
   });
 
   it("opens the mobile menu and exposes localized navigation links", async () => {

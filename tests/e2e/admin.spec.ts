@@ -2,10 +2,39 @@ import { expect, test } from "@playwright/test";
 
 import en from "../../messages/en.json";
 
-import { goToAdminPage, signIn } from "./helpers";
+import {
+  adminCredentials,
+  adminCredentialsMissing,
+  goToAdminPage,
+  signIn,
+} from "./helpers";
+
+test.describe("admin uploads", () => {
+  test("rejects unauthenticated image uploads", async ({ request }) => {
+    const png = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
+
+    const response = await request.post("/api/admin/uploads", {
+      multipart: {
+        kind: "product",
+        id: "11111111-1111-4111-8111-111111111111",
+        file: {
+          name: "photo.png",
+          mimeType: "image/png",
+          buffer: png,
+        },
+      },
+    });
+
+    expect(response.status()).toBe(401);
+  });
+});
 
 test.describe("admin dashboard", () => {
-  test("guards the dashboard and signs in with the development demo", async ({ page }) => {
+  test.beforeEach(() => {
+    test.skip(!adminCredentials, adminCredentialsMissing);
+  });
+
+  test("guards the dashboard and signs in with an administrator account", async ({ page }) => {
     await signIn(page);
     await expect(page.getByText(en.admin.common.demoBadge).first()).toBeVisible();
   });
@@ -21,12 +50,12 @@ test.describe("admin dashboard", () => {
 
     await createDialog.getByRole("button", { name: en.common.create }).click();
     await expect(createDialog.getByText(en.validation.productNameRequired).first()).toBeVisible();
-    await expect(createDialog.getByText(en.validation.skuRequired)).toBeVisible();
+    await expect(createDialog.getByText(en.validation.slugRequired)).toBeVisible();
 
     const fields = en.admin.products.fields;
+    const variants = en.admin.products.variants;
     await createDialog.getByLabel(fields.nameEn).fill("E2E Test Printer");
     await createDialog.getByLabel(fields.nameAr).fill("طابعة اختبار E2E");
-    await createDialog.getByLabel(fields.sku).fill("TEL-E2E-001");
     await createDialog.getByLabel(fields.slug).fill("e2e-test-printer");
 
     await createDialog.locator("#product-category").click();
@@ -40,9 +69,11 @@ test.describe("admin dashboard", () => {
       .getByLabel(fields.descriptionAr)
       .fill("طابعة إنتاج تم إنشاؤها أثناء اختبار شامل.");
 
-    await createDialog.getByLabel(fields.imageUrl).fill("/images/product-printer.svg");
-    await createDialog.getByLabel(fields.imageAltEn).fill("E2E test printer");
-    await createDialog.getByLabel(fields.imageAltAr).fill("طابعة اختبار E2E");
+    await createDialog.getByRole("button", { name: variants.add }).click();
+    await createDialog.getByLabel(variants.sizeEn).fill("Large");
+    await createDialog.getByLabel(variants.sizeAr).fill("كبير");
+    await createDialog.getByLabel(variants.price).fill("1250");
+    await createDialog.getByLabel(variants.sku).fill("TEL-E2E-001");
 
     await createDialog.getByRole("button", { name: en.common.create }).click();
     await expect(page.getByText(en.admin.products.createSuccess)).toBeVisible();
@@ -102,9 +133,6 @@ test.describe("admin dashboard", () => {
       .getByLabel(fields.descriptionAr)
       .fill("فئة تم إنشاؤها أثناء اختبار شامل.");
     await createDialog.getByLabel(fields.slug).fill("e2e-category");
-    await createDialog.getByLabel(fields.imageUrl).fill("/images/consumables.svg");
-    await createDialog.getByLabel(fields.imageAltEn).fill("E2E category image");
-    await createDialog.getByLabel(fields.imageAltAr).fill("صورة فئة E2E");
 
     await createDialog.getByRole("button", { name: en.common.create }).click();
     await expect(page.getByText(en.admin.categories.createSuccess)).toBeVisible();
@@ -127,6 +155,19 @@ test.describe("admin dashboard", () => {
     await signIn(page);
     await goToAdminPage(page, "profile");
     await expect(page.getByRole("heading", { name: en.admin.profile.title })).toBeVisible();
+
+    await expect(
+      page.getByRole("heading", { name: en.admin.profile.passwordTitle }),
+    ).toBeVisible();
+    await expect(
+      page.getByLabel(en.admin.profile.currentPassword, { exact: true }),
+    ).toBeVisible();
+    await expect(
+      page.getByLabel(en.admin.profile.newPassword, { exact: true }),
+    ).toBeVisible();
+    await expect(
+      page.getByLabel(en.admin.profile.confirmPassword, { exact: true }),
+    ).toBeVisible();
 
     const nameInput = page.getByLabel(en.admin.profile.name);
     await nameInput.fill("E2E Administrator");

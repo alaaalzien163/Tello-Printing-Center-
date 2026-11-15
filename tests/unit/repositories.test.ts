@@ -27,10 +27,6 @@ const baseCategory: CategoryInput = {
     ar: "فئة مؤقتة تستخدمها الاختبارات الآلية.",
   },
   slug: "test-category",
-  image: {
-    url: "/images/consumables.svg",
-    alt: { en: "Test category image", ar: "صورة فئة الاختبار" },
-  },
   active: true,
 };
 

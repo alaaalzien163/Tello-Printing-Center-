@@ -1,24 +1,21 @@
-import { ArrowLeft, CheckCircle2, Package } from "lucide-react";
+import { Package } from "lucide-react";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
 import { ProductCard } from "@/components/public/product-card";
-import { WhatsAppOrderButton } from "@/components/public/whatsapp-order-button";
+import { ProductDetail } from "@/components/public/product-detail";
 import { Breadcrumbs, type BreadcrumbItem } from "@/components/shared/breadcrumbs";
-import { ProductMedia } from "@/components/shared/product-media";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { absoluteUrl } from "@/config/site";
 import type { Locale } from "@/i18n/routing";
-import { Link } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
-import { formatPrice, pickLocalized } from "@/lib/format";
+import { pickLocalized } from "@/lib/format";
 import { localizedAlternates } from "@/lib/metadata";
 import {
   getPublicCatalog,
   getPublicProductBySlug,
   getPublicProductSlugs,
+  getPublicProductVariants,
 } from "@/repositories/public-catalog";
 import { getCategoryName, getRelatedProducts } from "@/services/catalog";
 
@@ -77,10 +74,9 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
   if (!product) notFound();
 
+  const variants = await getPublicProductVariants(product.id);
   const name = pickLocalized(product.name, locale);
   const description = pickLocalized(product.description, locale);
-  const imageAlt = pickLocalized(product.image.alt, locale);
-  const price = formatPrice(product.price, product.currency, locale);
   const category = catalog.categories.find((item) => item.id === product.categoryId) ?? null;
   const categoryName = getCategoryName(catalog.categories, product.categoryId, locale);
   const related = getRelatedProducts(catalog.products, product, 3);
@@ -89,7 +85,12 @@ export default async function ProductPage({ params }: ProductPageProps) {
   const breadcrumbs: BreadcrumbItem[] = [
     { label: tNav("home"), href: "/" },
     ...(category
-      ? [{ label: pickLocalized(category.name, locale), href: "/products#catalog" }]
+      ? [
+          {
+            label: pickLocalized(category.name, locale),
+            href: `/products/category/${category.slug}`,
+          },
+        ]
       : []),
     { label: name },
   ];
@@ -117,7 +118,6 @@ export default async function ProductPage({ params }: ProductPageProps) {
     { label: t("sku"), value: product.sku },
     { label: t("category"), value: categoryName },
     { label: t("availability"), value: product.active ? t("inStock") : t("outOfStock") },
-    { label: t("price"), value: price },
   ];
 
   return (
@@ -134,84 +134,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
       </div>
 
       <section className="container-page py-10 md:py-14">
-        <div className="grid gap-8 lg:grid-cols-2 lg:gap-14">
-          <div className="relative overflow-hidden rounded-3xl border border-border bg-muted shadow-soft">
-            <div className="relative aspect-[4/3] w-full">
-              <ProductMedia
-                src={product.image.url}
-                alt={imageAlt}
-                sizes="(min-width: 1024px) 36rem, 92vw"
-                priority
-              />
-            </div>
-            {product.featured ? (
-              <Badge className="absolute start-4 top-4 bg-card/90 text-foreground backdrop-blur">
-                {t("featured")}
-              </Badge>
-            ) : null}
-          </div>
-
-          <div className="flex flex-col">
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="text-xs font-semibold tracking-[0.16em] text-primary uppercase">
-                {categoryName}
-              </span>
-              <span className="text-muted-foreground/40" aria-hidden="true">
-                /
-              </span>
-              <span className="font-mono text-xs tracking-wide text-muted-foreground" dir="ltr">
-                {product.sku}
-              </span>
-            </div>
-
-            <h1 className="mt-3 text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
-              {name}
-            </h1>
-
-            <div className="mt-5 flex flex-wrap items-end gap-x-4 gap-y-2">
-              <p className="text-3xl font-semibold text-foreground">{price}</p>
-              <span
-                className={
-                  product.active
-                    ? "inline-flex items-center gap-1.5 rounded-full bg-success/10 px-2.5 py-1 text-xs font-medium text-success"
-                    : "inline-flex items-center gap-1.5 rounded-full bg-muted px-2.5 py-1 text-xs font-medium text-muted-foreground"
-                }
-              >
-                <CheckCircle2 className="size-3.5" aria-hidden="true" />
-                {product.active ? t("inStock") : t("outOfStock")}
-              </span>
-            </div>
-
-            <p className="mt-6 text-base leading-7 text-muted-foreground">{description}</p>
-
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-              <WhatsAppOrderButton
-                productName={name}
-                sku={product.sku}
-                formattedPrice={price}
-                productPath={`/${locale}/products/${product.slug}`}
-                size="lg"
-              />
-              <Button asChild variant="outline" size="lg">
-                <Link href="/products">
-                  <ArrowLeft className="rtl:rotate-180" aria-hidden="true" />
-                  {t("backToProducts")}
-                </Link>
-              </Button>
-            </div>
-
-            <dl className="mt-10 grid grid-cols-2 gap-x-6 gap-y-4 border-t border-border pt-6">
-              {specs.map((spec) => (
-                <div key={spec.label}>
-                  <dt className="text-[0.65rem] font-medium tracking-wide text-muted-foreground uppercase">
-                    {spec.label}
-                  </dt>
-                  <dd className="mt-1 text-sm font-medium text-foreground">{spec.value}</dd>
-                </div>
-              ))}
-            </dl>
-          </div>
-        </div>
+        <ProductDetail product={product} variants={variants} categoryName={categoryName} />
 
         <div className="mt-14 grid gap-8 border-t border-border pt-10 lg:grid-cols-[1fr_20rem]">
           <div>
@@ -220,7 +143,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
           </div>
           <div className="rounded-2xl border border-border bg-card p-5">
             <h2 className="flex items-center gap-2 text-sm font-semibold text-foreground">
-              <Package className="size-4 text-primary" aria-hidden="true" />
+              <Package className="size-4 text-primary-text" aria-hidden="true" />
               {t("specifications")}
             </h2>
             <dl className="mt-4 space-y-3 text-sm">

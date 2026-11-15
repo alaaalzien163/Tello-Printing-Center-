@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
-import { ProductCatalog } from "@/components/public/product-catalog";
+import { CategoryCatalog } from "@/components/public/category-catalog";
 import type { Locale } from "@/i18n/routing";
 import { localizedAlternates } from "@/lib/metadata";
 import { getPublicCatalog } from "@/repositories/public-catalog";
@@ -25,7 +25,11 @@ export default async function ProductsPage({ params }: ProductsPageProps) {
   const { locale } = await params;
   setRequestLocale(locale);
 
-  const [catalog, t] = await Promise.all([getPublicCatalog(), getTranslations("products")]);
+  const [catalog, t, tCategories] = await Promise.all([
+    getPublicCatalog(),
+    getTranslations("products"),
+    getTranslations("categories"),
+  ]);
 
   return (
     <>
@@ -43,10 +47,15 @@ export default async function ProductsPage({ params }: ProductsPageProps) {
 
       <section className="section-space pt-10 md:pt-12">
         <div className="container-page">
-          <ProductCatalog
-            products={catalog.products}
+          <CategoryCatalog
             categories={catalog.categories}
+            products={catalog.products}
             locale={locale}
+            labels={{
+              count: tCategories("count", { count: catalog.categories.length }),
+              emptyTitle: tCategories("emptyTitle"),
+              emptyDescription: tCategories("emptyDescription"),
+            }}
           />
         </div>
       </section>
