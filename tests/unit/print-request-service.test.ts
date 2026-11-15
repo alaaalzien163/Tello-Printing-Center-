@@ -18,7 +18,6 @@ const validInput = {
   details: "Please print three copies of the enclosed bracket in PLA.",
   locale: "en",
   submissionId,
-  turnstileToken: "",
   website: "",
   files: [],
 };
@@ -80,10 +79,6 @@ function query(
   return builder;
 }
 
-function configureVerification(verifyCaptcha = vi.fn().mockResolvedValue({ ok: true })) {
-  return verifyCaptcha;
-}
-
 afterEach(() => {
   vi.unstubAllGlobals();
   vi.unstubAllEnvs();
@@ -94,8 +89,8 @@ describe("initiatePrintRequest", () => {
     const supabase = { from: vi.fn(), rpc: vi.fn(), storage: { from: vi.fn() } };
     const result = await initiatePrintRequest(
       { ...validInput, phone: "x" },
-      { clientHash: "a".repeat(64), clientIp: "203.0.113.10" },
-      { supabase: supabase as unknown as SupabaseClient, verifyCaptcha: configureVerification() },
+      { clientHash: "a".repeat(64) },
+      { supabase: supabase as unknown as SupabaseClient },
     );
 
     expect(result.ok).toBe(false);
@@ -107,8 +102,8 @@ describe("initiatePrintRequest", () => {
     const supabase = { from: vi.fn(), rpc: vi.fn(), storage: { from: vi.fn() } };
     const result = await initiatePrintRequest(
       { ...validInput, website: "https://spam.example" },
-      { clientHash: "a".repeat(64), clientIp: "203.0.113.10" },
-      { supabase: supabase as unknown as SupabaseClient, verifyCaptcha: configureVerification() },
+      { clientHash: "a".repeat(64) },
+      { supabase: supabase as unknown as SupabaseClient },
     );
 
     expect(result.ok).toBe(false);
@@ -116,46 +111,130 @@ describe("initiatePrintRequest", () => {
     expect(supabase.from).not.toHaveBeenCalled();
   });
 
-  it("fails closed when the CAPTCHA verifier rejects the submission", async () => {
+  it("accepts a valid submission without any CAPTCHA token", async () => {
+    const inserted: unknown[] = [];
+
     const supabase = {
-      from: () => query({ data: null, error: null }),
-      rpc: vi.fn(),
+      from: (table: string) =>
+        query(
+          { data: null, error: null },
+          (payload) => inserted.push(payload),
+          undefined,
+          table === "print_requests"
+            ? { data: { id: requestId, request_number: 1001, status: "pending" }, error: null }
+            : undefined,
+        ),
+      rpc: vi.fn().mockResolvedValue({
+        data: [{ allowed: true, remaining: 2, retry_after_seconds: 0 }],
+        error: null,
+      }),
       storage: { from: vi.fn() },
     };
-    const verifyCaptcha = vi.fn().mockResolvedValue({ ok: false, reason: "invalid" });
 
     const result = await initiatePrintRequest(
-      validInput,
-      { clientHash: "a".repeat(64), clientIp: "203.0.113.10" },
-      { supabase: supabase as unknown as SupabaseClient, verifyCaptcha },
+      // A leftover token from an older client is ignored, never required.
+      { ...validInput, turnstileToken: "leftover-token" },
+      { clientHash: "a".repeat(64) },
+      { supabase: supabase as unknown as SupabaseClient },
+    );
+
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.status).toBe("pending");
+      expect(result.requestNumber).toBe("1001");
+    }
+    expect(inserted).toHaveLength(1);
+    expect(JSON.stringify(inserted[0])).not.toContain("leftover-token");
+  });
+
+  it("rejects unsupported file extensions before consuming a rate-limit attempt", async () => {
+    const supabase = { from: vi.fn(), rpc: vi.fn(), storage: { from: vi.fn() } };
+
+    const result = await initiatePrintRequest(
+      {
+        ...validInput,
+        files: [{ name: "payload.exe", size: 1024, type: "application/octet-stream" }],
+      },
+      { clientHash: "a".repeat(64) },
+      { supabase: supabase as unknown as SupabaseClient },
     );
 
     expect(result.ok).toBe(false);
-    if (!result.ok) expect(result.code).toBe("CAPTCHA");
+    if (!result.ok) expect(result.code).toBe("INVALID_INPUT");
     expect(supabase.rpc).not.toHaveBeenCalled();
+    expect(supabase.from).not.toHaveBeenCalled();
   });
 
-  it("reports a missing CAPTCHA configuration distinctly", async () => {
+  it("rejects oversized file metadata before consuming a rate-limit attempt", async () => {
+    const supabase = { from: vi.fn(), rpc: vi.fn(), storage: { from: vi.fn() } };
+
+    const result = await initiatePrintRequest(
+      {
+        ...validInput,
+        files: [{ name: "huge.stl", size: 51 * 1024 * 1024, type: "model/stl" }],
+      },
+      { clientHash: "a".repeat(64) },
+      { supabase: supabase as unknown as SupabaseClient },
+    );
+
+    expect(result.ok).toBe(false);
+    if (!result.ok) expect(result.code).toBe("INVALID_INPUT");
+    expect(supabase.rpc).not.toHaveBeenCalled();
+    expect(supabase.from).not.toHaveBeenCalled();
+  });
+
+  it("handles a storage signing failure safely and removes the request row", async () => {
+    const inserted: Array<{ table: string; payload: unknown }> = [];
+    let requestDeleted = false;
+
     const supabase = {
-      from: () => query({ data: null, error: null }),
-      rpc: vi.fn(),
-      storage: { from: vi.fn() },
+      from: (table: string) => {
+        const builder = query(
+          { data: null, error: null },
+          (payload) => inserted.push({ table, payload }),
+          undefined,
+          table === "print_requests"
+            ? { data: { id: requestId, request_number: 1007, status: "uploading" }, error: null }
+            : undefined,
+        );
+
+        if (table === "print_requests") {
+          builder.delete = () => {
+            requestDeleted = true;
+            return builder;
+          };
+        }
+
+        return builder;
+      },
+      rpc: vi.fn().mockResolvedValue({
+        data: [{ allowed: true, remaining: 2, retry_after_seconds: 0 }],
+        error: null,
+      }),
+      storage: {
+        from: () => ({
+          createSignedUploadUrl: async () => ({
+            data: null,
+            error: { message: "storage unavailable", statusCode: "503" },
+          }),
+        }),
+      },
     };
 
     const result = await initiatePrintRequest(
-      validInput,
-      { clientHash: "a".repeat(64), clientIp: "203.0.113.10" },
-      {
-        supabase: supabase as unknown as SupabaseClient,
-        verifyCaptcha: vi.fn().mockResolvedValue({ ok: false, reason: "not_configured" }),
-      },
+      { ...validInput, files: [{ name: "bracket.stl", size: 1200, type: "model/stl" }] },
+      { clientHash: "a".repeat(64) },
+      { supabase: supabase as unknown as SupabaseClient },
     );
 
     expect(result.ok).toBe(false);
     if (!result.ok) {
-      expect(result.code).toBe("CAPTCHA_NOT_CONFIGURED");
-      expect(result.status).toBe(503);
+      expect(result.code).toBe("STORAGE");
+      expect(result.status).toBe(502);
+      expect(JSON.stringify(result)).not.toContain("storage unavailable");
     }
+    expect(requestDeleted).toBe(true);
+    expect(inserted.filter((entry) => entry.table === "print_request_files")).toHaveLength(0);
   });
 
   it("returns the retry window when the SQL rate limiter refuses the client", async () => {
@@ -170,8 +249,8 @@ describe("initiatePrintRequest", () => {
 
     const result = await initiatePrintRequest(
       validInput,
-      { clientHash: "a".repeat(64), clientIp: "203.0.113.10" },
-      { supabase: supabase as unknown as SupabaseClient, verifyCaptcha: configureVerification() },
+      { clientHash: "a".repeat(64) },
+      { supabase: supabase as unknown as SupabaseClient },
     );
 
     expect(result.ok).toBe(false);
@@ -210,10 +289,9 @@ describe("initiatePrintRequest", () => {
           ...validInput,
           files: [{ name: "bracket.stl", size: 1200, type: "model/stl" }],
         },
-        { clientHash: "a".repeat(64), clientIp: "203.0.113.10" },
+        { clientHash: "a".repeat(64) },
         {
           supabase: supabase as unknown as SupabaseClient,
-          verifyCaptcha: configureVerification(),
         },
       );
 
@@ -256,8 +334,8 @@ describe("initiatePrintRequest", () => {
 
     const result = await initiatePrintRequest(
       validInput,
-      { clientHash: "a".repeat(64), clientIp: "203.0.113.10" },
-      { supabase: supabase as unknown as SupabaseClient, verifyCaptcha: configureVerification() },
+      { clientHash: "a".repeat(64) },
+      { supabase: supabase as unknown as SupabaseClient },
     );
 
     expect(result.ok).toBe(true);
@@ -283,8 +361,8 @@ describe("initiatePrintRequest", () => {
   it("returns 503 when the privileged client is not configured", async () => {
     const result = await initiatePrintRequest(
       validInput,
-      { clientHash: "a".repeat(64), clientIp: "203.0.113.10" },
-      { supabase: null, verifyCaptcha: configureVerification() },
+      { clientHash: "a".repeat(64) },
+      { supabase: null },
     );
 
     expect(result.ok).toBe(false);
@@ -316,8 +394,8 @@ describe("initiatePrintRequest", () => {
 
     const result = await initiatePrintRequest(
       validInput,
-      { clientHash: "a".repeat(64), clientIp: "203.0.113.10" },
-      { supabase: supabase as unknown as SupabaseClient, verifyCaptcha: configureVerification() },
+      { clientHash: "a".repeat(64) },
+      { supabase: supabase as unknown as SupabaseClient },
     );
 
     expect(result.ok).toBe(false);
@@ -357,8 +435,8 @@ describe("initiatePrintRequest", () => {
 
     const result = await initiatePrintRequest(
       validInput,
-      { clientHash: "a".repeat(64), clientIp: "203.0.113.10" },
-      { supabase: supabase as unknown as SupabaseClient, verifyCaptcha: configureVerification() },
+      { clientHash: "a".repeat(64) },
+      { supabase: supabase as unknown as SupabaseClient },
     );
 
     expect(result.ok).toBe(false);
@@ -391,8 +469,8 @@ describe("initiatePrintRequest", () => {
 
     const result = await initiatePrintRequest(
       { ...validInput, files: [{ name: "bracket.stl", size: 1200, type: "model/stl" }] },
-      { clientHash: "a".repeat(64), clientIp: "203.0.113.10" },
-      { supabase: supabase as unknown as SupabaseClient, verifyCaptcha: configureVerification() },
+      { clientHash: "a".repeat(64) },
+      { supabase: supabase as unknown as SupabaseClient },
     );
 
     expect(result.ok).toBe(false);
@@ -424,8 +502,8 @@ describe("initiatePrintRequest", () => {
 
     const result = await initiatePrintRequest(
       validInput,
-      { clientHash: "a".repeat(64), clientIp: "203.0.113.10" },
-      { supabase: supabase as unknown as SupabaseClient, verifyCaptcha: configureVerification() },
+      { clientHash: "a".repeat(64) },
+      { supabase: supabase as unknown as SupabaseClient },
     );
 
     expect(result.ok).toBe(false);
@@ -474,8 +552,8 @@ describe("initiatePrintRequest", () => {
 
     const result = await initiatePrintRequest(
       validInput,
-      { clientHash: "a".repeat(64), clientIp: "203.0.113.10" },
-      { supabase: supabase as unknown as SupabaseClient, verifyCaptcha: configureVerification() },
+      { clientHash: "a".repeat(64) },
+      { supabase: supabase as unknown as SupabaseClient },
     );
 
     expect(result.ok).toBe(true);
@@ -570,8 +648,8 @@ describe("initiatePrintRequest", () => {
 
     const result = await initiatePrintRequest(
       { ...validInput, files: [{ name: "drawing.pdf", size: 1024, type: "application/pdf" }] },
-      { clientHash: "a".repeat(64), clientIp: "203.0.113.10" },
-      { supabase: supabase as unknown as SupabaseClient, verifyCaptcha: configureVerification() },
+      { clientHash: "a".repeat(64) },
+      { supabase: supabase as unknown as SupabaseClient },
     );
 
     expect(result.ok).toBe(true);
@@ -630,8 +708,8 @@ describe("initiatePrintRequest", () => {
 
     const result = await initiatePrintRequest(
       { ...validInput, files },
-      { clientHash: "a".repeat(64), clientIp: "203.0.113.10" },
-      { supabase: supabase as unknown as SupabaseClient, verifyCaptcha: configureVerification() },
+      { clientHash: "a".repeat(64) },
+      { supabase: supabase as unknown as SupabaseClient },
     );
 
     expect(result.ok).toBe(true);

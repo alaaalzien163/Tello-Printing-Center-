@@ -21,7 +21,6 @@ function parseSubmission(overrides: Record<string, unknown> = {}) {
     ...validFields,
     locale: "en",
     submissionId,
-    turnstileToken: "",
     website: "",
     files: [],
     ...overrides,
@@ -62,6 +61,14 @@ describe("print request validation", () => {
 
   it("accepts a submission without attachments", () => {
     expect(parseSubmission().success).toBe(true);
+  });
+
+  it("ignores a leftover Turnstile token from older clients", () => {
+    const result = parseSubmission({ turnstileToken: "stale-token" });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data).not.toHaveProperty("turnstileToken");
+    }
   });
 
   it("accepts supported attachment metadata", () => {

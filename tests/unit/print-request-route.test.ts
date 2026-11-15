@@ -26,7 +26,6 @@ function submit() {
         details: "Please print three copies of the enclosed bracket in PLA.",
         locale: "en",
         submissionId: "11111111-1111-4111-8111-111111111111",
-        turnstileToken: "",
         website: "",
         files: [],
       }),

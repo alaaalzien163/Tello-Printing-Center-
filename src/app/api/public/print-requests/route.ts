@@ -60,7 +60,6 @@ export async function POST(request: Request) {
   }
 
   const result = await initiatePrintRequest(body, {
-    clientIp: ip,
     clientHash: hashClientIp(ip, secret),
   });
 

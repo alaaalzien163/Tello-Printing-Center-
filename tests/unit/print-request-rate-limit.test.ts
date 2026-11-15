@@ -7,7 +7,6 @@ import {
   hashClientIp,
   isProduction,
 } from "@/lib/print-requests/rate-limit";
-import { verifyTurnstileToken } from "@/lib/print-requests/turnstile";
 
 afterEach(() => {
   vi.unstubAllEnvs();
@@ -68,65 +67,5 @@ describe("print request rate-limit helpers", () => {
   it("detects production mode", () => {
     expect(isProduction({ NODE_ENV: "production" })).toBe(true);
     expect(isProduction({ NODE_ENV: "development" })).toBe(false);
-  });
-});
-
-describe("Turnstile server verification", () => {
-  it("skips the challenge in non-production when no secret is configured", async () => {
-    const result = await verifyTurnstileToken("", "203.0.113.10", { secret: null });
-    expect(result).toEqual({ ok: true, reason: "disabled" });
-  });
-
-  it("fails closed in production when the secret is missing", async () => {
-    vi.stubEnv("NODE_ENV", "production");
-    const result = await verifyTurnstileToken("token", "203.0.113.10", { secret: null });
-    expect(result).toEqual({ ok: false, reason: "not_configured" });
-  });
-
-  it("requires a token when a secret is configured", async () => {
-    const result = await verifyTurnstileToken("", "203.0.113.10", { secret: "secret" });
-    expect(result).toEqual({ ok: false, reason: "missing" });
-  });
-
-  it("trusts only Cloudflare's siteverify success response", async () => {
-    const successFetch = vi.fn().mockResolvedValue(
-      new Response(JSON.stringify({ success: true }), {
-        status: 200,
-        headers: { "content-type": "application/json" },
-      }),
-    );
-
-    await expect(
-      verifyTurnstileToken("valid-token", "203.0.113.10", {
-        secret: "secret",
-        fetchImpl: successFetch,
-      }),
-    ).resolves.toEqual({ ok: true });
-
-    const body = successFetch.mock.calls[0]?.[1]?.body as URLSearchParams;
-    expect(body.get("secret")).toBe("secret");
-    expect(body.get("response")).toBe("valid-token");
-    expect(body.get("remoteip")).toBe("203.0.113.10");
-
-    const invalidFetch = vi.fn().mockResolvedValue(
-      new Response(JSON.stringify({ success: false, "error-codes": ["invalid-input-response"] }), {
-        status: 200,
-        headers: { "content-type": "application/json" },
-      }),
-    );
-
-    await expect(
-      verifyTurnstileToken("bad-token", "203.0.113.10", {
-        secret: "secret",
-        fetchImpl: invalidFetch,
-      }),
-    ).resolves.toEqual({ ok: false, reason: "invalid" });
-  });
-
-  it("reports an unavailable verifier on network failure", async () => {
-    const fetchImpl = vi.fn().mockRejectedValue(new Error("offline"));
-    await expect(
-      verifyTurnstileToken("token", "203.0.113.10", { secret: "secret", fetchImpl }),
-    ).resolves.toEqual({ ok: false, reason: "unavailable" });
   });
 });

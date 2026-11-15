@@ -14,7 +14,7 @@ Router, React Server Components, strict TypeScript, Tailwind CSS and shadcn/ui.
   category CRUD backed by Supabase, direct Supabase Storage image uploads, profile
   preferences and demo-activity reset.
 - **Public print requests:** account-free intake at `/en/print-request` and
-  `/ar/print-request`, direct resumable uploads to a private bucket, CAPTCHA and
+  `/ar/print-request`, direct resumable uploads to a private bucket, server-side
   rate limiting, and an admin Requests inbox with status, notes, downloads and delete.
 
 > Supabase Auth, admin authorization, catalog persistence, image uploads and the public
@@ -91,9 +91,7 @@ never invents a phone number, email, address or social URL.
 | `NEXT_PUBLIC_HERO_PRINTER_MODEL`     | Optional licensed GLB for the homepage hero (see [3D hero scene](#3d-hero-scene)). |
 | `NEXT_PUBLIC_SUPABASE_URL`           | Supabase project URL used by the browser and server clients.            |
 | `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Publishable key for Supabase Auth. Never use a secret/service key here. |
-| `NEXT_PUBLIC_TURNSTILE_SITE_KEY`     | Cloudflare Turnstile site key (public). Empty hides the widget.         |
 | `SUPABASE_SECRET_KEY`                | Server-only Supabase secret key for the print-request API. Never public. |
-| `TURNSTILE_SECRET_KEY`               | Server-only Turnstile secret. Production fails closed when missing.      |
 | `PRINT_REQUEST_RATE_LIMIT_SECRET`    | Server-only HMAC salt (16+ chars) for the IP rate limiter.               |
 
 `NEXT_PUBLIC_SITE_URL` defaults to `http://localhost:3000` when absent or invalid.
@@ -294,9 +292,9 @@ footer. Requests are reviewed in the admin workspace under **Requests**.
 
 1. The browser validates full name, international phone, details and up to five attachments
    (50 MiB each, 100 MiB total, whitelisted extensions and declared types).
-2. `POST /api/public/print-requests` verifies the honeypot, the Cloudflare Turnstile token,
-   the SQL rate limit and the file policy, then creates the request and returns
-   server-chosen storage paths plus a short-lived signed upload token per file.
+2. `POST /api/public/print-requests` verifies the honeypot, the SQL rate limit and the
+   file policy, then creates the request and returns server-chosen storage paths plus a
+   short-lived signed upload token per file.
 3. The browser uploads each file directly to Supabase with `tus-js-client` (6 MiB chunks,
    retries and per-file progress). File bytes never pass through a Next.js request body.
 4. `POST /api/public/print-requests/complete` confirms every object exists with the expected
@@ -328,7 +326,7 @@ server; the browser cannot choose them.
 
 | Endpoint | Auth | Purpose |
 | --- | --- | --- |
-| `POST /api/public/print-requests` | Public + CAPTCHA + rate limit | Validate and initiate a request, return signed upload targets. |
+| `POST /api/public/print-requests` | Public + rate limit | Validate and initiate a request, return signed upload targets. |
 | `POST /api/public/print-requests/complete` | Public (submission ID) | Verify uploaded objects and finalize the request. |
 | `GET /api/admin/print-requests/[id]/files/[fileId]` | Administrator session | Redirect to a 60-second signed download. |
 
@@ -338,10 +336,9 @@ Both public routes run on the Node.js runtime and are `force-dynamic`.
 
 - Three requests per client IP per fifteen minutes, enforced by
   `public.consume_print_request_rate_limit()`. The IP is HMAC-hashed with
-  `PRINT_REQUEST_RATE_LIMIT_SECRET`; raw addresses are never stored.
-- Cloudflare Turnstile is verified server-side with `TURNSTILE_SECRET_KEY`. In production a
-  missing secret fails closed; in development the challenge is skipped only when no keys are
-  configured.
+  `PRINT_REQUEST_RATE_LIMIT_SECRET`; raw addresses are never stored. The API fails closed
+  (503) if the RPC errors or returns an unexpected shape, so an infrastructure fault
+  cannot bypass the budget.
 - Honeypot field, strict Zod limits and an idempotent submission ID.
 
 ### Database, storage and setup
@@ -579,10 +576,10 @@ Coverage includes:
   WebP, ZIP/3MF and text CAD formats, including disguised executables and HTML/SVG.
 - Print request validation: international phone handling, field length limits, submission
   IDs, locale, optional attachments and oversized/over-count metadata.
-- Print request rate limiting and Turnstile: proxy header precedence, HMAC hashing, secret
-  length, production fail-closed behavior and Cloudflare verdict handling.
-- Print request service: invalid payload/honeypot rejection before database access, CAPTCHA
-  failures, rate-limit responses, pending requests without files, uploading requests with
+- Print request rate limiting: proxy header precedence, HMAC hashing, secret length,
+  production fail-closed behavior, and the table-returning RPC response shape.
+- Print request service: invalid payload/honeypot rejection before database access,
+  rate-limit responses, pending requests without files, uploading requests with
   server-chosen signed targets, completion size/existence checks and `uploading` → `pending`.
 - Admin request mapping: database rows to dashboard summaries/details without exposing
   storage paths.
@@ -611,8 +608,8 @@ Coverage includes:
 - End-to-end print requests: English form validation, Arabic RTL layout, multi-file selection
   and removal, unsupported extension and 50 MB rejection, mobile overflow in both locales,
   dark-mode rendering, and the unauthenticated admin redirect/download guard. Submission,
-  admin list/detail/status/delete, CAPTCHA rejection, upload retry and the destructive
-  rate-limit test are gated on live configuration and the opt-in flags above.
+  admin list/detail/status/delete, upload retry and the destructive rate-limit test are
+  gated on live configuration and the opt-in flags above.
 
 ## Future roadmap
 
@@ -645,7 +642,7 @@ uploads and the public Supabase catalog are implemented.
   reconciles an existing project, the third fixes the rate-limit RPC return shape, the fourth
   aligns the ledger with the live `ip_hash` column), the
   private `print-request-files` bucket and (in
-  production) Turnstile + rate-limit secrets. Without them the public page renders but
+  production) a rate-limit secret. Without them the public page renders but
   submissions answer "not configured", and the admin Requests pages will error until the
   migrations are applied.
 - WhatsApp ordering requires `NEXT_PUBLIC_WHATSAPP_NUMBER`; without it the UI explains how

@@ -14,14 +14,6 @@ const submissionReady = Boolean(process.env.SUPABASE_SECRET_KEY);
 const submissionMissing =
   "Set SUPABASE_SECRET_KEY, apply supabase/migrations/20261114190000_print_requests.sql, supabase/migrations/20261115090000_print_requests_reconcile.sql and supabase/migrations/20261115130000_print_request_rate_limit_ip_hash.sql, and configure the print-request bucket to run submission tests.";
 
-// A configured Turnstile site key renders a real challenge. Headless browsers
-// cannot solve it, and a token is single-use and short-lived, so the flows that
-// submit through the page cannot run in that environment. Disable Turnstile
-// (both the site and secret keys) to exercise them.
-const turnstileConfigured = Boolean(process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY);
-const turnstileBlocked =
-  "NEXT_PUBLIC_TURNSTILE_SITE_KEY is set: headless browsers cannot obtain a Turnstile token. Unset NEXT_PUBLIC_TURNSTILE_SITE_KEY and TURNSTILE_SECRET_KEY to run submission tests.";
-
 function uniqueSubmissionId(): string {
   return crypto.randomUUID();
 }
@@ -31,7 +23,6 @@ const basePayload = {
   phone: "+963 944 000 111",
   details: "Please print this test part in PLA with a 0.2 mm layer height.",
   locale: "en" as const,
-  turnstileToken: "",
   website: "",
   files: [],
 };
@@ -154,7 +145,6 @@ test.describe("public print request page", () => {
 
   test("submits a request without attachments after validation", async ({ page }) => {
     test.skip(!submissionReady, submissionMissing);
-    test.skip(turnstileConfigured, turnstileBlocked);
 
     await page.goto("/en/print-request");
 
@@ -171,26 +161,10 @@ test.describe("public print request page", () => {
     await expect(success.getByText(/\d{4,}/)).toBeVisible();
   });
 
-  test("rejects CAPTCHA tokens when Turnstile is configured", async ({ request }) => {
-    test.skip(
-      !process.env.TURNSTILE_SECRET_KEY,
-      "Set NEXT_PUBLIC_TURNSTILE_SITE_KEY and TURNSTILE_SECRET_KEY to run the CAPTCHA rejection test.",
-    );
-
-    const response = await createRequestThroughApi(request, {
-      turnstileToken: "definitely-invalid-token",
-    });
-
-    expect(response.status()).toBe(400);
-    await expect(response.json()).resolves.toMatchObject({ error: "CAPTCHA" });
-  });
-
   test("enforces the 3-request rate limit", async ({ request }) => {
     test.skip(
-      process.env.E2E_PRINT_REQUEST_RATE_LIMIT !== "1" ||
-        !submissionReady ||
-        turnstileConfigured,
-      "Set E2E_PRINT_REQUEST_RATE_LIMIT=1 (plus submission configuration and disabled Turnstile) to run the destructive rate-limit test.",
+      process.env.E2E_PRINT_REQUEST_RATE_LIMIT !== "1" || !submissionReady,
+      "Set E2E_PRINT_REQUEST_RATE_LIMIT=1 (plus submission configuration) to run the destructive rate-limit test.",
     );
 
     const statuses: number[] = [];
@@ -213,10 +187,8 @@ test.describe("public print request page", () => {
 
   test("retries a failed direct upload and completes the request", async ({ page }) => {
     test.skip(
-      process.env.E2E_PRINT_REQUEST_UPLOADS !== "1" ||
-        !submissionReady ||
-        turnstileConfigured,
-      "Set E2E_PRINT_REQUEST_UPLOADS=1 (plus submission configuration and disabled Turnstile) to run the upload retry test.",
+      process.env.E2E_PRINT_REQUEST_UPLOADS !== "1" || !submissionReady,
+      "Set E2E_PRINT_REQUEST_UPLOADS=1 (plus submission configuration) to run the upload retry test.",
     );
     test.setTimeout(150_000);
 
@@ -287,10 +259,7 @@ test.describe("admin print requests", () => {
   });
 
   test("lists, opens, updates, marks read and deletes a request", async ({ page }) => {
-    test.skip(
-      !adminCredentials || !submissionReady || turnstileConfigured,
-      turnstileConfigured ? turnstileBlocked : submissionMissing,
-    );
+    test.skip(!adminCredentials || !submissionReady, submissionMissing);
 
     const suffix = Date.now().toString();
     const customerName = `E2E Admin Request ${suffix}`;

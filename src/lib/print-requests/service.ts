@@ -23,8 +23,6 @@ import {
   PRINT_REQUEST_RATE_LIMIT,
   PRINT_REQUEST_RATE_WINDOW_SECONDS,
 } from "./rate-limit";
-import type { TurnstileVerification } from "./turnstile";
-import { verifyTurnstileToken } from "./turnstile";
 
 const schemaTranslator: ValidationTranslator = (key) => key;
 
@@ -33,8 +31,6 @@ export const ABANDONED_REQUEST_AGE_MS = 24 * 60 * 60 * 1000;
 export type PrintRequestErrorCode =
   | "INVALID_INPUT"
   | "SPAM"
-  | "CAPTCHA"
-  | "CAPTCHA_NOT_CONFIGURED"
   | "RATE_LIMITED"
   | "SERVICE_UNAVAILABLE"
   | "NOT_CONFIGURED"
@@ -71,12 +67,10 @@ export type InitiateResult = InitiateSuccess | InitiateFailure;
 
 export interface InitiateContext {
   clientHash: string;
-  clientIp: string;
 }
 
 export interface ServiceDependencies {
   supabase?: SupabaseClient | null;
-  verifyCaptcha?: (token: string | undefined, ip: string) => Promise<TurnstileVerification>;
   now?: () => Date;
 }
 
@@ -388,17 +382,6 @@ export async function initiatePrintRequest(
   const existing = await findRequestByToken(supabase, values.submissionId);
   if (!existing.ok) return failure("SERVICE_UNAVAILABLE", 503);
   if (existing.request) return resumeRequest(supabase, existing.request);
-
-  const verifyCaptcha =
-    dependencies.verifyCaptcha ??
-    ((token: string | undefined, ip: string) => verifyTurnstileToken(token, ip));
-
-  const captcha = await verifyCaptcha(values.turnstileToken, context.clientIp);
-  if (!captcha.ok) {
-    return captcha.reason === "not_configured"
-      ? failure("CAPTCHA_NOT_CONFIGURED", 503)
-      : failure("CAPTCHA", 400);
-  }
 
   const rate = await consumeRateLimit(supabase, context.clientHash);
   if (rate.status === "unavailable") {

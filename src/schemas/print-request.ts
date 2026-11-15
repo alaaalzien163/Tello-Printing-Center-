@@ -95,7 +95,6 @@ export function createPrintRequestSchema(t: ValidationTranslator) {
         .max(10000, t("printRequestDetailsMax")),
       locale: z.enum(["en", "ar"]),
       submissionId: z.string().regex(UUID_PATTERN, t("printRequestSubmissionId")),
-      turnstileToken: z.string().max(4096).optional().default(""),
       website: z.string().max(200).optional().default(""),
       files: z
         .array(createFileMetadataSchema(t))

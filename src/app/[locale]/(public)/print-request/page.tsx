@@ -6,7 +6,6 @@ import { PrintRequestForm } from "@/components/public/print-request-form";
 import { SectionHeading } from "@/components/shared/section-heading";
 import type { Locale } from "@/i18n/routing";
 import { localizedAlternates } from "@/lib/metadata";
-import { getTurnstileSiteKey } from "@/lib/print-requests/turnstile";
 
 interface PrintRequestPageProps {
   params: Promise<{ locale: Locale }>;
@@ -30,7 +29,6 @@ export default async function PrintRequestPage({ params }: PrintRequestPageProps
   setRequestLocale(locale);
 
   const t = await getTranslations("printRequest");
-  const turnstileSiteKey = getTurnstileSiteKey();
 
   const steps = [
     { icon: FileCheck2, title: t("page.stepOneTitle"), description: t("page.stepOneDescription") },
@@ -50,7 +48,7 @@ export default async function PrintRequestPage({ params }: PrintRequestPageProps
         />
 
         <div className="mx-auto mt-10 grid max-w-6xl gap-6 lg:grid-cols-[minmax(0,1fr)_20rem] lg:items-start">
-          <PrintRequestForm turnstileSiteKey={turnstileSiteKey} />
+          <PrintRequestForm />
 
           <aside className="space-y-4 lg:sticky lg:top-24">
             <div className="rounded-2xl border border-border bg-card p-5 shadow-soft">

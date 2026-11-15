@@ -16,7 +16,6 @@ import { useId, useMemo, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
-import { TurnstileWidget } from "@/components/public/turnstile-widget";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -69,9 +68,6 @@ type FileErrorKey =
 type SubmitErrorKey =
   | "errors.invalidInput"
   | "errors.spam"
-  | "errors.captcha"
-  | "errors.captchaRequired"
-  | "errors.captchaNotConfigured"
   | "errors.rateLimited"
   | "errors.notConfigured"
   | "errors.serviceUnavailable"
@@ -84,8 +80,6 @@ type SubmitErrorKey =
 const API_ERROR_KEYS: Record<string, SubmitErrorKey> = {
   INVALID_INPUT: "errors.invalidInput",
   SPAM: "errors.spam",
-  CAPTCHA: "errors.captcha",
-  CAPTCHA_NOT_CONFIGURED: "errors.captchaNotConfigured",
   RATE_LIMITED: "errors.rateLimited",
   SERVICE_UNAVAILABLE: "errors.serviceUnavailable",
   NOT_CONFIGURED: "errors.notConfigured",
@@ -133,11 +127,7 @@ function fileKey(file: File): string {
   return `${file.name}:${file.size}:${file.lastModified}`;
 }
 
-interface PrintRequestFormProps {
-  turnstileSiteKey: string | null;
-}
-
-export function PrintRequestForm({ turnstileSiteKey }: PrintRequestFormProps) {
+export function PrintRequestForm() {
   const t = useTranslations("printRequest");
   const tv = useTranslations("validation");
   const locale = useLocale() as Locale;
@@ -160,8 +150,6 @@ export function PrintRequestForm({ turnstileSiteKey }: PrintRequestFormProps) {
   const [attachments, setAttachments] = useState<Attachment[]>([]);
   const [dragging, setDragging] = useState(false);
   const [honeypot, setHoneypot] = useState("");
-  const [turnstileToken, setTurnstileToken] = useState("");
-  const [turnstileReset, setTurnstileReset] = useState(0);
   const [phase, setPhase] = useState<SubmissionPhase>("idle");
   const [submitError, setSubmitError] = useState<SubmitErrorKey | null>(null);
   const [retryAfterSeconds, setRetryAfterSeconds] = useState<number | null>(null);
@@ -249,8 +237,6 @@ export function PrintRequestForm({ turnstileSiteKey }: PrintRequestFormProps) {
     setAttachments([]);
     setSubmitError(null);
     setRetryAfterSeconds(null);
-    setTurnstileToken("");
-    setTurnstileReset((value) => value + 1);
     reset({ customerName: "", phone: "", details: "" });
   }
 
@@ -275,21 +261,13 @@ export function PrintRequestForm({ turnstileSiteKey }: PrintRequestFormProps) {
     return next;
   }
 
-  async function submitValues(
-    values: PrintRequestFieldsValues,
-    options: { resume?: boolean } = {},
-  ) {
+  async function submitValues(values: PrintRequestFieldsValues) {
     if (submitting) return;
 
     const issue = validateFileList(attachments.map((attachment) => attachment.file));
     if (issue) {
       setSubmitError(null);
       toast.error(fileErrorMessage(issue));
-      return;
-    }
-
-    if (turnstileSiteKey && !turnstileToken && !options.resume) {
-      setSubmitError("errors.captchaRequired");
       return;
     }
 
@@ -315,7 +293,6 @@ export function PrintRequestForm({ turnstileSiteKey }: PrintRequestFormProps) {
           details: values.details,
           locale,
           submissionId,
-          turnstileToken,
           website: honeypot,
           files,
         }),
@@ -330,7 +307,6 @@ export function PrintRequestForm({ turnstileSiteKey }: PrintRequestFormProps) {
           const header = Number(response.headers.get("retry-after"));
           setRetryAfterSeconds(Number.isFinite(header) && header > 0 ? header : null);
         }
-        setTurnstileReset((value) => value + 1);
         return;
       }
 
@@ -426,8 +402,6 @@ export function PrintRequestForm({ turnstileSiteKey }: PrintRequestFormProps) {
     lastValuesRef.current = null;
     setLocked(false);
     setAttachments([]);
-    setTurnstileToken("");
-    setTurnstileReset((value) => value + 1);
     reset({ customerName: "", phone: "", details: "" });
   }
 
@@ -438,7 +412,7 @@ export function PrintRequestForm({ turnstileSiteKey }: PrintRequestFormProps) {
   function retry() {
     if (submitting) return;
     const values = lastValuesRef.current ?? getValues();
-    void submitValues(values, { resume: true });
+    void submitValues(values);
   }
 
   const totalBytes = attachments.reduce((sum, attachment) => sum + attachment.file.size, 0);
@@ -748,17 +722,6 @@ export function PrintRequestForm({ turnstileSiteKey }: PrintRequestFormProps) {
           </ul>
         ) : null}
       </div>
-
-      {turnstileSiteKey ? (
-        <div className="mt-6">
-          <TurnstileWidget
-            siteKey={turnstileSiteKey}
-            locale={locale}
-            onToken={setTurnstileToken}
-            resetSignal={turnstileReset}
-          />
-        </div>
-      ) : null}
 
       {submitError ? (
         <Alert variant="destructive" className="mt-6" data-testid="print-request-error">
