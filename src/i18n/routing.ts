@@ -2,7 +2,7 @@ import { defineRouting } from "next-intl/routing";
 
 export const locales = ["en", "ar"] as const;
 export type Locale = (typeof locales)[number];
-export const defaultLocale: Locale = "en";
+export const defaultLocale: Locale = "ar";
 
 export const localeNames: Record<Locale, string> = {
   en: "English",
@@ -22,5 +22,8 @@ export const routing = defineRouting({
   locales,
   defaultLocale,
   localePrefix: "always",
-  localeDetection: true,
+  // Arabic is the site's default language. Automatic Accept-Language
+  // detection is disabled so unprefixed URLs always resolve to Arabic;
+  // visitors can still switch to English explicitly or open /en.
+  localeDetection: false,
 });

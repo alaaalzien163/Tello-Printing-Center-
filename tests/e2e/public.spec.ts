@@ -16,6 +16,22 @@ test.describe("public website", () => {
     await expect(page.getByRole("link", { name: en.nav.products }).first()).toBeVisible();
   });
 
+  test("defaults to Arabic for unprefixed URLs", async ({ page }) => {
+    await page.goto("/");
+    await expect(page).toHaveURL(/\/ar$/);
+    await expect(page.locator("html")).toHaveAttribute("lang", "ar");
+    await expect(page.locator("html")).toHaveAttribute("dir", "rtl");
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText(ar.hero.title);
+
+    await page.goto("/products");
+    await expect(page).toHaveURL(/\/ar\/products$/);
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText(ar.products.title);
+
+    await page.goto("/en");
+    await expect(page.locator("html")).toHaveAttribute("dir", "ltr");
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText(en.hero.title);
+  });
+
   test("opens the admin sign-in page from the header logo", async ({ page }) => {
     await page.goto("/en/products");
 

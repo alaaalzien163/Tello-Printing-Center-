@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-import type { Locale } from "@/i18n/routing";
+import { defaultLocale, type Locale } from "@/i18n/routing";
 
 /**
  * Language alternates for a localized public page.
@@ -14,7 +14,7 @@ export function localizedAlternates(locale: Locale, path = ""): Metadata["altern
     languages: {
       en: `/en${suffix}`,
       ar: `/ar${suffix}`,
-      "x-default": `/en${suffix}`,
+      "x-default": `/${defaultLocale}${suffix}`,
     },
   };
 }

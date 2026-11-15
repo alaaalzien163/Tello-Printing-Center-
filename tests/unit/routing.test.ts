@@ -4,9 +4,9 @@ import { defaultLocale, isLocale, localeDirection, localeNames, locales } from "
 import { localizedAlternates } from "@/lib/metadata";
 
 describe("locale configuration", () => {
-  it("exposes English and Arabic with English as the default", () => {
+  it("exposes English and Arabic with Arabic as the default", () => {
     expect(locales).toEqual(["en", "ar"]);
-    expect(defaultLocale).toBe("en");
+    expect(defaultLocale).toBe("ar");
     expect(localeNames.ar).toBe("العربية");
   });
 
@@ -32,7 +32,7 @@ describe("localizedAlternates", () => {
       languages: {
         en: "/en/products/forge-x1",
         ar: "/ar/products/forge-x1",
-        "x-default": "/en/products/forge-x1",
+        "x-default": "/ar/products/forge-x1",
       },
     });
   });

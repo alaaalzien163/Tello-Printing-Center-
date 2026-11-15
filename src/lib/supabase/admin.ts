@@ -6,11 +6,12 @@ let cached: { url: string; key: string; client: SupabaseClient } | null = null;
 
 const CONFIG_SCOPE = "[supabase] privileged client unavailable";
 
+/**
+ * Reports configuration problems with variable names and reasons only.
+ * Values, keys and customer data are never included, so this is safe to log in
+ * production where it is needed to diagnose a 503 NOT_CONFIGURED response.
+ */
 function reportConfigurationIssue(reason: string, details: string[]): void {
-  // Only surface configuration problems during development. Production
-  // responses stay generic so deployment details are never leaked.
-  if (process.env.NODE_ENV === "production") return;
-
   console.error(CONFIG_SCOPE, { reason, details });
 }
 
@@ -22,14 +23,14 @@ function reportConfigurationIssue(reason: string, details: string[]): void {
  * server actions and server components.
  */
 export function getPrivilegedSupabaseClient(): SupabaseClient | null {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim();
-  const publishableKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY?.trim();
+  const rawUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim();
+  const rawPublishableKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY?.trim();
   const secret = process.env.SUPABASE_SECRET_KEY?.trim();
 
-  if (!url || !publishableKey || !secret) {
+  if (!rawUrl || !rawPublishableKey || !secret) {
     const missing: string[] = [];
-    if (!url) missing.push("NEXT_PUBLIC_SUPABASE_URL");
-    if (!publishableKey) missing.push("NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY");
+    if (!rawUrl) missing.push("NEXT_PUBLIC_SUPABASE_URL");
+    if (!rawPublishableKey) missing.push("NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY");
     if (!secret) missing.push("SUPABASE_SECRET_KEY");
     reportConfigurationIssue("missing-environment-variable", missing);
     return null;
@@ -37,11 +38,13 @@ export function getPrivilegedSupabaseClient(): SupabaseClient | null {
 
   const config = getSupabaseConfig();
   if (!config) {
-    reportConfigurationIssue("invalid-supabase-url", ["NEXT_PUBLIC_SUPABASE_URL"]);
+    reportConfigurationIssue("invalid-environment-variable", [
+      "NEXT_PUBLIC_SUPABASE_URL",
+    ]);
     return null;
   }
 
-  if (secret === publishableKey || secret.startsWith("sb_publishable_")) {
+  if (secret === config.publishableKey || secret.startsWith("sb_publishable_")) {
     reportConfigurationIssue("publishable-key-used-as-secret", [
       "SUPABASE_SECRET_KEY must be a server secret key (sb_secret_... or legacy service_role), not the publishable key.",
     ]);

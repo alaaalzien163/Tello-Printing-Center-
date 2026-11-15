@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next";
 
 import { siteConfig } from "@/config/site";
-import { locales } from "@/i18n/routing";
+import { defaultLocale, locales } from "@/i18n/routing";
 import { getPublicCategorySlugs, getPublicProductSlugs } from "@/repositories/public-catalog";
 
 const staticPaths = ["", "/products", "/contact"] as const;
@@ -13,7 +13,7 @@ function localizedUrl(locale: string, path: string): string {
 function languageAlternates(path: string): Record<string, string> {
   return Object.fromEntries([
     ...locales.map((locale) => [locale, localizedUrl(locale, path)]),
-    ["x-default", localizedUrl("en", path)],
+    ["x-default", localizedUrl(defaultLocale, path)],
   ]);
 }
 

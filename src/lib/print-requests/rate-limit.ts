@@ -31,11 +31,29 @@ export function hashClientIp(ip: string, secret: string): string {
   return createHmac("sha256", secret).update(ip.trim().toLocaleLowerCase()).digest("hex");
 }
 
+export interface RateLimitSecretStatus {
+  secret: string | null;
+  issue: "missing" | "too-short" | null;
+}
+
+/**
+ * Validates the rate-limit HMAC salt without exposing its value. A missing or
+ * too-short secret is reported as an issue so production diagnostics can name
+ * the variable instead of returning an opaque 503.
+ */
+export function getRateLimitSecretStatus(
+  env: { PRINT_REQUEST_RATE_LIMIT_SECRET?: string; NODE_ENV?: string } = process.env,
+): RateLimitSecretStatus {
+  const secret = env.PRINT_REQUEST_RATE_LIMIT_SECRET?.trim();
+  if (!secret) return { secret: null, issue: "missing" };
+  if (secret.length < 16) return { secret: null, issue: "too-short" };
+  return { secret, issue: null };
+}
+
 export function getRateLimitSecret(
   env: { PRINT_REQUEST_RATE_LIMIT_SECRET?: string; NODE_ENV?: string } = process.env,
 ): string | null {
-  const secret = env.PRINT_REQUEST_RATE_LIMIT_SECRET?.trim();
-  return secret && secret.length >= 16 ? secret : null;
+  return getRateLimitSecretStatus(env).secret;
 }
 
 export function isProduction(env: { NODE_ENV?: string } = process.env): boolean {

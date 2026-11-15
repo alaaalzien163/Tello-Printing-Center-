@@ -59,11 +59,14 @@ npm run dev
 Open:
 
 - English site — <http://localhost:3000/en>
-- Arabic site — <http://localhost:3000/ar>
+- Arabic site — <http://localhost:3000/ar> (default)
 - Admin sign-in — <http://localhost:3000/en/admin>
 
-The root URL redirects to the detected locale, falling back to English. In the public
-header, the Tello logo links to the admin sign-in page (`/en/admin/login` or
+The root URL and any unprefixed path redirect to the Arabic default locale (for
+example `/` → `/ar` and `/products` → `/ar/products`). Automatic browser-language
+detection is disabled so the default is always Arabic; visitors can switch to
+English from the language menu or open `/en` directly. In the public header, the
+Tello logo links to the admin sign-in page (`/en/admin/login` or
 `/ar/admin/login`) as requested for this build.
 
 ### Environment variables
@@ -388,7 +391,8 @@ configured" error.
 
 ## Internationalization and RTL
 
-- Routes are always locale-prefixed: `/en/...` and `/ar/...`.
+- Routes are always locale-prefixed: `/en/...` and `/ar/...`. Arabic is the
+  default locale, so unprefixed URLs redirect to their `/ar` equivalent.
 - `<html lang>` and `<html dir>` are set per locale; Arabic renders RTL.
 - Layouts use logical CSS properties (`ms-*`, `me-*`, `start-*`, `end-*`, `ps-*`, `pe-*`)
   and direction-aware icons.

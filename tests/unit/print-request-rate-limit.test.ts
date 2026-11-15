@@ -3,6 +3,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   getClientIp,
   getRateLimitSecret,
+  getRateLimitSecretStatus,
   hashClientIp,
   isProduction,
 } from "@/lib/print-requests/rate-limit";
@@ -47,6 +48,21 @@ describe("print request rate-limit helpers", () => {
     expect(
       getRateLimitSecret({ PRINT_REQUEST_RATE_LIMIT_SECRET: "a-secret-that-is-long-enough" }),
     ).toBe("a-secret-that-is-long-enough");
+  });
+
+  it("reports whether the rate-limit secret is missing or too short", () => {
+    expect(getRateLimitSecretStatus({})).toEqual({ secret: null, issue: "missing" });
+    expect(
+      getRateLimitSecretStatus({ PRINT_REQUEST_RATE_LIMIT_SECRET: "   " }),
+    ).toEqual({ secret: null, issue: "missing" });
+    expect(
+      getRateLimitSecretStatus({ PRINT_REQUEST_RATE_LIMIT_SECRET: "short" }),
+    ).toEqual({ secret: null, issue: "too-short" });
+    expect(
+      getRateLimitSecretStatus({
+        PRINT_REQUEST_RATE_LIMIT_SECRET: "a-secret-that-is-long-enough",
+      }),
+    ).toEqual({ secret: "a-secret-that-is-long-enough", issue: null });
   });
 
   it("detects production mode", () => {
