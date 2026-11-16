@@ -526,10 +526,10 @@ button hover/pressed states and both logo destinations in English and Arabic.
 
 ### Theme, RTL and accessibility
 
-- Dark mode is the default for first-time visitors. The theme switcher still offers light,
+- Light mode is the default for first-time visitors. The theme switcher still offers light,
   dark and system, and an explicit choice is stored in the browser.
 - Theme tokens are defined for both modes in `src/app/globals.css`; the public splash uses
-  the brand-black overlay regardless of the active theme.
+  the active background and logo treatment, so it follows light and dark mode.
 - Layouts use logical properties (`ms-*`, `me-*`, `start-*`, `end-*`), so English stays LTR
   and Arabic stays RTL without duplicated styles.
 - Reduced motion is respected by the splash and transitions.

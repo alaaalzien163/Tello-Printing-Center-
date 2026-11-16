@@ -116,12 +116,12 @@ test.describe("brand tokens", () => {
     });
   }
 
-  test("defaults to dark mode for new visitors", async ({ page }) => {
+  test("defaults to light mode for new visitors", async ({ page }) => {
     await page.goto("/en");
     await settle(page);
 
-    await expect(page.locator("html")).toHaveClass(/\bdark\b/);
-    await expect(page.locator("body")).toHaveCSS("background-color", "rgb(20, 18, 19)");
+    await expect(page.locator("html")).not.toHaveClass(/\bdark\b/);
+    await expect(page.locator("body")).toHaveCSS("background-color", "rgb(250, 248, 246)");
   });
 
   test("primary buttons use brand hover and pressed colors", async ({ page }) => {

@@ -287,8 +287,9 @@ test.describe("category-first catalog", () => {
       return;
     }
 
-    await page.emulateMedia({ colorScheme: "dark" });
     await page.goto(category.href);
+    await page.evaluate(() => localStorage.setItem("theme", "dark"));
+    await page.reload();
 
     await expect(page.locator("html")).toHaveClass(/dark/);
     await expect(page.getByRole("heading", { level: 1 })).toHaveText(category.name);

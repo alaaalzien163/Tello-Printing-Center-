@@ -25,13 +25,13 @@ export function SplashScreen() {
     <div
       aria-hidden="true"
       data-testid="splash-screen"
-      className="splash-overlay pointer-events-none fixed inset-0 z-100 flex flex-col items-center justify-center gap-5 bg-brand-black text-white"
+      className="splash-overlay pointer-events-none fixed inset-0 z-100 flex flex-col items-center justify-center gap-5 bg-background text-foreground"
     >
       <div className="splash-logo px-6">
-        <BrandLogo className="w-48 invert hue-rotate-180 sm:w-56" />
+        <BrandLogo className="w-48 sm:w-56" />
       </div>
       <div className="splash-rule h-px w-24 bg-brand-primary" />
-      <p className="splash-tagline text-[0.65rem] font-medium tracking-[0.3em] text-white/70 uppercase">
+      <p className="splash-tagline text-[0.65rem] font-medium tracking-[0.3em] text-muted-foreground uppercase">
         {t("tagline")}
       </p>
     </div>

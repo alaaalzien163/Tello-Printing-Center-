@@ -88,7 +88,7 @@ export default async function LocaleLayout({ children, params }: LocaleLayoutPro
       className={`${GeistSans.variable} ${GeistMono.variable}`}
     >
       <body>
-        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
+        <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange>
           <NextIntlClientProvider>
             <TooltipProvider delayDuration={250}>{children}</TooltipProvider>
             <Toaster position="top-center" richColors closeButton />

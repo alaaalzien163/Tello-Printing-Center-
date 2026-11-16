@@ -115,11 +115,11 @@ test.describe("product detail breadcrumbs", () => {
       return;
     }
 
-    // Drive dark mode through the system preference. Opening the Radix theme
-    // menu before hydration finishes is a separate, pre-existing dev-only race
-    // (it hides page siblings while React is still hydrating).
-    await page.emulateMedia({ colorScheme: "dark" });
+    // Persist the dark preference instead of using the theme menu, which has a
+    // pre-existing dev-only hydration race on first paint.
     await page.goto(product.href);
+    await page.evaluate(() => localStorage.setItem("theme", "dark"));
+    await page.reload();
     await expect(page.locator("html")).toHaveClass(/dark/);
 
     const breadcrumb = page.getByRole("navigation", { name: en.common.breadcrumb });
