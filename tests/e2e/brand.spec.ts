@@ -93,6 +93,9 @@ test.describe("brand tokens", () => {
       await page.goto(`/${locale}`);
       await settle(page);
 
+      await setTheme(page, "light");
+      await settle(page);
+
       const light = await snapshot(page);
       expectPalette(light.tokens);
       expect(light.bodyBackground).not.toBe(RGB.active);
@@ -112,6 +115,14 @@ test.describe("brand tokens", () => {
       expect(dark.overflow).toBe(0);
     });
   }
+
+  test("defaults to dark mode for new visitors", async ({ page }) => {
+    await page.goto("/en");
+    await settle(page);
+
+    await expect(page.locator("html")).toHaveClass(/\bdark\b/);
+    await expect(page.locator("body")).toHaveCSS("background-color", "rgb(20, 18, 19)");
+  });
 
   test("primary buttons use brand hover and pressed colors", async ({ page }) => {
     await page.goto("/en");

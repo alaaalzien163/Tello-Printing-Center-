@@ -526,13 +526,13 @@ button hover/pressed states and both logo destinations in English and Arabic.
 
 ### Theme, RTL and accessibility
 
-- Lighting and canvas backdrop follow the active light/dark theme; the canvas itself is
-  transparent over a theme-aware CSS gradient.
-- The hero uses logical layout properties, so the scene stays in the visual column that
-  matches LTR and RTL reading order without overlapping Arabic copy.
-- The canvas is decorative (`aria-hidden`) and non-interactive for assistive technology.
-  All hero actions remain normal keyboard-accessible links and buttons.
-- Reduced motion disables the turntable and falls back to the static poster.
+- Dark mode is the default for first-time visitors. The theme switcher still offers light,
+  dark and system, and an explicit choice is stored in the browser.
+- Theme tokens are defined for both modes in `src/app/globals.css`; the public splash uses
+  the brand-black overlay regardless of the active theme.
+- Layouts use logical properties (`ms-*`, `me-*`, `start-*`, `end-*`), so English stays LTR
+  and Arabic stays RTL without duplicated styles.
+- Reduced motion is respected by the splash and transitions.
 
 ## Tests
 
