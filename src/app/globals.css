@@ -62,16 +62,13 @@
   --radius-2xl: calc(var(--radius) * 1.7);
   --radius-3xl: calc(var(--radius) * 2.1);
   --radius-4xl: calc(var(--radius) * 2.5);
-  --shadow-soft: 0 1px 2px rgb(0 0 0 / 0.04), 0 12px 32px -20px rgb(0 0 0 / 0.18);
-  --shadow-lift: 0 2px 4px rgb(0 0 0 / 0.05), 0 24px 48px -24px rgb(0 0 0 / 0.24);
-  --animate-fade-up: fade-up 0.65s cubic-bezier(0.22, 1, 0.36, 1) both;
-  --animate-fade-in: fade-in 0.5s ease-out both;
-  --animate-scale-in: scale-in 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
-  --animate-sheen: sheen 2.8s ease-in-out infinite;
+  --shadow-soft: 0 1px 2px rgb(0 0 0 / 0.04), 0 10px 24px -20px rgb(0 0 0 / 0.16);
+  --shadow-lift: 0 2px 4px rgb(0 0 0 / 0.05), 0 20px 40px -26px rgb(0 0 0 / 0.22);
+  --animate-fade-in: fade-in 0.4s ease-out both;
 }
 
 :root {
-  --radius: 0.75rem;
+  --radius: 0.5rem;
 
   /*
    * Official Tello palette, extracted from the logo. These exact values are
@@ -85,21 +82,22 @@
   /* Derived tint for accents that sit on always-dark surfaces. */
   --brand-pink-soft: #f5a3c0;
 
-  --background: #fbfafa;
-  --foreground: #0b0b0c;
+  /* Warm off-white surfaces keep the storefront feel without tinting products. */
+  --background: #faf8f6;
+  --foreground: #171314;
   --card: #ffffff;
-  --card-foreground: #0b0b0c;
+  --card-foreground: #171314;
   --popover: #ffffff;
-  --popover-foreground: #0b0b0c;
+  --popover-foreground: #171314;
   /* Fills, active states and paid emphasis use the exact brand pink. */
   --primary: var(--brand-primary);
   --primary-foreground: #ffffff;
   /* Small text/icons that need AA contrast on light surfaces. */
   --primary-text: #cc1e5d;
-  --secondary: #f6f1f3;
-  --secondary-foreground: #1c1417;
-  --muted: #f7f4f5;
-  --muted-foreground: #6a5c62;
+  --secondary: #f4efec;
+  --secondary-foreground: #241b1d;
+  --muted: #f5f1ee;
+  --muted-foreground: #6b615c;
   --accent: #fbedf2;
   --accent-foreground: #8a1036;
   --destructive: #c41e3a;
@@ -110,21 +108,21 @@
   --warning-foreground: #ffffff;
   --whatsapp: #0f7a40;
   --whatsapp-foreground: #ffffff;
-  --border: #eae3e6;
-  --input: #ddd3d7;
+  --border: #e7dfd9;
+  --input: #d9cfc8;
   --ring: var(--brand-primary);
   --chart-1: #cc1e5d;
   --chart-2: #bb3665;
   --chart-3: #a72353;
   --chart-4: #c98a9f;
-  --chart-5: #6a5c62;
-  --sidebar: #f8f5f6;
-  --sidebar-foreground: #2a2225;
+  --chart-5: #6b615c;
+  --sidebar: #fbf9f7;
+  --sidebar-foreground: #241b1d;
   --sidebar-primary: var(--brand-primary);
   --sidebar-primary-foreground: #ffffff;
   --sidebar-accent: #fbedf2;
   --sidebar-accent-foreground: #cc1e5d;
-  --sidebar-border: #eae3e6;
+  --sidebar-border: #e7dfd9;
   --sidebar-ring: var(--brand-primary);
 
   --font-arabic-stack:
@@ -133,22 +131,23 @@
 }
 
 .dark {
-  --background: #000000;
-  --foreground: #f6f2f3;
-  --card: #0d0b0c;
-  --card-foreground: #f6f2f3;
-  --popover: #141011;
-  --popover-foreground: #f6f2f3;
+  /* Charcoal surfaces instead of pure black keep product imagery comfortable. */
+  --background: #141213;
+  --foreground: #f4efee;
+  --card: #1b1819;
+  --card-foreground: #f4efee;
+  --popover: #211d1e;
+  --popover-foreground: #f4efee;
   /* The exact brand pink is kept for every filled control. */
   --primary: var(--brand-primary);
   --primary-foreground: #ffffff;
-  /* #CC1E5D on black is only 3.9:1, so small text uses a brand-derived tint. */
+  /* #CC1E5D on charcoal is only ~4:1, so small text uses a brand-derived tint. */
   --primary-text: #f26f9e;
-  --secondary: #1a1517;
-  --secondary-foreground: #f2edef;
-  --muted: #191416;
-  --muted-foreground: #a99ca2;
-  --accent: #241b1e;
+  --secondary: #221e1f;
+  --secondary-foreground: #f4efee;
+  --muted: #221e1f;
+  --muted-foreground: #b1a6a4;
+  --accent: #2a2225;
   --accent-foreground: #fbe7ee;
   --destructive: #ff8296;
   --destructive-foreground: #22050a;
@@ -158,36 +157,25 @@
   --warning-foreground: #241503;
   --whatsapp: #3ed07a;
   --whatsapp-foreground: #041a0c;
-  --border: #2a2225;
-  --input: #3a3134;
+  --border: #332c2e;
+  --input: #3f3739;
   --ring: var(--brand-primary);
   --chart-1: #f26f9e;
   --chart-2: #cc1e5d;
   --chart-3: #bb3665;
   --chart-4: #a72353;
-  --chart-5: #a99ca2;
-  --sidebar: #0b0909;
-  --sidebar-foreground: #efe9eb;
+  --chart-5: #b1a6a4;
+  --sidebar: #171415;
+  --sidebar-foreground: #f0eae9;
   --sidebar-primary: var(--brand-primary);
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #201a1c;
+  --sidebar-accent: #251e20;
   --sidebar-accent-foreground: #f26f9e;
-  --sidebar-border: #241f21;
+  --sidebar-border: #2c2628;
   --sidebar-ring: var(--brand-primary);
 
-  --shadow-soft: 0 1px 2px rgb(0 0 0 / 0.5), 0 16px 40px -24px rgb(0 0 0 / 0.8);
-  --shadow-lift: 0 2px 4px rgb(0 0 0 / 0.55), 0 28px 64px -28px rgb(0 0 0 / 0.9);
-}
-
-@keyframes fade-up {
-  from {
-    opacity: 0;
-    transform: translateY(14px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  --shadow-soft: 0 1px 2px rgb(0 0 0 / 0.5), 0 14px 32px -24px rgb(0 0 0 / 0.8);
+  --shadow-lift: 0 2px 4px rgb(0 0 0 / 0.55), 0 24px 52px -30px rgb(0 0 0 / 0.9);
 }
 
 @keyframes fade-in {
@@ -196,29 +184,6 @@
   }
   to {
     opacity: 1;
-  }
-}
-
-@keyframes scale-in {
-  from {
-    opacity: 0;
-    transform: scale(0.97);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-@keyframes sheen {
-  0%,
-  100% {
-    opacity: 0.35;
-    transform: translateX(-60%);
-  }
-  50% {
-    opacity: 0.7;
-    transform: translateX(60%);
   }
 }
 
@@ -325,12 +290,12 @@
   }
 
   .section-space {
-    padding-block: 5rem;
+    padding-block: 4rem;
   }
 
   @media (min-width: 768px) {
     .section-space {
-      padding-block: 7rem;
+      padding-block: 5.5rem;
     }
   }
 
@@ -377,27 +342,6 @@
     transform: translateY(0);
   }
 
-  .surface-grid {
-    background-image:
-      linear-gradient(to right, color-mix(in oklab, var(--foreground) 6%, transparent) 1px, transparent 1px),
-      linear-gradient(to bottom, color-mix(in oklab, var(--foreground) 6%, transparent) 1px, transparent 1px);
-    background-size: 52px 52px;
-  }
-
-  .surface-glow {
-    background:
-      radial-gradient(
-        60% 60% at 15% 10%,
-        color-mix(in oklab, var(--primary) 14%, transparent),
-        transparent 70%
-      ),
-      radial-gradient(
-        45% 55% at 90% 25%,
-        color-mix(in oklab, var(--brand-secondary) 12%, transparent),
-        transparent 72%
-      );
-  }
-
   .no-scrollbar {
     scrollbar-width: none;
   }
@@ -410,23 +354,8 @@
     text-wrap: balance;
   }
 
-  .glass-header {
-    background: color-mix(in oklab, var(--background) 82%, transparent);
-    backdrop-filter: blur(16px) saturate(1.3);
-    -webkit-backdrop-filter: blur(16px) saturate(1.3);
-  }
-
-  /*
-   * The hero scene only needs pointer tracking, not dragging. Keeping vertical
-   * panning enabled lets touch users scroll past the canvas on tablets.
-   */
-  .hero-3d-viewport canvas {
-    display: block;
-    touch-action: pan-y !important;
-  }
-
   .splash-overlay {
-    animation: splash-fade-out 0.5s ease-in 0.9s forwards;
+    animation: splash-fade-out 0.35s ease-in 0.85s forwards;
   }
 
   .splash-logo {

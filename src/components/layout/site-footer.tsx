@@ -1,7 +1,7 @@
 import { Mail, MapPin, MessageCircle, Phone } from "lucide-react";
 import { getLocale, getTranslations } from "next-intl/server";
 
-import { Logo } from "@/components/brand/logo";
+import { BrandLogo } from "@/components/brand/brand-logo";
 import { SocialLinks } from "@/components/shared/social-links";
 import { siteConfig } from "@/config/site";
 import { Link } from "@/i18n/navigation";
@@ -22,56 +22,65 @@ export async function SiteFooter() {
   const year = new Date().getFullYear();
 
   return (
-    <footer className="border-t border-brand-primary/30 bg-brand-black text-white/80">
-      <div className="container-page grid gap-10 py-14 md:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1.1fr] lg:gap-12">
+    <footer className="border-t border-border bg-card">
+      <div className="container-page grid gap-10 py-12 md:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1.1fr] lg:gap-12">
         <div>
-          <Logo className="[&_span]:text-white [&_span:last-child]:text-white/55" />
-          <p className="mt-5 max-w-xs text-sm leading-6 text-white/65">{t("description")}</p>
+          <Link
+            href="/"
+            className="inline-flex rounded-md focus-visible:outline-2 focus-visible:outline-offset-4"
+          >
+            <BrandLogo className="w-44" />
+          </Link>
+          <p className="mt-5 max-w-xs text-sm leading-6 text-muted-foreground">{t("description")}</p>
           {siteConfig.socialLinks.length > 0 ? (
-            <div className="mt-6 flex items-center gap-2">
-              <span className="text-xs font-medium tracking-wide text-white/50 uppercase">
+            <div className="mt-5">
+              <p className="text-xs font-semibold tracking-[0.14em] text-muted-foreground uppercase">
                 {t("follow")}
-              </span>
-              <SocialLinks links={siteConfig.socialLinks} />
+              </p>
+              <SocialLinks
+                links={siteConfig.socialLinks}
+                className="mt-3"
+                linkClassName="border border-border bg-background text-muted-foreground hover:border-primary/35 hover:bg-background hover:text-primary-text"
+              />
             </div>
           ) : null}
         </div>
 
         <div>
-          <h2 className="text-[0.68rem] font-semibold tracking-[0.18em] text-brand-pink-soft uppercase">
+          <h2 className="text-xs font-semibold tracking-[0.14em] text-foreground uppercase">
             {t("explore")}
           </h2>
-          <ul className="mt-4 space-y-3 text-sm">
+          <ul className="mt-4 space-y-2.5 text-sm">
             <li>
-              <Link href="/" className="text-white/70 transition-colors hover:text-brand-pink-soft">
+              <Link href="/" className="text-muted-foreground transition-colors hover:text-primary-text">
                 {tNav("home")}
               </Link>
             </li>
             <li>
-              <Link href="/#about" className="text-white/70 transition-colors hover:text-brand-pink-soft">
+              <Link href="/#about" className="text-muted-foreground transition-colors hover:text-primary-text">
                 {tNav("about")}
               </Link>
             </li>
             <li>
-              <Link href="/products" className="text-white/70 transition-colors hover:text-brand-pink-soft">
+              <Link href="/products" className="text-muted-foreground transition-colors hover:text-primary-text">
                 {tNav("products")}
               </Link>
             </li>
             <li>
               <Link
                 href="/print-request"
-                className="text-white/70 transition-colors hover:text-brand-pink-soft"
+                className="text-muted-foreground transition-colors hover:text-primary-text"
               >
                 {tNav("printRequest")}
               </Link>
             </li>
             <li>
-              <Link href="/contact" className="text-white/70 transition-colors hover:text-brand-pink-soft">
+              <Link href="/contact" className="text-muted-foreground transition-colors hover:text-primary-text">
                 {tContact("title")}
               </Link>
             </li>
             <li>
-              <Link href="/admin" className="text-white/40 transition-colors hover:text-white/80">
+              <Link href="/admin" className="text-muted-foreground/70 transition-colors hover:text-foreground">
                 {t("adminLink")}
               </Link>
             </li>
@@ -79,15 +88,15 @@ export async function SiteFooter() {
         </div>
 
         <div>
-          <h2 className="text-[0.68rem] font-semibold tracking-[0.18em] text-brand-pink-soft uppercase">
+          <h2 className="text-xs font-semibold tracking-[0.14em] text-foreground uppercase">
             {t("productAreas")}
           </h2>
-          <ul className="mt-4 space-y-3 text-sm">
+          <ul className="mt-4 space-y-2.5 text-sm">
             {categories.map((category) => (
               <li key={category.id}>
                 <Link
                   href={`/products/category/${category.slug}`}
-                  className="text-white/70 transition-colors hover:text-brand-pink-soft"
+                  className="text-muted-foreground transition-colors hover:text-primary-text"
                 >
                   {pickLocalized(category.name, locale)}
                 </Link>
@@ -97,15 +106,15 @@ export async function SiteFooter() {
         </div>
 
         <div>
-          <h2 className="text-[0.68rem] font-semibold tracking-[0.18em] text-brand-pink-soft uppercase">
+          <h2 className="text-xs font-semibold tracking-[0.14em] text-foreground uppercase">
             {t("contact")}
           </h2>
-          <ul className="mt-4 space-y-3 text-sm">
+          <ul className="mt-4 space-y-2.5 text-sm">
             {siteConfig.contact.email ? (
               <li>
                 <a
                   href={`mailto:${siteConfig.contact.email}`}
-                  className="inline-flex items-center gap-2 text-white/70 transition-colors hover:text-white"
+                  className="inline-flex items-center gap-2 text-muted-foreground transition-colors hover:text-primary-text"
                 >
                   <Mail className="size-4 shrink-0" aria-hidden="true" />
                   {siteConfig.contact.email}
@@ -116,7 +125,7 @@ export async function SiteFooter() {
               <li>
                 <a
                   href={`tel:${siteConfig.contact.phone.replace(/[^\d+]/g, "")}`}
-                  className="inline-flex items-center gap-2 text-white/70 transition-colors hover:text-white"
+                  className="inline-flex items-center gap-2 text-muted-foreground transition-colors hover:text-primary-text"
                   dir="ltr"
                 >
                   <Phone className="size-4 shrink-0" aria-hidden="true" />
@@ -129,7 +138,7 @@ export async function SiteFooter() {
                 <a
                   href={whatsappHref}
                   {...externalLinkProps}
-                  className="inline-flex items-center gap-2 text-white/70 transition-colors hover:text-white"
+                  className="inline-flex items-center gap-2 text-muted-foreground transition-colors hover:text-primary-text"
                 >
                   <MessageCircle className="size-4 shrink-0 text-whatsapp" aria-hidden="true" />
                   WhatsApp
@@ -137,7 +146,7 @@ export async function SiteFooter() {
               </li>
             ) : null}
             {siteConfig.contact.address ? (
-              <li className="flex items-start gap-2 text-white/70">
+              <li className="flex items-start gap-2 text-muted-foreground">
                 <MapPin className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
                 <span>{pickLocalized(siteConfig.contact.address, locale)}</span>
               </li>
@@ -146,14 +155,14 @@ export async function SiteFooter() {
             !siteConfig.contact.phone &&
             !whatsappHref &&
             !siteConfig.contact.address ? (
-              <li className="text-white/50">{t("contactPending")}</li>
+              <li className="text-muted-foreground">{t("contactPending")}</li>
             ) : null}
           </ul>
         </div>
       </div>
 
-      <div className="border-t border-white/10">
-        <div className="container-page flex flex-col gap-2 py-5 text-xs text-white/40 sm:flex-row sm:items-center sm:justify-between">
+      <div className="border-t border-border">
+        <div className="container-page flex flex-col gap-2 py-5 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
           <p>{t("rights", { year })}</p>
           <p className="flex items-center gap-3">
             <span>{t("languageNote")}</span>

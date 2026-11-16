@@ -185,6 +185,50 @@ test.describe("public print request page", () => {
     expect(statuses[3]).toBe(429);
   });
 
+  test("uploads real attachments through the signed resumable route", async ({ page }) => {
+    test.skip(
+      process.env.E2E_PRINT_REQUEST_LIVE_UPLOAD !== "1" || !submissionReady,
+      "Set E2E_PRINT_REQUEST_LIVE_UPLOAD=1 (plus submission configuration) to run the real upload test.",
+    );
+    test.setTimeout(180_000);
+
+    const storageRequests: string[] = [];
+    page.on("request", (request) => {
+      if (request.url().includes("/storage/v1/upload/resumable")) {
+        storageRequests.push(request.url());
+      }
+    });
+
+    await page.goto("/en/print-request");
+
+    await page.getByLabel(en.printRequest.fields.name).fill(`E2E Live Upload ${Date.now()}`);
+    await page.getByLabel(en.printRequest.fields.phone).fill("+963 944 555 999");
+    await page
+      .getByLabel(en.printRequest.fields.details)
+      .fill("Live resumable upload end-to-end request.");
+    await page.locator('input[type="file"]').setInputFiles([
+      {
+        name: "live.stl",
+        mimeType: "model/stl",
+        buffer: Buffer.from("solid live\n  facet normal 0 0 1\n  endfacet\nendsolid live\n"),
+      },
+      {
+        name: "live.pdf",
+        mimeType: "application/pdf",
+        buffer: Buffer.from("%PDF-1.4\n% live e2e upload\n%%EOF\n"),
+      },
+    ]);
+
+    await page.getByRole("button", { name: en.printRequest.actions.submit }).click();
+
+    await expect(page.getByTestId("print-request-success")).toBeVisible({ timeout: 150_000 });
+
+    // The browser must use the signed TUS route, never the authenticated one,
+    // otherwise Storage falls back to `anon` and RLS rejects the insert.
+    expect(storageRequests.length).toBeGreaterThan(0);
+    expect(storageRequests.every((url) => url.includes("/upload/resumable/sign"))).toBe(true);
+  });
+
   test("retries a failed direct upload and completes the request", async ({ page }) => {
     test.skip(
       process.env.E2E_PRINT_REQUEST_UPLOADS !== "1" || !submissionReady,

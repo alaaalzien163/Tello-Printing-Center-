@@ -54,7 +54,7 @@ export function ProductMedia({
     return (
       <div
         className={cn(
-          "flex size-full flex-col items-center justify-center gap-2 bg-[radial-gradient(circle_at_50%_35%,color-mix(in_oklab,var(--primary)_18%,transparent),transparent_68%)] text-muted-foreground",
+          "flex size-full flex-col items-center justify-center gap-2 bg-secondary text-muted-foreground",
           fallbackClassName,
         )}
         role="img"

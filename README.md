@@ -88,7 +88,6 @@ never invents a phone number, email, address or social URL.
 | `NEXT_PUBLIC_SOCIAL_TELEGRAM`        | Telegram profile URL (must be `http`/`https`).                          |
 | `NEXT_PUBLIC_SOCIAL_LINKEDIN`        | LinkedIn profile URL (must be `http`/`https`).                          |
 | `NEXT_PUBLIC_SOCIAL_X`               | X / Twitter profile URL (must be `http`/`https`).                       |
-| `NEXT_PUBLIC_HERO_PRINTER_MODEL`     | Optional licensed GLB for the homepage hero (see [3D hero scene](#3d-hero-scene)). |
 | `NEXT_PUBLIC_SUPABASE_URL`           | Supabase project URL used by the browser and server clients.            |
 | `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Publishable key for Supabase Auth. Never use a secret/service key here. |
 | `SUPABASE_SECRET_KEY`                | Server-only Supabase secret key for the print-request API. Never public. |
@@ -107,6 +106,7 @@ Optional end-to-end fixtures and opt-in tests, all read from `.env.local`:
 | `E2E_ADMIN_EMAIL` / `E2E_ADMIN_PASSWORD` | Credentialed admin Playwright flows. |
 | `E2E_NON_ADMIN_EMAIL` / `E2E_NON_ADMIN_PASSWORD` | Non-admin denial flow. |
 | `E2E_PRINT_REQUEST_UPLOADS` | Set to `1` to run the destructive upload-retry test. |
+| `E2E_PRINT_REQUEST_LIVE_UPLOAD` | Set to `1` to run a real two-file signed-resumable upload. |
 | `E2E_PRINT_REQUEST_RATE_LIMIT` | Set to `1` to run the destructive rate-limit test. |
 
 ### Scripts
@@ -154,9 +154,6 @@ The suite runs against the development server because the admin dashboard is dev
 | Testing Library (React) | `16.3.3` |
 | Playwright              | `1.65.0` |
 | jsdom                   | `27.4.0` |
-| Three.js                | `0.187.0` |
-| React Three Fiber       | `9.8.2`  |
-| Drei                    | `10.7.9` |
 
 Fonts are provided by the local `geist` package; Arabic uses the platform's system UI
 stack. No build-time Google Fonts request is required.
@@ -165,8 +162,7 @@ stack. No build-time Google Fonts request is required.
 
 ```text
 messages/                     English and Arabic message catalogs (key parity enforced)
-public/images/                Local SVG product and category artwork
-public/models/                 Hero 3D asset slot, poster fallback and licensing notes
+public/images/                Local storefront and product artwork
 supabase/migrations/          Catalog/storage policies and print-request schema
 src/app/[locale]/             Localized routes
   (public)/                   Storefront, catalog, product detail, print request, contact, 404
@@ -176,7 +172,6 @@ src/proxy.ts                  Supabase session refresh for admin routes
 src/app/sitemap.ts            Localized sitemap with hreflang alternates
 src/app/robots.ts             Robots policy (admin routes disallowed)
 src/components/
-  3d/                         Lazy hero scene, printer model, lights, fallbacks
   admin/                      Dashboard shell, CRUD managers, forms, session context
     requests/                 Requests inbox, detail view, status badge, unread polling
   layout/                     Header, footer, splash, theme/locale switchers
@@ -296,7 +291,11 @@ footer. Requests are reviewed in the admin workspace under **Requests**.
    file policy, then creates the request and returns server-chosen storage paths plus a
    short-lived signed upload token per file.
 3. The browser uploads each file directly to Supabase with `tus-js-client` (6 MiB chunks,
-   retries and per-file progress). File bytes never pass through a Next.js request body.
+   retries and per-file progress). Signed uploads use the dedicated
+   `/storage/v1/upload/resumable/sign` route with the token in `x-signature`; the
+   authenticated `/storage/v1/upload/resumable` route ignores that token, runs as `anon`
+   and is rejected by the bucket's RLS policies. File bytes never pass through a Next.js
+   request body.
 4. `POST /api/public/print-requests/complete` confirms every object exists with the expected
    size, marks the files uploaded and moves the request from `uploading` to `pending`.
 5. Administrators see unread counts, filter/search/sort the inbox, open a request, download
@@ -376,6 +375,10 @@ key must be an `sb_secret_...` key (never the publishable key) and is never sent
 browser. Add the migrations, the bucket (private) and the variables above to enable the
 feature. Without them the page still renders and the API answers with a clear "not
 configured" error.
+
+The signed TUS route verifies each `x-signature` token against the exact bucket and object
+path before writing, so uploads succeed with the private bucket's administrator-only
+policies. No anonymous `insert` policy on `storage.objects` is needed or wanted.
 
 ### Admin requests
 
@@ -484,37 +487,19 @@ localized field errors, and image validation errors are surfaced next to the upl
 - Tested layouts target 360, 390, 768, 1024 and 1440 px, with a responsive admin sidebar
   that becomes a sheet below `lg`.
 
-## 3D hero scene
+## Hero artwork
 
-The homepage hero includes an optional, decorative 3D printer scene built with Three.js,
-React Three Fiber and Drei. It complements the server-rendered hero copy, buttons and
-catalog links; no content or navigation depends on it.
+The homepage hero uses a single static illustration, `public/images/printing-equipment.svg`,
+rendered with `next/image` at a fixed aspect ratio. It shows a multifunction copier, a desktop
+printer, paper and ink supplies in a warm neutral showroom. There is no WebGL, canvas or
+client-side scene code, so the hero is part of the server-rendered HTML and adds no extra
+JavaScript.
 
-| File                                          | Role                                                        |
-| --------------------------------------------- | ----------------------------------------------------------- |
-| `src/components/3d/lazy-3d-container.tsx`     | Interaction-gated loader, capability checks, error boundary |
-| `src/components/3d/hero-3d-scene.tsx`         | Canvas, camera rig, turntable rotation, visibility handling  |
-| `src/components/3d/printer-model.tsx`         | Procedural printer and optional licensed GLB loader          |
-| `src/components/3d/scene-lights.tsx`          | Theme-aware lighting                                         |
-| `src/components/3d/scene-fallback.tsx`        | Static poster fallback                                       |
-| `public/models/hero-printer-poster.svg`       | Static poster (about 8 KB)                                   |
-
-### Loading and performance strategy
-
-- The scene is **client-only** and loaded through `React.lazy` + `Suspense`, so Three.js is
-  not part of the initial server render or the first-load JavaScript chunk.
-- The chunk is fetched only after the first pointer, scroll or key interaction, with a
-  10-second fallback timer. Lighthouse and no-JavaScript visits stay on the poster.
-- WebGL support is probed at activation time, not on mount, to avoid paying context-creation
-  cost during first paint.
-- Rendering pauses when the hero leaves the viewport, and the canvas is limited to a
-  sensible device pixel ratio. There is one canvas for the whole homepage; product cards
-  never mount their own.
-- The poster is used for viewports below `768px`, `prefers-reduced-motion: reduce`,
-  low-memory/low-core or save-data devices, missing WebGL, context loss and runtime errors.
-- The procedural model uses primitives and no textures, keeping the scene small. Set
-  `NEXT_PUBLIC_HERO_PRINTER_MODEL` to a licensed, optimized GLB to replace it; see
-  `public/models/README.md` for licensing, compression, triangle and texture guidance.
+- The illustration is decorative next to the localized headline and calls to action.
+- `width`/`height` are declared, so the image reserves space and does not shift the layout.
+- The alt text is localized in both message catalogs.
+- Replace the SVG with licensed product photography when it is available; keep the 1000×760
+  aspect ratio or update the declared dimensions to avoid layout shifts.
 
 ### Brand palette and design tokens
 
@@ -581,6 +566,10 @@ Coverage includes:
 - Print request service: invalid payload/honeypot rejection before database access,
   rate-limit responses, pending requests without files, uploading requests with
   server-chosen signed targets, completion size/existence checks and `uploading` → `pending`.
+- Print request upload client: the signed `/upload/resumable/sign` endpoint, the
+  `x-signature` header (and the absence of `apikey`/`authorization`), 6 MiB chunks,
+  bucket/path metadata, independent uploads per attachment, missing-token refusal,
+  progress mapping, abort and safe error mapping.
 - Admin request mapping: database rows to dashboard summaries/details without exposing
   storage paths.
 - Admin authorization: claim verification, `admin_users` membership, error handling, and
@@ -589,9 +578,9 @@ Coverage includes:
   server-action outcomes (authorization, re-authentication, rate limits, weak passwords).
 - Locale preservation and theme selection.
 - Brand palette: exact token values in light/dark and English/Arabic, button hover/pressed
-  colors, and header-logo navigation to the dashboard sign-in.
+  colors, and header-logo navigation to the homepage.
 - Mobile navigation.
-- Hero 3D: poster fallback, reduced motion, mobile viewport, RTL layout and hydration safety.
+- Hero artwork: static optimized illustration, localized alt text, mobile viewport and RTL layout.
 - End-to-end public flows (category overview, category filtering, product detail navigation,
   breadcrumbs, language/RTL, theme, WhatsApp guidance, contact validation, 404, mobile menu).
   Catalog tests discover the currently published Supabase categories and products, so they
@@ -608,8 +597,8 @@ Coverage includes:
 - End-to-end print requests: English form validation, Arabic RTL layout, multi-file selection
   and removal, unsupported extension and 50 MB rejection, mobile overflow in both locales,
   dark-mode rendering, and the unauthenticated admin redirect/download guard. Submission,
-  admin list/detail/status/delete, upload retry and the destructive rate-limit test are
-  gated on live configuration and the opt-in flags above.
+  admin list/detail/status/delete, a real signed-resumable upload, upload retry and the
+  destructive rate-limit test are gated on live configuration and the opt-in flags above.
 
 ## Future roadmap
 
@@ -650,5 +639,5 @@ uploads and the public Supabase catalog are implemented.
 - No real contact details or social accounts are included by default.
 - Sample product prices are illustrative and displayed in USD.
 - Artwork is local illustrative SVG; replace it with production photography.
-- The hero 3D printer is an original procedural model, not a real product scan. It is
-  decorative only; mobile, reduced-motion and WebGL-unsupported visitors see the poster.
+- The hero illustration is an original vector scene, not a real product photo. Replace it with
+  licensed showroom photography when it is available.

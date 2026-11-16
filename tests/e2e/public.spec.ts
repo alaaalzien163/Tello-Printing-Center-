@@ -32,10 +32,10 @@ test.describe("public website", () => {
     await expect(page.getByRole("heading", { level: 1 })).toHaveText(en.hero.title);
   });
 
-  test("opens the admin sign-in page from the header logo", async ({ page }) => {
+  test("opens the localized admin sign-in page from the header logo", async ({ page }) => {
     await page.goto("/en/products");
 
-    const logo = page.getByRole("link", { name: en.nav.adminLogin });
+    const logo = page.locator("header").getByRole("link", { name: en.nav.adminLogin });
     const image = logo.getByRole("img");
     await expect(image).toHaveAttribute("alt", en.common.logoAlt);
     await expect(image).toHaveAttribute("src", /logo-tello\.png/);
@@ -51,11 +51,12 @@ test.describe("public website", () => {
     ).toBeVisible();
 
     await page.goto("/ar/products");
-    const arabicLogo = page.getByRole("link", { name: ar.nav.adminLogin });
+    const arabicLogo = page.locator("header").getByRole("link", { name: ar.nav.adminLogin });
     await expect(arabicLogo.getByRole("img")).toHaveAttribute("alt", ar.common.logoAlt);
 
     await arabicLogo.click();
     await expect(page).toHaveURL(/\/ar\/admin\/login$/);
+    await expect(page.locator("html")).toHaveAttribute("dir", "rtl");
   });
 
   test("does not render the former industry trust bar", async ({ page }) => {
@@ -67,7 +68,7 @@ test.describe("public website", () => {
     }
   });
 
-  test("shows categories instead of listing every product", async ({ page }) => {
+  test("shows categories and their products", async ({ page }) => {
     await page.goto("/en/products");
 
     const categoryLinks = page.locator('#catalog a[href*="/products/category/"]');
@@ -77,12 +78,23 @@ test.describe("public website", () => {
     }
 
     await expect(categoryLinks.first()).toBeVisible();
-    await expect(page.locator('#catalog h3 a[href*="/products/"]')).toHaveCount(0);
     await expect(page.getByRole("searchbox")).toHaveCount(0);
     await expect(page.getByRole("combobox")).toHaveCount(0);
     await expect(
       page.locator("#catalog").getByText(/^\d+ categor(y|ies)$/),
     ).toBeVisible();
+
+    const productLinks = page.locator('#catalog h3 a[href*="/products/"]');
+    if ((await productLinks.count()) > 0) {
+      await expect(productLinks.first()).toBeVisible();
+      expect(await productLinks.first().getAttribute("href")).toMatch(
+        /^\/en\/products\/[^/]+$/,
+      );
+    } else {
+      await expect(
+        page.getByText(en.products.categoryEmptyTitle).first(),
+      ).toBeVisible();
+    }
   });
 
   test("switches language while preserving category path and hash", async ({ page }) => {

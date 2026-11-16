@@ -2,7 +2,6 @@
 
 import { Menu } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
-import { useEffect, useState } from "react";
 
 import { BrandLogo } from "@/components/brand/brand-logo";
 import { LocaleSwitcher } from "@/components/layout/locale-switcher";
@@ -44,46 +43,31 @@ export function SiteHeader() {
   const t = useTranslations("nav");
   const pathname = usePathname();
   const locale = useLocale() as Locale;
-  const [scrolled, setScrolled] = useState(false);
-
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 12);
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
 
   return (
-    <header
-      className={cn(
-        "glass-header sticky top-0 z-40 w-full border-b border-transparent transition-[border-color,box-shadow] duration-200",
-        scrolled && "border-border/80 shadow-soft",
-      )}
-    >
+    <header className="sticky top-0 z-40 w-full border-b border-border bg-background">
       <div className="container-page flex h-(--header-height) items-center justify-between gap-3">
         <Link
           href="/admin/login"
           aria-label={t("adminLogin")}
-          className="shrink-0 rounded-lg focus-visible:outline-2 focus-visible:outline-offset-4"
+          className="shrink-0 rounded-md focus-visible:outline-2 focus-visible:outline-offset-4"
         >
-          <BrandLogo priority className="w-[min(45vw,13rem)]" />
+          <BrandLogo priority className="w-[min(45vw,12.5rem)]" />
         </Link>
 
         <nav aria-label={t("mainNav")} className="hidden items-center gap-1 lg:flex">
           {navItems.map((item) => (
-            <Button key={item.href} asChild variant="ghost" size="sm" className="px-3.5">
-              <Link
-                href={item.href}
-                aria-current={isActivePath(pathname, item.href) ? "page" : undefined}
-                className={cn(
-                  "text-[0.82rem] text-muted-foreground",
-                  isActivePath(pathname, item.href) &&
-                    "bg-primary/10 text-primary-text hover:bg-primary/10 hover:text-primary-text",
-                )}
-              >
-                {t(item.labelKey)}
-              </Link>
-            </Button>
+            <Link
+              key={item.href}
+              href={item.href}
+              aria-current={isActivePath(pathname, item.href) ? "page" : undefined}
+              className={cn(
+                "rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground",
+                isActivePath(pathname, item.href) && "bg-secondary text-foreground",
+              )}
+            >
+              {t(item.labelKey)}
+            </Link>
           ))}
         </nav>
 
@@ -119,9 +103,8 @@ export function SiteHeader() {
                       href={item.href}
                       aria-current={isActivePath(pathname, item.href) ? "page" : undefined}
                       className={cn(
-                        "rounded-lg px-3 py-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground",
-                        isActivePath(pathname, item.href) &&
-                          "bg-primary/10 text-primary-text hover:bg-primary/10 hover:text-primary-text",
+                        "rounded-md px-3 py-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground",
+                        isActivePath(pathname, item.href) && "bg-secondary text-foreground",
                       )}
                     >
                       {t(item.labelKey)}

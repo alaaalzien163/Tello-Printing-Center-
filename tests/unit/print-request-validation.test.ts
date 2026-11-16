@@ -82,6 +82,28 @@ describe("print request validation", () => {
     expect(result.success).toBe(true);
   });
 
+  it("accepts files larger than the 6 MiB TUS chunk size, up to 50 MiB", () => {
+    const chunk = 6 * 1024 * 1024;
+
+    expect(
+      parseSubmission({
+        files: [{ name: "large.stl", size: chunk * 2 + 1, type: "model/stl" }],
+      }).success,
+    ).toBe(true);
+
+    expect(
+      parseSubmission({
+        files: [{ name: "max.stl", size: 50 * 1024 * 1024, type: "model/stl" }],
+      }).success,
+    ).toBe(true);
+
+    expect(
+      parseSubmission({
+        files: [{ name: "over.stl", size: 50 * 1024 * 1024 + 1, type: "model/stl" }],
+      }).success,
+    ).toBe(false);
+  });
+
   it("rejects too many files, unsupported extensions and oversized metadata", () => {
     const files = Array.from({ length: 6 }, (_, index) => ({
       name: `part-${index}.stl`,

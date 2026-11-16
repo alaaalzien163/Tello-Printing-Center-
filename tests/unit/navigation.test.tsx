@@ -107,6 +107,18 @@ describe("SiteHeader", () => {
     expect(within(logo).getByRole("img", { name: enMessages.common.logoAlt })).toBeInTheDocument();
   });
 
+  it("links the Arabic brand logo to the localized admin sign-in page", () => {
+    render(
+      <NextIntlClientProvider locale="ar" messages={arMessages}>
+        <SiteHeader />
+      </NextIntlClientProvider>,
+    );
+
+    const logo = screen.getByRole("link", { name: arMessages.nav.adminLogin });
+    expect(logo).toHaveAttribute("href", "/admin/login");
+    expect(within(logo).getByRole("img", { name: arMessages.common.logoAlt })).toBeInTheDocument();
+  });
+
   it("opens the mobile menu and exposes localized navigation links", async () => {
     const user = userEvent.setup({ pointerEventsCheck: 0 });
 

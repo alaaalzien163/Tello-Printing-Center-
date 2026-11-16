@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
-import { CategoryCatalog } from "@/components/public/category-catalog";
+import { ProductCatalog } from "@/components/public/product-catalog";
 import type { Locale } from "@/i18n/routing";
 import { localizedAlternates } from "@/lib/metadata";
 import { getPublicCatalog } from "@/repositories/public-catalog";
@@ -31,9 +31,11 @@ export default async function ProductsPage({ params }: ProductsPageProps) {
     getTranslations("categories"),
   ]);
 
+  const productCountLabel = (count: number) => t("resultsCount", { count });
+
   return (
     <>
-      <section className="surface-glow border-b border-border/70">
+      <section className="border-b border-border/70 bg-secondary/40">
         <div className="container-page py-12 md:py-16">
           <span className="eyebrow">{t("eyebrow")}</span>
           <h1 className="mt-4 max-w-3xl text-4xl font-semibold tracking-tight text-foreground sm:text-5xl">
@@ -47,14 +49,19 @@ export default async function ProductsPage({ params }: ProductsPageProps) {
 
       <section className="section-space pt-10 md:pt-12">
         <div className="container-page">
-          <CategoryCatalog
+          <ProductCatalog
             categories={catalog.categories}
             products={catalog.products}
             locale={locale}
             labels={{
-              count: tCategories("count", { count: catalog.categories.length }),
+              categoriesTitle: t("categoriesTitle"),
+              jumpToCategory: t("jumpToCategory"),
+              categoryCount: tCategories("count", { count: catalog.categories.length }),
               emptyTitle: tCategories("emptyTitle"),
               emptyDescription: tCategories("emptyDescription"),
+              categoryEmptyTitle: t("categoryEmptyTitle"),
+              categoryEmptyDescription: t("categoryEmptyDescription"),
+              formatProductCount: productCountLabel,
             }}
           />
         </div>

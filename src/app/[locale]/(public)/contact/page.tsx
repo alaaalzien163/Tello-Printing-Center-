@@ -28,7 +28,7 @@ export default async function ContactPage({ params }: ContactPageProps) {
 
   return (
     <>
-      <section className="surface-glow border-b border-border/70">
+      <section className="border-b border-border/70 bg-secondary/40">
         <div className="container-page flex flex-col items-start justify-between gap-6 py-14 md:flex-row md:items-end md:py-18">
           <div className="max-w-2xl">
             <span className="eyebrow">{t("eyebrow")}</span>

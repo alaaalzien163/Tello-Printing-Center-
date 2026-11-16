@@ -9,10 +9,19 @@ import { PRINT_REQUEST_BUCKET } from "@/lib/print-requests/files";
  * Browser-side direct upload to Supabase Storage.
  *
  * The file never passes through a Next.js route body: the API only returns a
- * short-lived signed upload token and the server-chosen storage path. The
- * publishable key travels in `apikey`; the signed token travels in
- * `x-signature`, which is the current Supabase TUS integration.
+ * short-lived signed upload token and the server-chosen storage path.
+ *
+ * Supabase serves signed TUS uploads from a dedicated route that is separate
+ * from the authenticated one. `POST /storage/v1/upload/resumable` only accepts
+ * a user/service JWT, so a signed token sent there is ignored and the insert
+ * runs as `anon`, which the bucket's RLS policies reject. Signed uploads must
+ * go to `/storage/v1/upload/resumable/sign` with the token in `x-signature`;
+ * that route verifies the token against the bucket and object path before
+ * writing, and the `Location` it returns already points at the signed route,
+ * so the follow-up PATCH requests stay authorized.
  */
+export const PRINT_REQUEST_UPLOAD_ENDPOINT_PATH = "/storage/v1/upload/resumable/sign";
+
 export const PRINT_REQUEST_UPLOAD_CHUNK_SIZE = 6 * 1024 * 1024;
 
 const RETRY_DELAYS = [0, 1_000, 3_000, 5_000, 10_000];
@@ -62,10 +71,21 @@ export function uploadPrintRequestFile({
     };
   }
 
+  // The signed route rejects a request without a token ("Missing x-signature
+  // header"). Fail before opening the connection so a missing token is reported
+  // as a safe upload error instead of a network-level TUS failure.
+  if (!target.token) {
+    return {
+      promise: Promise.reject(new PrintRequestUploadError("UPLOAD_FAILED")),
+      abort: async () => undefined,
+    };
+  }
+
   const upload = new tus.Upload(file, {
-    endpoint: `${config.url}/storage/v1/upload/resumable`,
+    endpoint: `${config.url}${PRINT_REQUEST_UPLOAD_ENDPOINT_PATH}`,
     headers: {
-      apikey: config.publishableKey,
+      // The signed route authorizes the upload with this token alone; no
+      // `apikey` or `authorization` header is needed (or honored) there.
       "x-signature": target.token,
       "x-upsert": "true",
     },

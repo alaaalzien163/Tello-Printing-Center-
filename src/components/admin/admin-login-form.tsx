@@ -8,7 +8,7 @@ import { useForm } from "react-hook-form";
 
 import { LocaleSwitcher } from "@/components/layout/locale-switcher";
 import { ThemeSwitcher } from "@/components/layout/theme-switcher";
-import { Logo } from "@/components/brand/logo";
+import { BrandLogo } from "@/components/brand/brand-logo";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -67,12 +67,7 @@ export function AdminLoginForm({ initialError }: AdminLoginFormProps) {
   return (
     <div className="grid min-h-dvh lg:grid-cols-[1.05fr_1fr]">
       <section className="relative hidden overflow-hidden bg-brand-black p-10 text-white lg:flex lg:flex-col">
-        <div className="surface-grid pointer-events-none absolute inset-0 opacity-20" aria-hidden="true" />
-        <div
-          className="pointer-events-none absolute -top-24 -end-24 size-80 rounded-full bg-primary/30 blur-3xl"
-          aria-hidden="true"
-        />
-        <Logo className="relative [&_span]:text-white [&_span:last-child]:text-white/55" />
+        <BrandLogo className="relative w-52 invert hue-rotate-180" />
         <div className="relative mt-auto max-w-md pb-8">
           <p className="text-xs font-semibold tracking-[0.24em] text-brand-pink-soft uppercase">
             {t("eyebrow")}
@@ -82,7 +77,7 @@ export function AdminLoginForm({ initialError }: AdminLoginFormProps) {
           <ul className="mt-8 space-y-4">
             {features.map(({ icon: Icon, label }) => (
               <li key={label} className="flex items-center gap-3 text-sm text-white/80">
-                <span className="flex size-8 items-center justify-center rounded-lg bg-white/8 text-brand-pink-soft">
+                <span className="flex size-8 items-center justify-center rounded-lg bg-white/10 text-brand-pink-soft">
                   <Icon className="size-4" aria-hidden="true" />
                 </span>
                 {label}
@@ -97,7 +92,7 @@ export function AdminLoginForm({ initialError }: AdminLoginFormProps) {
 
       <section className="flex flex-col bg-background">
         <header className="flex items-center justify-between px-5 py-4 sm:px-8">
-          <Logo className="lg:invisible" />
+          <BrandLogo className="w-40 lg:invisible" />
           <div className="flex items-center gap-1">
             <LocaleSwitcher compact />
             <ThemeSwitcher />

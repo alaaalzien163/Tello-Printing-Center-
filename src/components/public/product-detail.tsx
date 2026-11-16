@@ -61,7 +61,7 @@ export function ProductDetail({ product, variants, categoryName }: ProductDetail
 
   return (
     <div className="grid gap-8 lg:grid-cols-2 lg:gap-14">
-      <div className="relative overflow-hidden rounded-3xl border border-border bg-muted shadow-soft">
+      <div className="relative overflow-hidden rounded-xl border border-border bg-secondary shadow-soft">
         <div className="relative aspect-[4/3] w-full">
           <div className="absolute inset-0" data-testid="product-main-image">
             <ProductMedia
@@ -74,7 +74,7 @@ export function ProductDetail({ product, variants, categoryName }: ProductDetail
           </div>
         </div>
         {product.featured ? (
-          <Badge className="absolute start-4 top-4 bg-card/90 text-foreground backdrop-blur">
+          <Badge className="absolute start-4 top-4 bg-card text-foreground shadow-sm">
             {t("featured")}
           </Badge>
         ) : null}

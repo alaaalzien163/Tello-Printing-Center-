@@ -4,7 +4,7 @@ import ar from "../../messages/ar.json";
 import en from "../../messages/en.json";
 
 test.describe("about section", () => {
-  test("renders the complete English company profile", async ({ page }) => {
+  test("renders the English company profile", async ({ page }) => {
     await page.goto("/en");
 
     const about = page.locator("#about");
@@ -22,16 +22,7 @@ test.describe("about section", () => {
       ).toBeVisible();
     }
 
-    await expect(
-      about.getByRole("heading", { level: 3, name: en.about.materials.title }),
-    ).toBeVisible();
-    await expect(
-      about.getByRole("heading", {
-        level: 4,
-        name: en.about.materials.consumables.title,
-      }),
-    ).toBeVisible();
-    await expect(about.getByText("PLA", { exact: true })).toBeVisible();
+    await expect(about.getByText(en.about.story.location)).toBeVisible();
     await expect(
       about.getByRole("heading", { level: 3, name: en.about.why.title }),
     ).toBeVisible();
@@ -39,7 +30,7 @@ test.describe("about section", () => {
     await expect(about.getByRole("link", { name: en.about.why.secondaryCta })).toBeVisible();
   });
 
-  test("renders the complete Arabic profile in RTL", async ({ page }) => {
+  test("renders the Arabic profile in RTL", async ({ page }) => {
     await page.goto("/ar");
 
     await expect(page.locator("html")).toHaveAttribute("dir", "rtl");
@@ -56,13 +47,7 @@ test.describe("about section", () => {
       ).toBeVisible();
     }
 
-    await expect(about.getByText("ألياف الكربون", { exact: true })).toBeVisible();
-    await expect(
-      about.getByRole("heading", {
-        level: 4,
-        name: ar.about.materials.consumables.title,
-      }),
-    ).toBeVisible();
+    await expect(about.getByText(ar.about.story.location)).toBeVisible();
     await expect(about.getByRole("link", { name: ar.about.why.cta })).toBeVisible();
   });
 

@@ -60,7 +60,7 @@ describe("ProductCard", () => {
 
     expect(screen.getByRole("heading", { name: product.name.ar })).toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: `${arMessages.whatsapp.unavailable} — ${product.name.ar}` }),
+      screen.getByRole("button", { name: arMessages.whatsapp.unavailableShort }),
     ).toBeInTheDocument();
 
     const links = screen.getAllByRole("link");

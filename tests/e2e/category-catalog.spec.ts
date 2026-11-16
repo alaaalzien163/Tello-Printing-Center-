@@ -26,11 +26,14 @@ function assetUrl(src: string | null): string {
 }
 
 test.describe("category-first catalog", () => {
-  test("lists categories instead of every product", async ({ page }) => {
+  test("lists categories with the products in each category", async ({ page }) => {
     await page.goto("/en/products");
     await expect(page.locator("html")).toHaveAttribute("dir", "ltr");
 
     await expect(page.getByRole("heading", { level: 1 })).toHaveText(en.products.title);
+    await expect(
+      page.getByRole("heading", { level: 2, name: en.products.categoriesTitle }),
+    ).toBeVisible();
 
     const categoryLinks = page.locator('#catalog a[href*="/products/category/"]');
     if ((await categoryLinks.count()) === 0) {
@@ -39,9 +42,96 @@ test.describe("category-first catalog", () => {
     }
 
     await expect(categoryLinks.first()).toBeVisible();
-    await expect(page.locator('#catalog h3 a[href*="/products/"]')).toHaveCount(0);
     await expect(page.getByRole("searchbox")).toHaveCount(0);
     await expect(page.getByRole("combobox")).toHaveCount(0);
+
+    const productLinks = page.locator('#catalog h3 a[href*="/products/"]');
+    if ((await productLinks.count()) > 0) {
+      await expect(productLinks.first()).toBeVisible();
+      expect(await productLinks.first().getAttribute("href")).toMatch(
+        /^\/en\/products\/[^/]+$/,
+      );
+    } else {
+      await expect(
+        page.getByText(en.products.categoryEmptyTitle).first(),
+      ).toBeVisible();
+    }
+  });
+
+  test("shows the Arabic catalog in RTL with localized category and product links", async ({
+    page,
+  }) => {
+    await page.goto("/ar/products");
+    await expect(page.locator("html")).toHaveAttribute("dir", "rtl");
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText(ar.products.title);
+
+    const categoryLinks = page.locator('#catalog a[href*="/products/category/"]');
+    if ((await categoryLinks.count()) === 0) {
+      await expect(page.getByText(ar.categories.emptyTitle)).toBeVisible();
+      return;
+    }
+
+    await expect(categoryLinks.first()).toBeVisible();
+
+    const productLinks = page.locator('#catalog h3 a[href*="/products/"]');
+    if ((await productLinks.count()) > 0) {
+      await expect(productLinks.first()).toHaveAttribute(
+        "href",
+        /^\/ar\/products\/[^/]+$/,
+      );
+    }
+  });
+
+  test("shows a jump link for every category section", async ({ page }) => {
+    await page.goto("/en/products");
+
+    const categoryLinks = page.locator('#catalog a[href*="/products/category/"]');
+    if ((await categoryLinks.count()) === 0) {
+      test.skip(true, "No published categories in Supabase.");
+      return;
+    }
+
+    const jumpLinks = page.locator('#catalog nav a[href^="#category-"]');
+    await expect(jumpLinks).toHaveCount(await categoryLinks.count());
+
+    const firstJump = jumpLinks.first();
+    const href = await firstJump.getAttribute("href");
+    expect(href).toMatch(/^#category-.+$/);
+
+    const sectionId = (href ?? "").slice(1);
+    await expect(page.locator(`#catalog section[id="${sectionId}"]`)).toBeVisible();
+  });
+
+  test("keeps product card details and WhatsApp ordering on the catalog page", async ({ page }) => {
+    const product = await getFirstPublishedProduct(page);
+    if (!product) {
+      test.skip(true, "No published products in Supabase.");
+      return;
+    }
+
+    await page.goto("/en/products");
+    await expect(page.locator(`a[href="${product.href}"]`).first()).toBeVisible();
+
+    const card = page
+      .locator(`#catalog h3 a[href="${product.href}"]`)
+      .first()
+      .locator("xpath=ancestor::*[@data-slot='card'][1]");
+    await expect(card).toBeVisible();
+    await expect(card).toContainText(en.products.price);
+    await expect(card).toContainText(en.products.viewDetails);
+    await expect(card.locator('a[href*="/products/"]').first()).toBeVisible();
+
+    const whatsappLinks = page.locator('a[href*="wa.me/"]');
+    if ((await whatsappLinks.count()) > 0) {
+      await expect(whatsappLinks.first()).toHaveAttribute(
+        "href",
+        /^https:\/\/wa\.me\/\d{8,15}\?text=/,
+      );
+    } else {
+      await expect(
+        page.getByRole("button", { name: en.whatsapp.unavailableShort, exact: true }).first(),
+      ).toBeVisible();
+    }
   });
 
   test("opens a category and shows only products from that category", async ({ page }) => {
@@ -261,8 +351,10 @@ test.describe("category-first catalog", () => {
       return;
     }
 
-    await expect(page.locator("#catalog img")).toHaveCount(0);
-    await expect(page.locator("#catalog picture")).toHaveCount(0);
+    const categoryGrid = page.getByTestId("category-grid");
+    await expect(categoryGrid).toBeVisible();
+    await expect(categoryGrid.locator("img")).toHaveCount(0);
+    await expect(categoryGrid.locator("picture")).toHaveCount(0);
   });
 
   test("renders the category hero without an image", async ({ page }) => {
@@ -419,6 +511,30 @@ test.describe("category-first catalog", () => {
 
       await page.goto(`/ar/products/category/${category.slug}`);
       await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+
+      const overflow = await page.evaluate(
+        () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
+      );
+      expect(overflow).toBeLessThanOrEqual(1);
+    });
+
+    test("keeps the Arabic product catalog inside the viewport", async ({ page }) => {
+      await page.goto("/ar/products");
+      await expect(page.locator("html")).toHaveAttribute("dir", "rtl");
+      await expect(page.getByRole("heading", { level: 1 })).toHaveText(ar.products.title);
+      await expect(
+        page.getByRole("heading", { level: 2, name: ar.products.categoriesTitle }),
+      ).toBeVisible();
+
+      const overflow = await page.evaluate(
+        () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
+      );
+      expect(overflow).toBeLessThanOrEqual(1);
+    });
+
+    test("keeps the English product catalog inside the viewport", async ({ page }) => {
+      await page.goto("/en/products");
+      await expect(page.getByRole("heading", { level: 1 })).toHaveText(en.products.title);
 
       const overflow = await page.evaluate(
         () => document.documentElement.scrollWidth - document.documentElement.clientWidth,

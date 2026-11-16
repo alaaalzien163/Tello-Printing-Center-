@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowUpRight, Star } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { WhatsAppOrderButton } from "@/components/public/whatsapp-order-button";
@@ -32,33 +32,31 @@ export function ProductCard({ product, categoryName, locale, className }: Produc
   return (
     <Card
       className={cn(
-        "group h-full gap-0 overflow-hidden border-0 py-0 ring-1 ring-border/80 transition-[box-shadow,transform] duration-300 hover:-translate-y-1 hover:shadow-lift",
+        "group h-full gap-0 overflow-hidden border border-border py-0 shadow-none transition-[border-color,box-shadow] duration-200 hover:border-primary/35 hover:shadow-soft",
         className,
       )}
     >
       <Link
         href={href}
-        className="relative block aspect-[4/3] overflow-hidden bg-muted focus-visible:outline-offset-[-4px]"
+        className="relative block aspect-[4/3] overflow-hidden border-b border-border bg-secondary focus-visible:outline-offset-[-4px]"
         aria-label={`${t("viewDetails")} — ${name}`}
       >
         <ProductMedia
           src={product.image.url}
           alt={pickLocalized(product.image.alt, locale)}
           sizes="(min-width: 1280px) 22rem, (min-width: 768px) 33vw, 90vw"
-          imageClassName="transition-transform duration-500 ease-out group-hover:scale-[1.04]"
+          imageClassName="transition-transform duration-300 ease-out group-hover:scale-[1.03]"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-brand-black/35 via-transparent to-transparent opacity-70" />
         {product.featured ? (
-          <Badge className="absolute start-3 top-3 gap-1 bg-card/90 text-foreground shadow-sm backdrop-blur">
-            <Star className="size-3 fill-warning text-warning" aria-hidden="true" />
+          <Badge className="absolute start-3 top-3 border border-border bg-card text-[0.65rem] text-foreground shadow-sm">
             {t("featured")}
           </Badge>
         ) : null}
       </Link>
 
-      <CardContent className="flex flex-1 flex-col gap-3 p-5">
+      <CardContent className="flex flex-1 flex-col gap-2.5 p-5">
         <div className="flex items-center justify-between gap-2">
-          <span className="text-[0.68rem] font-semibold tracking-[0.14em] text-primary-text uppercase">
+          <span className="text-[0.68rem] font-semibold tracking-[0.12em] text-primary-text uppercase">
             {categoryName}
           </span>
           <span className="font-mono text-[0.68rem] tracking-wide text-muted-foreground" dir="ltr">
@@ -78,32 +76,29 @@ export function ProductCard({ product, categoryName, locale, className }: Produc
         ) : null}
         <p className="line-clamp-2 text-sm leading-6 text-muted-foreground">{description}</p>
 
-        <div className="mt-auto flex items-end justify-between gap-3 pt-3">
+        <div className="mt-auto flex items-end justify-between gap-3 border-t border-border pt-3">
           <div>
             <span className="text-[0.65rem] font-medium tracking-wide text-muted-foreground uppercase">
               {t("price")}
             </span>
             <p className="text-lg font-semibold text-foreground">{price}</p>
           </div>
-          <div className="flex items-center gap-1.5">
-            <WhatsAppOrderButton
-              productName={name}
-              sku={product.sku}
-              formattedPrice={price}
-              productPath={`/${locale}${href}`}
-              size="icon-sm"
-              iconOnly
-              className="rounded-lg"
-            />
-            <Link
-              href={href}
-              className="inline-flex size-8 items-center justify-center rounded-lg border border-border text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-              aria-label={`${t("viewDetails")} — ${name}`}
-            >
-              <ArrowUpRight className="size-4" aria-hidden="true" />
-            </Link>
-          </div>
+          <WhatsAppOrderButton
+            productName={name}
+            sku={product.sku}
+            formattedPrice={price}
+            productPath={`/${locale}${href}`}
+            size="sm"
+          />
         </div>
+
+        <Link
+          href={href}
+          className="mt-1 inline-flex items-center gap-1 text-xs font-medium text-muted-foreground transition-colors hover:text-primary-text"
+        >
+          {t("viewDetails")}
+          <ArrowRight className="size-3.5 rtl:rotate-180" aria-hidden="true" />
+        </Link>
       </CardContent>
     </Card>
   );

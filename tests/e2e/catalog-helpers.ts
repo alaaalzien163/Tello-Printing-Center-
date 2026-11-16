@@ -97,18 +97,28 @@ export async function getFirstProductWithVariants(
 
     const links = page.locator('h3 a[href*="/products/"]');
     const count = await links.count();
+    const entries: CatalogEntry[] = [];
 
+    // Collect hrefs before navigating away: the locator is bound to the
+    // category page and becomes stale once a product detail page is open.
     for (let index = 0; index < count; index += 1) {
       const link = links.nth(index);
       const href = await link.getAttribute("href");
       if (!href) continue;
 
-      const name = (await link.innerText()).trim();
-      await page.goto(href);
+      entries.push({
+        name: (await link.innerText()).trim(),
+        href,
+        slug: slugFromHref(href),
+      });
+    }
+
+    for (const entry of entries) {
+      await page.goto(entry.href);
 
       const options = page.getByTestId("variant-option");
       if ((await options.count()) >= 2) {
-        return { name, href, slug: slugFromHref(href), category };
+        return { ...entry, category };
       }
     }
   }

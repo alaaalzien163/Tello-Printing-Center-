@@ -3,10 +3,10 @@
     "siteName": "Tello Printing Center",
     "defaultTitle": "Tello Printing Center — Professional Printing Equipment",
     "titleTemplate": "%s | Tello Printing Center",
-    "description": "Tello Printing Center is a retail store and supplier of professional printing equipment, including 3D, DTF and UV printers, printing materials, inks, parts and accessories.",
-    "keywords": "printing equipment, printing supplies, 3D printers, DTF printers, UV printers, printing materials, printing inks, printer parts, Tello Printing Center",
+    "description": "Tello Printing Center is a printing equipment store in Damascus, supplying printers, photocopiers, inks, paper, spare parts and accessories, and providing professional document printing services.",
+    "keywords": "printing equipment, printers, photocopiers, printing supplies, inks, paper, printer parts, document printing, Tello Printing Center",
     "productsTitle": "Printing Equipment & Supplies",
-    "productsDescription": "Browse 3D, DTF and UV printers, industrial printing machines, filaments, inks, parts and accessories from Tello Printing Center.",
+    "productsDescription": "Browse printers, photocopiers, printing supplies, inks, paper, parts and accessories from Tello Printing Center.",
     "aboutTitle": "About Us",
     "contactTitle": "Contact Us",
     "adminTitle": "Admin",
@@ -81,28 +81,31 @@
     "tagline": "Printing equipment and supplies"
   },
   "hero": {
-    "eyebrow": "Printing equipment retail and supply",
-    "title": "Your trusted supplier for professional printing equipment.",
-    "description": "Tello Printing Center is a retail store and supplier of professional printing equipment, materials and accessories. Browse machines, compare product options and order the equipment your business needs.",
+    "eyebrow": "Printers · Copiers · Printing supplies",
+    "title": "Printing equipment and supplies for your business.",
+    "description": "Tello Printing Center supplies printers, photocopiers, inks, paper and spare parts, and provides professional document printing services in Damascus. Browse the catalog, compare options and order with our team.",
     "primaryCta": "Explore products",
     "secondaryCta": "Contact us",
-    "imageAlt": "Professional printing equipment displayed for customers",
-    "badge": "Equipment, materials and consumables",
-    "panelLabel": "Product range",
-    "panelValue": "Printers · Materials · Parts",
-    "metricPrecision": "Product areas",
-    "metricPrecisionValue": "7 categories",
-    "metricMaterials": "Catalog",
-    "metricMaterialsValue": "Equipment & supplies",
-    "metricSupport": "Order support",
-    "metricSupportValue": "Product inquiries"
+    "imageAlt": "Multifunction copier, desktop printer, paper and ink supplies in the Tello showroom",
+    "highlights": {
+      "catalog": {
+        "title": "Printers & copiers",
+        "description": "Office and professional machines from trusted brands."
+      },
+      "supplies": {
+        "title": "Inks & paper",
+        "description": "Consumables, spare parts and accessories in stock."
+      },
+      "support": {
+        "title": "Sales & service",
+        "description": "Product advice, delivery and after-sales support."
+      }
+    }
   },
   "about": {
     "eyebrow": "About Tello Printing Center",
-    "title": "Tello Printing Center: Your Destination for 3D Printing Solutions and Industrial Equipment in Syria",
-    "description": "Founded in 1985 in the heart of Damascus, on Amin Al-Rihani Street, Tello Library / Tello Printing Center has grown into a leading technology partner and a trusted supplier of office and engineering equipment and services.",
-    "imageAlt": "Digital calipers measuring a precision 3D printed lattice component on a dark workbench",
-    "badge": "Precision manufacturing since 1985",
+    "title": "A printing equipment store built on four decades of service.",
+    "description": "Since 1985, Tello Printing Center has supplied printers, photocopiers, printing supplies and document services to offices, workshops and institutions across Damascus. We help customers choose the right machine and keep it running.",
     "facts": {
       "foundedLabel": "Founded",
       "foundedValue": "1985",
@@ -113,76 +116,52 @@
     },
     "story": {
       "eyebrow": "Our story",
-      "title": "Four decades of experience, built on precision.",
+      "title": "Four decades of practical printing experience.",
       "paragraphs": {
-        "experience": "Over 40 years of experience and excellence, we have built a bridge between innovative ideas and practical delivery, placing our deep technical expertise at the service of Syria's engineering community, students and industrial sectors.",
-        "choice": "Whether you are looking for a professional team to execute your project with exceptional precision, or you want to purchase advanced industrial machinery and equipment for your company, Tello Printing Center is your ideal choice."
+        "experience": "What began as Tello Library on Amin Al-Rihani Street has grown into a complete printing equipment store. Our team combines product knowledge with hands-on service, so customers get clear advice before and after the sale.",
+        "choice": "From a single desktop printer to a full office copier, inks, paper and spare parts, we stock the essentials and order the rest. We also print documents, drawings and plans for customers who need a reliable print partner."
       },
       "location": "Damascus — Amin Al-Rihani Street"
     },
     "services": {
-      "eyebrow": "Professional services",
-      "title": "Professional services: printing your ideas with precision",
-      "description": "At Tello, we operate an advanced, fully equipped technology facility built to handle the most demanding engineering requirements and student projects.",
+      "eyebrow": "What we offer",
+      "title": "Equipment, supplies and printing services in one place.",
+      "description": "A straightforward range for offices, print shops, engineers and institutions.",
       "items": {
-        "printing": {
-          "title": "Custom 3D Printing",
-          "description": "We transform your CAD and 3D files into precise, tangible architectural and engineering models."
+        "equipment": {
+          "title": "Printers & photocopiers",
+          "description": "Desktop printers, multifunction copiers and professional printing machines."
         },
-        "scanning": {
-          "title": "3D Scanning",
-          "description": "Professional digital scanning of physical objects for reverse engineering."
-        },
-        "industrial": {
-          "title": "DTF & UV Printing",
-          "description": "Direct-to-film thermal printing on woven fabrics (DTF) and high-resolution printing on solid surfaces (UV)."
+        "supplies": {
+          "title": "Inks, paper & parts",
+          "description": "Original and compatible consumables, paper, spare parts and accessories."
         },
         "documents": {
-          "title": "Engineering Plotting & Documents",
-          "description": "Large-format engineering plotting, plus fast, high-precision document scanning and copying."
+          "title": "Document printing",
+          "description": "Everyday printing, copying, scanning and large-format plan printing."
+        },
+        "support": {
+          "title": "Sales & after-sales support",
+          "description": "Help choosing the right machine, delivery and practical technical support."
         }
-      }
-    },
-    "materials": {
-      "eyebrow": "Materials and consumables",
-      "title": "Materials and consumables: everything you need in one place",
-      "description": "Tello Printing Center stocks a diverse range of raw materials for self-production and custom projects.",
-      "filaments": {
-        "title": "3D Filaments",
-        "description": "More than 100 colors across PLA, PETG, TPU and ABS, plus durable carbon fiber filament.",
-        "chips": {
-          "pla": "PLA",
-          "petg": "PETG",
-          "tpu": "TPU",
-          "abs": "ABS",
-          "carbon": "Carbon Fiber"
-        }
-      },
-      "industrial": {
-        "title": "Industrial Materials",
-        "description": "Available as standard rolls or plastic pellets to meet the needs of workshops and factories."
-      },
-      "consumables": {
-        "title": "Industrial Consumables",
-        "description": "Longlu UV ink, DTF inks, PET rolls and thermal TPU powder."
       }
     },
     "why": {
       "eyebrow": "Why Tello",
-      "title": "Why choose Tello Printing Center?",
-      "description": "Because we combine four decades of proven experience with the latest digital manufacturing technologies, bringing high quality and competitive pricing to the Syrian market.",
+      "title": "Why customers choose Tello Printing Center.",
+      "description": "A local store with a long track record, clear product advice and dependable follow-up.",
       "points": {
         "heritage": {
-          "title": "Four decades of experience",
-          "description": "Since 1985, we have built deep expertise across office, engineering and industrial equipment and services."
+          "title": "Serving Damascus since 1985",
+          "description": "Four decades of experience with office and professional printing equipment."
         },
-        "technology": {
-          "title": "Advanced digital manufacturing",
-          "description": "We work with the latest digital manufacturing technologies to deliver precise, reliable results."
+        "products": {
+          "title": "Products that fit the job",
+          "description": "We match machines and supplies to your volume, budget and printing needs."
         },
-        "value": {
-          "title": "Quality with competitive pricing",
-          "description": "Our aim is to offer the Syrian market high quality at competitive prices."
+        "support": {
+          "title": "Support after the sale",
+          "description": "Consumables, spare parts and practical help when you need it."
         }
       },
       "cta": "Talk to our team",
@@ -191,7 +170,7 @@
   },
   "categories": {
     "eyebrow": "Product categories",
-    "title": "Seven product areas for professional printing.",
+    "title": "Product categories for professional printing.",
     "description": "Machines, materials, inks, parts and accessories — organized so you can find the right product for your operation.",
     "itemCount": "{count, plural, =0 {No products} one {# product} other {# products}}",
     "viewProducts": "View products",
@@ -202,8 +181,10 @@
   },
   "products": {
     "eyebrow": "Product catalog",
-    "title": "Printing equipment, materials and supplies.",
-    "description": "Browse professional printing machines, consumables, parts and accessories. Product pages include SKU, pricing and direct ordering.",
+    "title": "Browse printing equipment and supplies.",
+    "description": "Choose a category to see its products, or browse the full catalog below. Every product shows its SKU, price and WhatsApp ordering option.",
+    "categoriesTitle": "Shop by category",
+    "jumpToCategory": "Jump to a category",
     "resultsCount": "{count, plural, =0 {No products available} one {# product} other {# products}}",
     "emptyTitle": "No products available yet",
     "emptyDescription": "Products are being added to the catalog. Please check back soon.",

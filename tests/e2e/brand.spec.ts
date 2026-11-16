@@ -106,7 +106,7 @@ test.describe("brand tokens", () => {
 
       const dark = await snapshot(page);
       expectPalette(dark.tokens);
-      expect(dark.bodyBackground).toBe("rgb(0, 0, 0)");
+      expect(dark.bodyBackground).toBe("rgb(20, 18, 19)");
       expect(dark.buttonBackground).toBe(RGB.primary);
       expect(dark.buttonForeground).toBe(RGB.white);
       expect(dark.overflow).toBe(0);
@@ -152,15 +152,15 @@ test.describe("brand tokens", () => {
 
     const dark = await snapshot(page);
     expectPalette(dark.tokens);
-    expect(dark.bodyBackground).toBe("rgb(0, 0, 0)");
+    expect(dark.bodyBackground).toBe("rgb(20, 18, 19)");
     expect(dark.buttonBackground).toBe(RGB.primary);
   });
 
-  test("logo in the public header opens the dashboard sign-in", async ({ page }) => {
+  test("logo in the public header opens the localized admin sign-in page", async ({ page }) => {
     await page.goto("/ar");
     await settle(page);
 
-    await page.locator("header a[href$='/admin/login']").first().click();
+    await page.locator("header a[href='/ar/admin/login']").first().click();
     await expect(page).toHaveURL(/\/ar\/admin\/login$/);
     await expect(page.locator("html")).toHaveAttribute("dir", "rtl");
   });

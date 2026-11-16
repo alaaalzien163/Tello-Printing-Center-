@@ -82,7 +82,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
         </div>
       </div>
 
-      <section data-testid="category-hero" className="surface-glow border-b border-border/70">
+      <section data-testid="category-hero" className="border-b border-border/70 bg-secondary/40">
         <div className="container-page py-10 md:py-14">
           <Button asChild variant="ghost" size="sm" className="-ms-3 text-muted-foreground">
             <Link href="/products">

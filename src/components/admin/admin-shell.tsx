@@ -231,7 +231,7 @@ function AdminFrame({ session, children }: { session: AdminSession; children: Re
       </aside>
 
       <div className="flex min-w-0 flex-col">
-        <header className="glass-header sticky top-0 z-30 flex h-(--header-height) items-center justify-between gap-3 border-b border-border px-4 sm:px-6">
+        <header className="sticky top-0 z-30 flex h-(--header-height) items-center justify-between gap-3 border-b border-border bg-background px-4 sm:px-6">
           <div className="flex min-w-0 items-center gap-2">
             <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
               <SheetTrigger asChild>

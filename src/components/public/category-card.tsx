@@ -1,4 +1,13 @@
-import { ArrowUpRight } from "lucide-react";
+import {
+  ArrowRight,
+  Boxes,
+  Droplets,
+  FileText,
+  Layers,
+  Printer,
+  ScanLine,
+  Wrench,
+} from "lucide-react";
 import { getTranslations } from "next-intl/server";
 
 import type { Category } from "@/domain/category";
@@ -15,10 +24,35 @@ interface CategoryCardProps {
 }
 
 /**
- * Typographic category card. Categories deliberately have no image: the card
- * relies on the name, optional description, product count and a subtle hover
- * state instead of artwork or decorative image placeholders.
+ * Text and icon category card. Categories deliberately have no image: the card
+ * relies on a clear label, an optional description and the product count so the
+ * catalog stays fast and the product photography keeps the focus.
  */
+function CategoryIcon({ slug }: { slug: string }) {
+  const value = slug.toLowerCase();
+  const className = "size-5";
+
+  if (value.includes("ink") || value.includes("toner")) {
+    return <Droplets className={className} aria-hidden="true" />;
+  }
+  if (value.includes("paper") || value.includes("document")) {
+    return <FileText className={className} aria-hidden="true" />;
+  }
+  if (value.includes("scan")) {
+    return <ScanLine className={className} aria-hidden="true" />;
+  }
+  if (value.includes("part") || value.includes("accessor") || value.includes("spare")) {
+    return <Wrench className={className} aria-hidden="true" />;
+  }
+  if (value.includes("finish") || value.includes("material") || value.includes("filament")) {
+    return <Layers className={className} aria-hidden="true" />;
+  }
+  if (value.includes("print")) {
+    return <Printer className={className} aria-hidden="true" />;
+  }
+  return <Boxes className={className} aria-hidden="true" />;
+}
+
 export async function CategoryCard({
   category,
   productCount,
@@ -33,33 +67,30 @@ export async function CategoryCard({
     <Link
       href={`/products/category/${category.slug}`}
       className={cn(
-        "group flex h-full flex-col justify-between rounded-2xl border border-border bg-card p-6 transition-[border-color,box-shadow,transform] duration-300 hover:-translate-y-1 hover:border-primary/30 hover:shadow-lift",
+        "group flex h-full flex-col rounded-xl border border-border bg-card p-5 transition-[border-color,box-shadow] duration-200 hover:border-primary/40 hover:shadow-soft",
         className,
       )}
     >
-      <div>
-        <div className="flex items-start justify-between gap-3">
-          <h3 className="text-lg leading-snug font-semibold text-foreground transition-colors group-hover:text-primary-text">
-            {name}
-          </h3>
-          <ArrowUpRight
-            className="mt-0.5 size-4 shrink-0 text-muted-foreground opacity-0 transition-[color,opacity] duration-300 group-hover:text-primary-text group-hover:opacity-100"
-            aria-hidden="true"
-          />
-        </div>
-        {description ? (
-          <p className="mt-3 line-clamp-3 text-sm leading-6 text-muted-foreground">
-            {description}
+      <div className="flex items-start gap-3">
+        <span className="flex size-10 shrink-0 items-center justify-center rounded-lg border border-border bg-secondary text-primary-text">
+          <CategoryIcon slug={category.slug} />
+        </span>
+        <div className="min-w-0">
+          <h3 className="text-base leading-snug font-semibold text-foreground">{name}</h3>
+          <p className="mt-1 text-xs font-medium text-muted-foreground">
+            {t("itemCount", { count: productCount })}
           </p>
-        ) : null}
+        </div>
       </div>
 
-      <div className="mt-6 flex items-center justify-between gap-3 border-t border-border/70 pt-4">
-        <span className="text-xs font-medium text-muted-foreground">
-          {t("itemCount", { count: productCount })}
-        </span>
-        <span className="text-xs font-semibold text-primary-text">{t("viewProducts")}</span>
-      </div>
+      {description ? (
+        <p className="mt-4 line-clamp-2 text-sm leading-6 text-muted-foreground">{description}</p>
+      ) : null}
+
+      <span className="mt-auto flex items-center gap-1.5 pt-4 text-sm font-medium text-primary-text">
+        {t("viewProducts")}
+        <ArrowRight className="size-4 transition-transform duration-200 group-hover:translate-x-0.5 rtl:rotate-180 rtl:group-hover:-translate-x-0.5" aria-hidden="true" />
+      </span>
     </Link>
   );
 }

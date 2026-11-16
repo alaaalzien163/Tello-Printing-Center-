@@ -1,20 +1,4 @@
-import {
-  ArrowRight,
-  BadgeCheck,
-  Boxes,
-  CalendarClock,
-  Cpu,
-  Droplets,
-  Factory,
-  FileStack,
-  HandCoins,
-  Layers,
-  MapPin,
-  MessageSquare,
-  Printer,
-  ScanLine,
-} from "lucide-react";
-import Image from "next/image";
+import { ArrowRight, FileText, MapPin, MessageSquare, Package, Printer, Wrench } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 
 import { Button } from "@/components/ui/button";
@@ -31,81 +15,43 @@ export async function AboutSection() {
 
   const services = [
     {
-      key: "printing",
-      icon: Boxes,
-      title: t("services.items.printing.title"),
-      body: t("services.items.printing.description"),
-    },
-    {
-      key: "scanning",
-      icon: ScanLine,
-      title: t("services.items.scanning.title"),
-      body: t("services.items.scanning.description"),
-    },
-    {
-      key: "industrial",
+      key: "equipment",
       icon: Printer,
-      title: t("services.items.industrial.title"),
-      body: t("services.items.industrial.description"),
+      title: t("services.items.equipment.title"),
+      body: t("services.items.equipment.description"),
+    },
+    {
+      key: "supplies",
+      icon: Package,
+      title: t("services.items.supplies.title"),
+      body: t("services.items.supplies.description"),
     },
     {
       key: "documents",
-      icon: FileStack,
+      icon: FileText,
       title: t("services.items.documents.title"),
       body: t("services.items.documents.description"),
     },
-  ] as const;
-
-  const filamentChips = [
-    t("materials.filaments.chips.pla"),
-    t("materials.filaments.chips.petg"),
-    t("materials.filaments.chips.tpu"),
-    t("materials.filaments.chips.abs"),
-    t("materials.filaments.chips.carbon"),
-  ];
-
-  const materialCards = [
     {
-      key: "industrial",
-      icon: Factory,
-      title: t("materials.industrial.title"),
-      body: t("materials.industrial.description"),
-    },
-    {
-      key: "consumables",
-      icon: Droplets,
-      title: t("materials.consumables.title"),
-      body: t("materials.consumables.description"),
+      key: "support",
+      icon: Wrench,
+      title: t("services.items.support.title"),
+      body: t("services.items.support.description"),
     },
   ] as const;
 
   const reasons = [
-    {
-      key: "heritage",
-      icon: CalendarClock,
-      title: t("why.points.heritage.title"),
-      body: t("why.points.heritage.description"),
-    },
-    {
-      key: "technology",
-      icon: Cpu,
-      title: t("why.points.technology.title"),
-      body: t("why.points.technology.description"),
-    },
-    {
-      key: "value",
-      icon: HandCoins,
-      title: t("why.points.value.title"),
-      body: t("why.points.value.description"),
-    },
+    { key: "heritage", title: t("why.points.heritage.title"), body: t("why.points.heritage.description") },
+    { key: "products", title: t("why.points.products.title"), body: t("why.points.products.description") },
+    { key: "support", title: t("why.points.support.title"), body: t("why.points.support.description") },
   ] as const;
 
   return (
-    <section id="about" aria-labelledby="about-title" className="section-space scroll-mt-24">
+    <section id="about" aria-labelledby="about-title" className="section-space scroll-mt-24 border-t border-border/70">
       <div className="container-page">
-        <div className="grid items-center gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16">
+        <div className="grid gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16">
           <div>
-            <span className="eyebrow">{t("eyebrow")}</span>
+            <p className="eyebrow">{t("eyebrow")}</p>
             <h2
               id="about-title"
               className="mt-4 text-3xl font-semibold tracking-tight text-foreground sm:text-4xl"
@@ -130,179 +76,65 @@ export async function AboutSection() {
             </dl>
           </div>
 
-          <div className="relative">
-            <div className="relative overflow-hidden rounded-3xl border border-border/80 bg-brand-black shadow-lift">
-              <div className="relative aspect-[4/3] w-full">
-                <Image
-                  src="/images/about-inspection.svg"
-                  alt={t("imageAlt")}
-                  fill
-                  sizes="(min-width: 1024px) 36rem, 92vw"
-                  className="object-cover"
-                />
-                <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-brand-black/70 via-transparent to-transparent" />
-              </div>
-
-              <div className="absolute start-4 top-4 inline-flex items-center gap-2 rounded-full border border-white/15 bg-brand-black/55 px-3 py-1.5 text-[0.68rem] font-medium text-white backdrop-blur-md">
-                <BadgeCheck className="size-3.5 text-brand-pink-soft" aria-hidden="true" />
-                {t("badge")}
-              </div>
+          <div className="rounded-xl border border-border bg-card p-6 sm:p-8">
+            <p className="eyebrow">{t("story.eyebrow")}</p>
+            <h3 className="mt-3 text-xl font-semibold tracking-tight text-foreground sm:text-2xl">
+              {t("story.title")}
+            </h3>
+            <div className="mt-4 space-y-4 text-sm leading-7 text-muted-foreground md:text-base">
+              <p>{t("story.paragraphs.experience")}</p>
+              <p>{t("story.paragraphs.choice")}</p>
             </div>
-
-            <div className="absolute -bottom-4 end-5 hidden items-center gap-2 rounded-xl border border-border bg-card px-3.5 py-2.5 shadow-soft sm:flex">
+            <p className="mt-6 flex items-center gap-2 border-t border-border pt-4 text-sm font-medium text-foreground">
               <MapPin className="size-4 text-primary-text" aria-hidden="true" />
-              <span className="text-xs font-semibold text-foreground">{t("story.location")}</span>
-            </div>
+              {t("story.location")}
+            </p>
           </div>
         </div>
 
-        <div className="mt-16 overflow-hidden rounded-3xl border border-border bg-card/70 shadow-soft md:mt-20">
-          <div className="relative grid gap-8 p-6 md:p-10 lg:grid-cols-[0.85fr_1.15fr] lg:gap-14">
-            <div
-              className="surface-grid pointer-events-none absolute inset-0 opacity-[0.35] dark:opacity-20"
-              aria-hidden="true"
-            />
-
-            <div className="relative">
-              <span className="eyebrow">{t("story.eyebrow")}</span>
-              <h3 className="mt-3 text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
-                {t("story.title")}
-              </h3>
-            </div>
-
-            <div className="relative space-y-4 border-s border-primary/20 ps-5 md:ps-8">
-              <p className="text-sm leading-7 text-muted-foreground md:text-base">
-                {t("story.paragraphs.experience")}
-              </p>
-              <p className="text-sm leading-7 text-muted-foreground md:text-base">
-                {t("story.paragraphs.choice")}
-              </p>
-            </div>
+        <div className="mt-14 md:mt-16">
+          <div className="max-w-3xl">
+            <p className="eyebrow">{t("services.eyebrow")}</p>
+            <h3 className="mt-3 text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
+              {t("services.title")}
+            </h3>
+            <p className="mt-4 text-sm leading-7 text-muted-foreground md:text-base">
+              {t("services.description")}
+            </p>
           </div>
-        </div>
 
-        <div className="mt-16 md:mt-20">
-          <AboutHeading
-            eyebrow={t("services.eyebrow")}
-            title={t("services.title")}
-            description={t("services.description")}
-          />
-
-          <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {services.map(({ key, icon: Icon, title, body }, index) => (
-              <article
-                key={key}
-                className="group relative overflow-hidden rounded-2xl border border-border bg-card p-6 shadow-soft transition-[border-color,box-shadow] duration-300 hover:border-primary/30 hover:shadow-lift"
-              >
-                <div className="flex items-center justify-between">
-                  <span className="flex size-11 items-center justify-center rounded-xl border border-primary/15 bg-primary/5 text-primary-text">
-                    <Icon className="size-5" aria-hidden="true" />
-                  </span>
-                  <span className="font-mono text-[0.65rem] font-medium tracking-widest text-muted-foreground/70">
-                    {String(index + 1).padStart(2, "0")}
-                  </span>
-                </div>
-                <h4 className="mt-5 text-base font-semibold text-foreground">{title}</h4>
+          <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {services.map(({ key, icon: Icon, title, body }) => (
+              <article key={key} className="rounded-xl border border-border bg-card p-6">
+                <span className="flex size-10 items-center justify-center rounded-lg border border-border bg-secondary text-primary-text">
+                  <Icon className="size-5" aria-hidden="true" />
+                </span>
+                <h4 className="mt-4 text-base font-semibold text-foreground">{title}</h4>
                 <p className="mt-2 text-sm leading-6 text-muted-foreground">{body}</p>
-                <span
-                  className="pointer-events-none absolute inset-x-6 bottom-0 h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100"
-                  aria-hidden="true"
-                />
               </article>
             ))}
           </div>
         </div>
 
-        <div className="mt-16 rounded-3xl border border-border bg-muted/40 p-6 md:mt-20 md:p-10">
-          <div className="grid gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:gap-12">
+        <div className="mt-14 rounded-xl border border-border bg-secondary/60 p-6 md:mt-16 md:p-10">
+          <div className="grid gap-8 lg:grid-cols-[1fr_1.1fr] lg:items-center lg:gap-14">
             <div>
-              <span className="eyebrow">{t("materials.eyebrow")}</span>
+              <p className="eyebrow">{t("why.eyebrow")}</p>
               <h3 className="mt-3 text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
-                {t("materials.title")}
-              </h3>
-              <p className="mt-4 text-sm leading-7 text-muted-foreground md:text-base">
-                {t("materials.description")}
-              </p>
-            </div>
-
-            <div className="grid gap-4">
-              <article className="rounded-2xl border border-border bg-card p-5 shadow-soft">
-                <div className="flex items-start gap-3">
-                  <span className="flex size-9 shrink-0 items-center justify-center rounded-lg border border-primary/15 bg-primary/5 text-primary-text">
-                    <Layers className="size-4" aria-hidden="true" />
-                  </span>
-                  <div>
-                    <h4 className="text-sm font-semibold text-foreground">
-                      {t("materials.filaments.title")}
-                    </h4>
-                    <p className="mt-1.5 text-sm leading-6 text-muted-foreground">
-                      {t("materials.filaments.description")}
-                    </p>
-                    <ul className="mt-3 flex flex-wrap gap-1.5">
-                      {filamentChips.map((chip) => (
-                        <li
-                          key={chip}
-                          className="rounded-full border border-border bg-background px-2.5 py-1 text-[0.7rem] font-medium text-foreground"
-                        >
-                          {chip}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
-              </article>
-
-              <div className="grid gap-4 sm:grid-cols-2">
-                {materialCards.map(({ key, icon: Icon, title, body }) => (
-                  <article
-                    key={key}
-                    className="rounded-2xl border border-border bg-card p-5 shadow-soft"
-                  >
-                    <span className="flex size-9 items-center justify-center rounded-lg border border-primary/15 bg-primary/5 text-primary-text">
-                      <Icon className="size-4" aria-hidden="true" />
-                    </span>
-                    <h4 className="mt-3 text-sm font-semibold text-foreground">{title}</h4>
-                    <p className="mt-1.5 text-sm leading-6 text-muted-foreground">{body}</p>
-                  </article>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="relative mt-16 overflow-hidden rounded-3xl border border-white/10 bg-brand-black p-6 text-white md:mt-20 md:p-10">
-          <div
-            className="surface-grid pointer-events-none absolute inset-0 opacity-20"
-            aria-hidden="true"
-          />
-          <div
-            className="pointer-events-none absolute -end-24 -top-24 size-72 rounded-full bg-brand-primary/10 blur-3xl"
-            aria-hidden="true"
-          />
-
-          <div className="relative grid gap-10 lg:grid-cols-[1fr_1.15fr] lg:items-center lg:gap-16">
-            <div>
-              <span className="eyebrow text-brand-pink-soft">{t("why.eyebrow")}</span>
-              <h3 className="mt-3 text-2xl font-semibold tracking-tight sm:text-3xl">
                 {t("why.title")}
               </h3>
-              <p className="mt-4 max-w-lg text-sm leading-7 text-white/70 md:text-base">
+              <p className="mt-4 max-w-lg text-sm leading-7 text-muted-foreground md:text-base">
                 {t("why.description")}
               </p>
 
-              <div className="mt-7 flex flex-col gap-3 sm:flex-row">
+              <div className="mt-6 flex flex-col gap-3 sm:flex-row">
                 <Button asChild size="lg">
                   <Link href="/contact">
                     <MessageSquare aria-hidden="true" />
                     {t("why.cta")}
                   </Link>
                 </Button>
-                <Button
-                  asChild
-                  size="lg"
-                  variant="outline"
-                  className="border-white/25 bg-white/5 text-white hover:bg-white/10 hover:text-white"
-                >
+                <Button asChild size="lg" variant="outline">
                   <Link href="/products">
                     {t("why.secondaryCta")}
                     <ArrowRight className="rtl:rotate-180" aria-hidden="true" />
@@ -312,18 +144,10 @@ export async function AboutSection() {
             </div>
 
             <ul className="space-y-3">
-              {reasons.map(({ key, icon: Icon, title, body }) => (
-                <li
-                  key={key}
-                  className="flex gap-4 rounded-2xl border border-white/10 bg-white/[0.04] p-4"
-                >
-                  <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-white/10 text-brand-pink-soft">
-                    <Icon className="size-4" aria-hidden="true" />
-                  </span>
-                  <div>
-                    <h4 className="text-sm font-semibold">{title}</h4>
-                    <p className="mt-1 text-sm leading-6 text-white/65">{body}</p>
-                  </div>
+              {reasons.map(({ key, title, body }) => (
+                <li key={key} className="rounded-lg border border-border bg-card p-4">
+                  <h4 className="text-sm font-semibold text-foreground">{title}</h4>
+                  <p className="mt-1 text-sm leading-6 text-muted-foreground">{body}</p>
                 </li>
               ))}
             </ul>
@@ -331,25 +155,5 @@ export async function AboutSection() {
         </div>
       </div>
     </section>
-  );
-}
-
-function AboutHeading({
-  eyebrow,
-  title,
-  description,
-}: {
-  eyebrow: string;
-  title: string;
-  description: string;
-}) {
-  return (
-    <div className="max-w-3xl">
-      <span className="eyebrow">{eyebrow}</span>
-      <h3 className="mt-3 text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
-        {title}
-      </h3>
-      <p className="mt-4 text-sm leading-7 text-muted-foreground md:text-base">{description}</p>
-    </div>
   );
 }

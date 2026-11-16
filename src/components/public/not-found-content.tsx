@@ -8,7 +8,7 @@ export async function NotFoundContent() {
   const t = await getTranslations("notFound");
 
   return (
-    <section className="surface-glow flex min-h-[70vh] items-center">
+    <section className="flex min-h-[70vh] items-center bg-secondary/40">
       <div className="container-page py-16 text-center">
         <span className="mx-auto flex size-14 items-center justify-center rounded-2xl border border-primary/15 bg-primary/5 text-primary-text">
           <Compass className="size-6" aria-hidden="true" />

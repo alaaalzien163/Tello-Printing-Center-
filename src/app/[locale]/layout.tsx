@@ -47,13 +47,13 @@ export async function generateMetadata({ params }: LocaleLayoutProps): Promise<M
       description: t("description"),
       url: `${siteConfig.url}/${locale}`,
       locale: locale === "ar" ? "ar_SA" : "en_US",
-      images: [{ url: "/images/hero-printer.svg", width: 1200, height: 900, alt: t("siteName") }],
+      images: [{ url: "/images/printing-equipment.svg", width: 1000, height: 760, alt: t("siteName") }],
     },
     twitter: {
       card: "summary_large_image",
       title: t("defaultTitle"),
       description: t("description"),
-      images: ["/images/hero-printer.svg"],
+      images: ["/images/printing-equipment.svg"],
     },
     robots: { index: true, follow: true },
     icons: {
