@@ -8,7 +8,7 @@ import { FeaturedProductsSection } from "@/components/public/featured-products-s
 import { HeroSection } from "@/components/public/hero-section";
 import { PrintRequestCta } from "@/components/public/print-request-cta";
 import type { Locale } from "@/i18n/routing";
-import { localizedAlternates } from "@/lib/metadata";
+import { localizedAlternates, pageSocialMetadata } from "@/lib/metadata";
 import { getPublicCatalog } from "@/repositories/public-catalog";
 
 interface HomePageProps {
@@ -21,7 +21,14 @@ export async function generateMetadata({ params }: HomePageProps): Promise<Metad
 
   return {
     title: { absolute: t("defaultTitle") },
+    description: t("description"),
     alternates: localizedAlternates(locale),
+    ...pageSocialMetadata({
+      locale,
+      title: t("defaultTitle"),
+      description: t("description"),
+      siteName: t("siteName"),
+    }),
   };
 }
 

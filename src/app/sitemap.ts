@@ -1,64 +1,14 @@
 import type { MetadataRoute } from "next";
 
 import { siteConfig } from "@/config/site";
-import { defaultLocale, locales } from "@/i18n/routing";
-import { getPublicCategorySlugs, getPublicProductSlugs } from "@/repositories/public-catalog";
-
-const staticPaths = ["", "/products", "/contact"] as const;
-
-function localizedUrl(locale: string, path: string): string {
-  return `${siteConfig.url}/${locale}${path}`;
-}
-
-function languageAlternates(path: string): Record<string, string> {
-  return Object.fromEntries([
-    ...locales.map((locale) => [locale, localizedUrl(locale, path)]),
-    ["x-default", localizedUrl(defaultLocale, path)],
-  ]);
-}
+import { buildSitemapEntries } from "@/lib/sitemap";
+import { getPublicSitemapCatalog } from "@/repositories/public-catalog";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const [productSlugs, categorySlugs] = await Promise.all([
-    getPublicProductSlugs(),
-    getPublicCategorySlugs(),
-  ]);
-  const lastModified = new Date();
+  // Do not swallow a catalog failure here: an empty sitemap would look valid
+  // to crawlers and silently drop every product and category. Let the route
+  // fail so the problem is visible in logs and monitoring.
+  const { categories, products } = await getPublicSitemapCatalog();
 
-  const staticEntries: MetadataRoute.Sitemap = locales.flatMap((locale) =>
-    staticPaths.map((path) => ({
-      url: localizedUrl(locale, path),
-      lastModified,
-      changeFrequency: path === "" ? "weekly" : "monthly",
-      priority: path === "" ? 1 : 0.8,
-      alternates: { languages: languageAlternates(path) },
-    })),
-  );
-
-  const productEntries: MetadataRoute.Sitemap = locales.flatMap((locale) =>
-    productSlugs.map((slug) => {
-      const path = `/products/${slug}`;
-      return {
-        url: localizedUrl(locale, path),
-        lastModified,
-        changeFrequency: "monthly",
-        priority: 0.6,
-        alternates: { languages: languageAlternates(path) },
-      };
-    }),
-  );
-
-  const categoryEntries: MetadataRoute.Sitemap = locales.flatMap((locale) =>
-    categorySlugs.map((slug) => {
-      const path = `/products/category/${slug}`;
-      return {
-        url: localizedUrl(locale, path),
-        lastModified,
-        changeFrequency: "weekly",
-        priority: 0.7,
-        alternates: { languages: languageAlternates(path) },
-      };
-    }),
-  );
-
-  return [...staticEntries, ...categoryEntries, ...productEntries];
+  return buildSitemapEntries({ baseUrl: siteConfig.url, categories, products });
 }

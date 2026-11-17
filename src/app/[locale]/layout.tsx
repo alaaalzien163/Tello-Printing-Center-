@@ -11,6 +11,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { siteConfig } from "@/config/site";
 import { localeDirection, routing } from "@/i18n/routing";
+import { pageSocialMetadata } from "@/lib/metadata";
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
@@ -40,22 +41,14 @@ export async function generateMetadata({ params }: LocaleLayoutProps): Promise<M
     creator: t("siteName"),
     publisher: t("siteName"),
     formatDetection: { telephone: false },
-    openGraph: {
-      type: "website",
+    ...pageSocialMetadata({
+      locale,
+      title: t("defaultTitle"),
+      description: t("description"),
       siteName: t("siteName"),
-      title: t("defaultTitle"),
-      description: t("description"),
-      url: `${siteConfig.url}/${locale}`,
-      locale: locale === "ar" ? "ar_SA" : "en_US",
-      images: [{ url: "/images/printing-equipment.svg", width: 1000, height: 760, alt: t("siteName") }],
-    },
-    twitter: {
-      card: "summary_large_image",
-      title: t("defaultTitle"),
-      description: t("description"),
-      images: ["/images/printing-equipment.svg"],
-    },
-    robots: { index: true, follow: true },
+    }),
+    // No global `index, follow` directive: not-found and preview responses
+    // must not inherit an indexable robots meta tag.
     icons: {
       icon: [{ url: "/icon.svg", type: "image/svg+xml" }],
       shortcut: "/icon.svg",

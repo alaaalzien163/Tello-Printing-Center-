@@ -9,6 +9,8 @@
     "productsDescription": "Browse printers, photocopiers, printing supplies, inks, paper, parts and accessories from Tello Printing Center.",
     "aboutTitle": "About Us",
     "contactTitle": "Contact Us",
+    "contactDescription": "Contact Tello Printing Center about printing equipment, supplies, pricing, availability and after-sales support.",
+    "categoryDescriptionFallback": "Browse {category} products and printing supplies from Tello Printing Center.",
     "adminTitle": "Admin",
     "loginTitle": "Admin Sign In",
     "printRequestTitle": "Submit a Print Request",

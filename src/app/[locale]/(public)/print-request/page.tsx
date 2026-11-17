@@ -5,7 +5,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { PrintRequestForm } from "@/components/public/print-request-form";
 import { SectionHeading } from "@/components/shared/section-heading";
 import type { Locale } from "@/i18n/routing";
-import { localizedAlternates } from "@/lib/metadata";
+import { localizedAlternates, pageSocialMetadata } from "@/lib/metadata";
 
 interface PrintRequestPageProps {
   params: Promise<{ locale: Locale }>;
@@ -16,11 +16,20 @@ export async function generateMetadata({
 }: PrintRequestPageProps): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "metadata" });
+  const title = t("printRequestTitle");
+  const description = t("printRequestDescription");
 
   return {
-    title: t("printRequestTitle"),
-    description: t("printRequestDescription"),
+    title,
+    description,
     alternates: localizedAlternates(locale, "/print-request"),
+    ...pageSocialMetadata({
+      locale,
+      title,
+      description,
+      path: "/print-request",
+      siteName: t("siteName"),
+    }),
   };
 }
 

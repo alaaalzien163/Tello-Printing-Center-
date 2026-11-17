@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Link } from "@/i18n/navigation";
 import { routing, type Locale } from "@/i18n/routing";
 import { pickLocalized } from "@/lib/format";
-import { localizedAlternates } from "@/lib/metadata";
+import { localizedAlternates, pageSocialMetadata } from "@/lib/metadata";
 import {
   getPublicCategoryBySlug,
   getPublicCategorySlugs,
@@ -29,25 +29,35 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params }: CategoryPageProps): Promise<Metadata> {
   const { locale, slug } = await params;
-  const category = await getPublicCategoryBySlug(slug);
+  const [category, tMeta, tProducts] = await Promise.all([
+    getPublicCategoryBySlug(slug),
+    getTranslations({ locale, namespace: "metadata" }),
+    getTranslations({ locale, namespace: "products" }),
+  ]);
 
   if (!category) {
-    const t = await getTranslations({ locale, namespace: "products" });
-    return { title: t("categoryNotFoundTitle"), robots: { index: false, follow: false } };
+    return {
+      title: tProducts("categoryNotFoundTitle"),
+      robots: { index: false, follow: false },
+    };
   }
 
   const name = pickLocalized(category.name, locale);
-  const description = pickLocalized(category.description, locale).slice(0, 160);
+  const description =
+    pickLocalized(category.description, locale).slice(0, 160) ||
+    tMeta("categoryDescriptionFallback", { category: name });
 
   return {
     title: name,
     description,
     alternates: localizedAlternates(locale, `/products/category/${category.slug}`),
-    openGraph: {
-      type: "website",
+    ...pageSocialMetadata({
+      locale,
       title: name,
       description,
-    },
+      path: `/products/category/${category.slug}`,
+      siteName: tMeta("siteName"),
+    }),
   };
 }
 
