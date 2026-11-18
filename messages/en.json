@@ -84,7 +84,7 @@
   },
   "hero": {
     "eyebrow": "Printers · Copiers · Printing supplies",
-    "title": "Printing equipment and supplies for your business.",
+    "title": "Printing equipment and supplies .",
     "description": "Tello Printing Center supplies printers, photocopiers, inks, paper and spare parts, and provides professional document printing services in Damascus. Browse the catalog, compare options and order with our team.",
     "primaryCta": "Explore products",
     "secondaryCta": "Contact us",
@@ -124,50 +124,6 @@
         "choice": "From a single desktop printer to a full office copier, inks, paper and spare parts, we stock the essentials and order the rest. We also print documents, drawings and plans for customers who need a reliable print partner."
       },
       "location": "Damascus — Amin Al-Rihani Street"
-    },
-    "services": {
-      "eyebrow": "What we offer",
-      "title": "Equipment, supplies and printing services in one place.",
-      "description": "A straightforward range for offices, print shops, engineers and institutions.",
-      "items": {
-        "equipment": {
-          "title": "Printers & photocopiers",
-          "description": "Desktop printers, multifunction copiers and professional printing machines."
-        },
-        "supplies": {
-          "title": "Inks, paper & parts",
-          "description": "Original and compatible consumables, paper, spare parts and accessories."
-        },
-        "documents": {
-          "title": "Document printing",
-          "description": "Everyday printing, copying, scanning and large-format plan printing."
-        },
-        "support": {
-          "title": "Sales & after-sales support",
-          "description": "Help choosing the right machine, delivery and practical technical support."
-        }
-      }
-    },
-    "why": {
-      "eyebrow": "Why Tello",
-      "title": "Why customers choose Tello Printing Center.",
-      "description": "A local store with a long track record, clear product advice and dependable follow-up.",
-      "points": {
-        "heritage": {
-          "title": "Serving Damascus since 1985",
-          "description": "Four decades of experience with office and professional printing equipment."
-        },
-        "products": {
-          "title": "Products that fit the job",
-          "description": "We match machines and supplies to your volume, budget and printing needs."
-        },
-        "support": {
-          "title": "Support after the sale",
-          "description": "Consumables, spare parts and practical help when you need it."
-        }
-      },
-      "cta": "Talk to our team",
-      "secondaryCta": "Explore products"
     }
   },
   "categories": {

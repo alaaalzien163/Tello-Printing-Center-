@@ -1,3 +1,5 @@
+import { randomUUID } from "node:crypto";
+
 import { NextResponse } from "next/server";
 
 import {
@@ -16,26 +18,34 @@ const RATE_LIMIT_SECRET_VARIABLE = "PRINT_REQUEST_RATE_LIMIT_SECRET";
 function errorResponse(
   error: string,
   status: number,
+  correlationId: string,
   retryAfterSeconds?: number,
 ) {
-  return NextResponse.json(
-    { error },
-    {
-      status,
-      headers: retryAfterSeconds
-        ? { "Retry-After": String(Math.ceil(retryAfterSeconds)) }
-        : undefined,
-    },
-  );
+  const headers: Record<string, string> = {
+    "x-request-id": correlationId,
+  };
+
+  if (retryAfterSeconds) {
+    headers["Retry-After"] = String(Math.ceil(retryAfterSeconds));
+  }
+
+  return NextResponse.json({ error }, { status, headers });
 }
 
 export async function POST(request: Request) {
+  const correlationId = randomUUID();
   let body: unknown;
 
   try {
     body = await request.json();
   } catch {
-    return errorResponse("INVALID_INPUT", 400);
+    console.warn("[print-requests] request failed", {
+      correlationId,
+      operation: "parse-body",
+      code: "INVALID_INPUT",
+      status: 400,
+    });
+    return errorResponse("INVALID_INPUT", 400, correlationId);
   }
 
   const ip = getClientIp(request.headers);
@@ -46,13 +56,15 @@ export async function POST(request: Request) {
     if (isProduction()) {
       // Names and reasons only: never log the value or any request data.
       console.error("[print-requests] configuration unavailable", {
+        correlationId,
+        operation: "rate-limit-config",
         reason:
           rateLimit.issue === "too-short"
             ? "invalid-environment-variable"
             : "missing-environment-variable",
         variable: RATE_LIMIT_SECRET_VARIABLE,
       });
-      return errorResponse("NOT_CONFIGURED", 503);
+      return errorResponse("NOT_CONFIGURED", 503, correlationId);
     }
     // Local development and Playwright use a stable non-secret salt so the
     // rate limiter still works without production configuration.
@@ -61,16 +73,37 @@ export async function POST(request: Request) {
 
   const result = await initiatePrintRequest(body, {
     clientHash: hashClientIp(ip, secret),
+    correlationId,
   });
 
   if (!result.ok) {
-    return errorResponse(result.code, result.status, result.retryAfterSeconds);
+    // The service logs the failing operation; this line ties it to the HTTP
+    // response without including customer data, secrets or stack traces.
+    const logFailure =
+      result.status >= 500 ? console.error : console.warn;
+    logFailure("[print-requests] request failed", {
+      correlationId,
+      code: result.code,
+      status: result.status,
+      ...(result.retryAfterSeconds
+        ? { retryAfterSeconds: result.retryAfterSeconds }
+        : {}),
+    });
+    return errorResponse(
+      result.code,
+      result.status,
+      correlationId,
+      result.retryAfterSeconds,
+    );
   }
 
-  return NextResponse.json({
-    requestId: result.requestId,
-    requestNumber: result.requestNumber,
-    status: result.status,
-    uploads: result.uploads,
-  });
+  return NextResponse.json(
+    {
+      requestId: result.requestId,
+      requestNumber: result.requestNumber,
+      status: result.status,
+      uploads: result.uploads,
+    },
+    { headers: { "x-request-id": correlationId } },
+  );
 }

@@ -54,7 +54,33 @@ describe("POST /api/public/print-requests", () => {
 
     expect(response.status).toBe(503);
     expect(response.headers.get("retry-after")).toBeNull();
+    expect(response.headers.get("x-request-id")).toMatch(
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/,
+    );
     await expect(response.json()).resolves.toEqual({ error: "SERVICE_UNAVAILABLE" });
+  });
+
+  it("logs a safe failure category with the response correlation id", async () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    initiatePrintRequest.mockResolvedValue({
+      ok: false,
+      code: "INVALID_INPUT",
+      status: 400,
+    });
+
+    const response = await submit();
+    const correlationId = response.headers.get("x-request-id");
+
+    expect(response.status).toBe(400);
+    expect(correlationId).toBeTruthy();
+    expect(warn).toHaveBeenCalledWith(
+      "[print-requests] request failed",
+      expect.objectContaining({
+        correlationId,
+        code: "INVALID_INPUT",
+        status: 400,
+      }),
+    );
   });
 
   it("returns 429 with the retry window when the rate limiter denies", async () => {
@@ -84,6 +110,7 @@ describe("POST /api/public/print-requests", () => {
     const response = await submit();
 
     expect(response.status).toBe(200);
+    expect(response.headers.get("x-request-id")).toBeTruthy();
     await expect(response.json()).resolves.toEqual({
       requestId: "22222222-2222-4222-8222-222222222222",
       requestNumber: "1001",
@@ -102,10 +129,15 @@ describe("POST /api/public/print-requests", () => {
     expect(response.status).toBe(503);
     await expect(response.json()).resolves.toEqual({ error: "NOT_CONFIGURED" });
     expect(initiatePrintRequest).not.toHaveBeenCalled();
-    expect(spy).toHaveBeenCalledWith("[print-requests] configuration unavailable", {
-      reason: "missing-environment-variable",
-      variable: "PRINT_REQUEST_RATE_LIMIT_SECRET",
-    });
+    expect(spy).toHaveBeenCalledWith(
+      "[print-requests] configuration unavailable",
+      expect.objectContaining({
+        operation: "rate-limit-config",
+        reason: "missing-environment-variable",
+        variable: "PRINT_REQUEST_RATE_LIMIT_SECRET",
+        correlationId: expect.any(String),
+      }),
+    );
 
     const logged = JSON.stringify(spy.mock.calls);
     expect(logged).not.toContain("Layla Haddad");
@@ -121,10 +153,15 @@ describe("POST /api/public/print-requests", () => {
 
     expect(response.status).toBe(503);
     await expect(response.json()).resolves.toEqual({ error: "NOT_CONFIGURED" });
-    expect(spy).toHaveBeenCalledWith("[print-requests] configuration unavailable", {
-      reason: "invalid-environment-variable",
-      variable: "PRINT_REQUEST_RATE_LIMIT_SECRET",
-    });
+    expect(spy).toHaveBeenCalledWith(
+      "[print-requests] configuration unavailable",
+      expect.objectContaining({
+        operation: "rate-limit-config",
+        reason: "invalid-environment-variable",
+        variable: "PRINT_REQUEST_RATE_LIMIT_SECRET",
+        correlationId: expect.any(String),
+      }),
+    );
     expect(JSON.stringify(spy.mock.calls)).not.toContain("short-value");
   });
 

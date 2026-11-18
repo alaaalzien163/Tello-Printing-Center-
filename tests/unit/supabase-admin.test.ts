@@ -53,6 +53,25 @@ describe("getPrivilegedSupabaseClient", () => {
     expect(logged).not.toContain("sb_publishable_example_key");
   });
 
+  it("includes the request correlation id in configuration logs", () => {
+    vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "https://example.supabase.co");
+    vi.stubEnv(
+      "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY",
+      "sb_publishable_example_key",
+    );
+    vi.stubEnv("SUPABASE_SECRET_KEY", "");
+    const spy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+    expect(getPrivilegedSupabaseClient("correlation-123")).toBeNull();
+    expect(spy).toHaveBeenCalledWith(
+      "[supabase] privileged client unavailable",
+      expect.objectContaining({
+        correlationId: "correlation-123",
+        details: ["SUPABASE_SECRET_KEY"],
+      }),
+    );
+  });
+
   it("rejects a malformed Supabase URL and names the variable", () => {
     vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "not-a-url");
     vi.stubEnv(

@@ -12,22 +12,51 @@ test.describe("about section", () => {
     await expect(
       about.getByRole("heading", { level: 3, name: en.about.story.title }),
     ).toBeVisible();
-    await expect(
-      about.getByRole("heading", { level: 3, name: en.about.services.title }),
-    ).toBeVisible();
-
-    for (const service of Object.values(en.about.services.items)) {
-      await expect(
-        about.getByRole("heading", { level: 4, name: service.title }),
-      ).toBeVisible();
-    }
-
     await expect(about.getByText(en.about.story.location)).toBeVisible();
-    await expect(
-      about.getByRole("heading", { level: 3, name: en.about.why.title }),
-    ).toBeVisible();
-    await expect(about.getByRole("link", { name: en.about.why.cta })).toBeVisible();
-    await expect(about.getByRole("link", { name: en.about.why.secondaryCta })).toBeVisible();
+  });
+
+  test("does not render the removed service and why blocks", async ({ page }) => {
+    for (const locale of ["en", "ar"] as const) {
+      await page.goto(`/${locale}`);
+      const about = page.locator("#about");
+
+      await expect(
+        about.getByText(
+          "Equipment, supplies and printing services in one place.",
+        ),
+      ).toHaveCount(0);
+      await expect(
+        about.getByText("Why customers choose Tello Printing Center."),
+      ).toHaveCount(0);
+      await expect(about.getByText("Serving Damascus since 1985")).toHaveCount(0);
+      await expect(about.getByText("Why Tello")).toHaveCount(0);
+    }
+  });
+
+  test("footer links stay localized, relative and free of the removed Services entry", async ({
+    page,
+  }) => {
+    for (const locale of ["en", "ar"] as const) {
+      await page.goto(`/${locale}`);
+      const footer = page.locator("footer");
+
+      const hrefs = await footer
+        .locator("a")
+        .evaluateAll((links) => links.map((link) => link.getAttribute("href") ?? ""));
+      const internalHrefs = hrefs.filter(
+        (href) => !/^(https?:|mailto:|tel:)/.test(href),
+      );
+
+      expect(internalHrefs.every((href) => href.startsWith("/"))).toBe(true);
+      expect(internalHrefs.some((href) => href.includes("localhost"))).toBe(false);
+      expect(internalHrefs).toContain(`/${locale}`);
+      expect(internalHrefs).toContain(`/${locale}/products`);
+
+      const servicesLabel = locale === "en" ? "Services" : "الخدمات";
+      await expect(
+        footer.getByRole("link", { name: servicesLabel, exact: true }),
+      ).toHaveCount(0);
+    }
   });
 
   test("renders the Arabic profile in RTL", async ({ page }) => {
@@ -40,15 +69,7 @@ test.describe("about section", () => {
     await expect(
       about.getByRole("heading", { level: 3, name: ar.about.story.title }),
     ).toBeVisible();
-
-    for (const service of Object.values(ar.about.services.items)) {
-      await expect(
-        about.getByRole("heading", { level: 4, name: service.title }),
-      ).toBeVisible();
-    }
-
     await expect(about.getByText(ar.about.story.location)).toBeVisible();
-    await expect(about.getByRole("link", { name: ar.about.why.cta })).toBeVisible();
   });
 
   test("loads without console or page errors in both locales", async ({ page }) => {

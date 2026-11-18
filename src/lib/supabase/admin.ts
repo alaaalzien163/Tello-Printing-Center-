@@ -11,8 +11,16 @@ const CONFIG_SCOPE = "[supabase] privileged client unavailable";
  * Values, keys and customer data are never included, so this is safe to log in
  * production where it is needed to diagnose a 503 NOT_CONFIGURED response.
  */
-function reportConfigurationIssue(reason: string, details: string[]): void {
-  console.error(CONFIG_SCOPE, { reason, details });
+function reportConfigurationIssue(
+  reason: string,
+  details: string[],
+  correlationId?: string,
+): void {
+  console.error(CONFIG_SCOPE, {
+    ...(correlationId ? { correlationId } : {}),
+    reason,
+    details,
+  });
 }
 
 /**
@@ -22,7 +30,9 @@ function reportConfigurationIssue(reason: string, details: string[]): void {
  * prefixed with `NEXT_PUBLIC_`. Import this module only from server routes,
  * server actions and server components.
  */
-export function getPrivilegedSupabaseClient(): SupabaseClient | null {
+export function getPrivilegedSupabaseClient(
+  correlationId?: string,
+): SupabaseClient | null {
   const rawUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim();
   const rawPublishableKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY?.trim();
   const secret = process.env.SUPABASE_SECRET_KEY?.trim();
@@ -32,22 +42,32 @@ export function getPrivilegedSupabaseClient(): SupabaseClient | null {
     if (!rawUrl) missing.push("NEXT_PUBLIC_SUPABASE_URL");
     if (!rawPublishableKey) missing.push("NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY");
     if (!secret) missing.push("SUPABASE_SECRET_KEY");
-    reportConfigurationIssue("missing-environment-variable", missing);
+    reportConfigurationIssue(
+      "missing-environment-variable",
+      missing,
+      correlationId,
+    );
     return null;
   }
 
   const config = getSupabaseConfig();
   if (!config) {
-    reportConfigurationIssue("invalid-environment-variable", [
-      "NEXT_PUBLIC_SUPABASE_URL",
-    ]);
+    reportConfigurationIssue(
+      "invalid-environment-variable",
+      ["NEXT_PUBLIC_SUPABASE_URL"],
+      correlationId,
+    );
     return null;
   }
 
   if (secret === config.publishableKey || secret.startsWith("sb_publishable_")) {
-    reportConfigurationIssue("publishable-key-used-as-secret", [
-      "SUPABASE_SECRET_KEY must be a server secret key (sb_secret_... or legacy service_role), not the publishable key.",
-    ]);
+    reportConfigurationIssue(
+      "publishable-key-used-as-secret",
+      [
+        "SUPABASE_SECRET_KEY must be a server secret key (sb_secret_... or legacy service_role), not the publishable key.",
+      ],
+      correlationId,
+    );
     return null;
   }
 

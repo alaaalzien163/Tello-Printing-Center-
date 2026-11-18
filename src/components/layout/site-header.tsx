@@ -22,14 +22,14 @@ import { cn } from "@/lib/utils";
 
 interface NavItem {
   href: string;
-  labelKey: "home" | "products" | "printRequest" | "about" | "contact";
+  labelKey: "home" |"about"  | "products" | "printRequest" | "contact";
 }
 
 const navItems: NavItem[] = [
   { href: "/", labelKey: "home" },
+  { href: "/#about", labelKey: "about" },
   { href: "/products", labelKey: "products" },
   { href: "/print-request", labelKey: "printRequest" },
-  { href: "/#about", labelKey: "about" },
   { href: "/contact", labelKey: "contact" },
 ];
 
@@ -74,9 +74,9 @@ export function SiteHeader() {
         <div className="hidden items-center gap-1 lg:flex">
           <ThemeSwitcher />
           <LocaleSwitcher />
-          <Button asChild size="sm" className="ms-2 h-9 px-4">
+          {/* <Button asChild size="sm" className="ms-2 h-9 px-4">
             <Link href="/products">{t("products")}</Link>
-          </Button>
+          </Button> */}
         </div>
 
         <div className="flex items-center gap-0.5 lg:hidden">

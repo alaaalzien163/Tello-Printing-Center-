@@ -408,6 +408,26 @@ browser. Add the migrations, the bucket (private) and the variables above to ena
 feature. Without them the page still renders and the API answers with a clear "not
 configured" error.
 
+### Vercel environment scopes for print requests
+
+The public API needs every variable below in **both** the Production and Preview scopes.
+Vercel keeps those scopes separate, so a Preview deployment can return `503
+NOT_CONFIGURED` even when Production works.
+
+| Variable | Scope | Notes |
+| --- | --- | --- |
+| `NEXT_PUBLIC_SUPABASE_URL` | Production + Preview | Supabase project URL. |
+| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Production + Preview | Publishable key only. |
+| `SUPABASE_SECRET_KEY` | Production + Preview | Server-only `sb_secret_...` key; never `NEXT_PUBLIC_*`. |
+| `PRINT_REQUEST_RATE_LIMIT_SECRET` | Production + Preview | Server-only HMAC salt, at least 16 characters. |
+
+When `PRINT_REQUEST_RATE_LIMIT_SECRET` is missing or too short, the route returns `503`
+with `{ "error": "NOT_CONFIGURED" }` and logs the variable name plus the response
+`x-request-id`. When the privileged Supabase client is not configured, the service logs
+the missing variable names and the same correlation id. Values, customer data, tokens and
+authorization headers are never logged. Add the variable in Vercel, then redeploy; an
+existing deployment does not pick up a new environment variable automatically.
+
 The signed TUS route verifies each `x-signature` token against the exact bucket and object
 path before writing, so uploads succeed with the private bucket's administrator-only
 policies. No anonymous `insert` policy on `storage.objects` is needed or wanted.

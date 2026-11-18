@@ -9,7 +9,7 @@ import {
 } from "@/schemas/print-request";
 import type { ValidationTranslator } from "@/schemas/shared";
 import { getPrivilegedSupabaseClient } from "@/lib/supabase/admin";
-import { logSupabaseError } from "@/lib/supabase/errors";
+import { formatSupabaseError } from "@/lib/supabase/errors";
 
 import { inspectFileSignature, signatureSampleSize } from "./file-signatures";
 import {
@@ -67,11 +67,15 @@ export type InitiateResult = InitiateSuccess | InitiateFailure;
 
 export interface InitiateContext {
   clientHash: string;
+  /** Correlates every log line produced while handling one HTTP request. */
+  correlationId?: string;
 }
 
 export interface ServiceDependencies {
   supabase?: SupabaseClient | null;
   now?: () => Date;
+  /** Correlates every log line produced while handling one HTTP request. */
+  correlationId?: string;
 }
 
 interface RequestRow {
@@ -100,8 +104,15 @@ function failure(
   return { ok: false, code, status, ...extra };
 }
 
-function log(scope: string, error: unknown): void {
-  logSupabaseError(`[print-requests] ${scope}`, error);
+function log(
+  scope: string,
+  error: unknown,
+  correlationId?: string,
+): void {
+  console.error(`[print-requests] ${scope}`, {
+    ...(correlationId ? { correlationId } : {}),
+    ...formatSupabaseError(error),
+  });
 }
 
 function requestNumberOf(row: RequestRow): string {
@@ -111,12 +122,20 @@ function requestNumberOf(row: RequestRow): string {
 async function signedUploadFor(
   supabase: SupabaseClient,
   path: string,
+  correlationId?: string,
 ): Promise<{ token: string; signedUrl: string } | null> {
   const { data, error } = await supabase.storage
     .from(PRINT_REQUEST_BUCKET)
     .createSignedUploadUrl(path, { upsert: true });
 
-  if (error || !data?.token) return null;
+  if (error || !data?.token) {
+    log(
+      "storage signed upload failed",
+      error ?? { message: "createSignedUploadUrl returned no token" },
+      correlationId,
+    );
+    return null;
+  }
   return { token: data.token, signedUrl: data.signedUrl ?? "" };
 }
 
@@ -127,6 +146,7 @@ type LookupResult =
 async function findRequestByToken(
   supabase: SupabaseClient,
   clientToken: string,
+  correlationId?: string,
 ): Promise<LookupResult> {
   const { data, error } = await supabase
     .from("print_requests")
@@ -135,7 +155,7 @@ async function findRequestByToken(
     .maybeSingle();
 
   if (error) {
-    log("idempotency lookup failed", error);
+    log("idempotency lookup failed", error, correlationId);
     // Failing closed keeps the retry guarantee: a transient database error
     // must not turn a repeated submission into a duplicate request.
     return { ok: false };
@@ -147,6 +167,7 @@ async function findRequestByToken(
 async function resumeRequest(
   supabase: SupabaseClient,
   request: RequestRow,
+  correlationId?: string,
 ): Promise<InitiateResult> {
   if (request.status !== "uploading") {
     return {
@@ -166,14 +187,18 @@ async function resumeRequest(
     .order("created_at", { ascending: true });
 
   if (error) {
-    log("resume file lookup failed", error);
+    log("resume file lookup failed", error, correlationId);
     return failure("STORAGE", 502);
   }
 
   const uploads: UploadAuthorization[] = [];
 
   for (const row of (data ?? []) as FileRow[]) {
-    const signed = await signedUploadFor(supabase, row.storage_path);
+    const signed = await signedUploadFor(
+      supabase,
+      row.storage_path,
+      correlationId,
+    );
     if (!signed) return failure("STORAGE", 502);
 
     uploads.push({
@@ -246,6 +271,7 @@ type RateLimitOutcome =
 async function consumeRateLimit(
   supabase: SupabaseClient,
   clientHash: string,
+  correlationId?: string,
 ): Promise<RateLimitOutcome> {
   const { data, error } = await supabase.rpc("consume_print_request_rate_limit", {
     p_ip_hash: clientHash,
@@ -257,7 +283,7 @@ async function consumeRateLimit(
     // Fail closed in every environment: an infrastructure failure must never
     // let a submission bypass the abuse budget. The caller answers 503 without
     // creating a request or minting upload tokens.
-    log("rate limit RPC failed", error);
+    log("rate limit RPC failed", error, correlationId);
     return { status: "unavailable" };
   }
 
@@ -265,6 +291,7 @@ async function consumeRateLimit(
   if (!parsed.ok) {
     // Log only shape metadata; never log the IP hash or the RPC payload.
     console.warn("[print-requests] rate limit RPC returned an unexpected shape", {
+      ...(correlationId ? { correlationId } : {}),
       isArray: Array.isArray(data),
       rowType: Array.isArray(data) ? typeof data[0] : typeof data,
     });
@@ -283,6 +310,7 @@ async function consumeRateLimit(
 export async function cleanupAbandonedPrintRequests(
   supabase: SupabaseClient,
   now: Date = new Date(),
+  correlationId?: string,
 ): Promise<number> {
   const cutoff = new Date(now.getTime() - ABANDONED_REQUEST_AGE_MS).toISOString();
 
@@ -294,13 +322,13 @@ export async function cleanupAbandonedPrintRequests(
     .limit(5);
 
   if (error) {
-    log("abandoned lookup failed", error);
+    log("abandoned lookup failed", error, correlationId);
     return 0;
   }
 
   let removed = 0;
   for (const row of (data ?? []) as Array<{ id: string }>) {
-    const ok = await removeRequestObjects(supabase, row.id);
+    const ok = await removeRequestObjects(supabase, row.id, correlationId);
     if (!ok) continue;
 
     const { error: deleteError } = await supabase
@@ -309,7 +337,7 @@ export async function cleanupAbandonedPrintRequests(
       .eq("id", row.id);
 
     if (deleteError) {
-      log("abandoned delete failed", deleteError);
+      log("abandoned delete failed", deleteError, correlationId);
       continue;
     }
     removed += 1;
@@ -326,6 +354,7 @@ export async function cleanupAbandonedPrintRequests(
 export async function removeRequestObjects(
   supabase: SupabaseClient,
   requestId: string,
+  correlationId?: string,
 ): Promise<boolean> {
   const { data, error } = await supabase
     .from("print_request_files")
@@ -333,7 +362,7 @@ export async function removeRequestObjects(
     .eq("request_id", requestId);
 
   if (error) {
-    log("file path lookup failed", error);
+    log("file path lookup failed", error, correlationId);
     return false;
   }
 
@@ -348,7 +377,7 @@ export async function removeRequestObjects(
     .remove(paths);
 
   if (removeError) {
-    log("storage remove failed", removeError);
+    log("storage remove failed", removeError, correlationId);
     return false;
   }
 
@@ -360,13 +389,22 @@ export async function initiatePrintRequest(
   context: InitiateContext,
   dependencies: ServiceDependencies = {},
 ): Promise<InitiateResult> {
+  const correlationId = context.correlationId;
+
   // An explicit `null` dependency means "no client configured" in tests; only
   // an omitted dependency should fall back to the server-only client.
   const supabase =
     dependencies.supabase !== undefined
       ? dependencies.supabase
-      : getPrivilegedSupabaseClient();
-  if (!supabase) return failure("NOT_CONFIGURED", 503);
+      : getPrivilegedSupabaseClient(correlationId);
+  if (!supabase) {
+    log(
+      "privileged supabase client unavailable",
+      { message: "print request storage and database are not configured" },
+      correlationId,
+    );
+    return failure("NOT_CONFIGURED", 503);
+  }
 
   const parsed = createPrintRequestSchema(schemaTranslator).safeParse(raw);
   if (!parsed.success) return failure("INVALID_INPUT", 400);
@@ -379,11 +417,21 @@ export async function initiatePrintRequest(
   if (fileIssue) return failure("INVALID_INPUT", 400, { retryAfterSeconds: 0 });
 
   // Resuming an in-progress request must not consume the abuse budget again.
-  const existing = await findRequestByToken(supabase, values.submissionId);
+  const existing = await findRequestByToken(
+    supabase,
+    values.submissionId,
+    correlationId,
+  );
   if (!existing.ok) return failure("SERVICE_UNAVAILABLE", 503);
-  if (existing.request) return resumeRequest(supabase, existing.request);
+  if (existing.request) {
+    return resumeRequest(supabase, existing.request, correlationId);
+  }
 
-  const rate = await consumeRateLimit(supabase, context.clientHash);
+  const rate = await consumeRateLimit(
+    supabase,
+    context.clientHash,
+    correlationId,
+  );
   if (rate.status === "unavailable") {
     return failure("SERVICE_UNAVAILABLE", 503);
   }
@@ -394,9 +442,13 @@ export async function initiatePrintRequest(
   }
 
   try {
-    await cleanupAbandonedPrintRequests(supabase, dependencies.now?.() ?? new Date());
+    await cleanupAbandonedPrintRequests(
+      supabase,
+      dependencies.now?.() ?? new Date(),
+      correlationId,
+    );
   } catch (error) {
-    log("abandoned cleanup skipped", error);
+    log("abandoned cleanup skipped", error, correlationId);
   }
 
   const status: "pending" | "uploading" =
@@ -421,10 +473,16 @@ export async function initiatePrintRequest(
 
   if (createError || !created) {
     if (createError?.code === "23505") {
-      const raced = await findRequestByToken(supabase, values.submissionId);
-      if (raced.ok && raced.request) return resumeRequest(supabase, raced.request);
+      const raced = await findRequestByToken(
+        supabase,
+        values.submissionId,
+        correlationId,
+      );
+      if (raced.ok && raced.request) {
+        return resumeRequest(supabase, raced.request, correlationId);
+      }
     }
-    log("request insert failed", createError);
+    log("request insert failed", createError, correlationId);
     return failure("UNKNOWN", 500);
   }
 
@@ -436,7 +494,7 @@ export async function initiatePrintRequest(
     const fileId = randomUUID();
     const path = buildPrintRequestStoragePath(request.id, fileId, extension);
 
-    const signed = await signedUploadFor(supabase, path);
+    const signed = await signedUploadFor(supabase, path, correlationId);
     if (!signed) {
       await supabase.from("print_requests").delete().eq("id", request.id);
       return failure("STORAGE", 502);
@@ -454,7 +512,7 @@ export async function initiatePrintRequest(
     });
 
     if (fileError) {
-      log("file metadata insert failed", fileError);
+      log("file metadata insert failed", fileError, correlationId);
       await supabase.storage.from(PRINT_REQUEST_BUCKET).remove([path]);
       await supabase.from("print_requests").delete().eq("id", request.id);
       return failure("STORAGE", 502);
@@ -495,6 +553,7 @@ async function readObjectSignature(
   supabase: SupabaseClient,
   path: string,
   extension: string,
+  correlationId?: string,
 ): Promise<"ok" | "mismatch" | "unverified"> {
   try {
     const { data, error } = await supabase.storage
@@ -522,7 +581,7 @@ async function readObjectSignature(
     const result = inspectFileSignature(`file.${extension}`, bytes);
     return result === "ok" ? "ok" : "mismatch";
   } catch (error) {
-    log("signature check failed", error);
+    log("signature check failed", error, correlationId);
     return "unverified";
   }
 }
@@ -538,11 +597,19 @@ export async function completePrintRequest(
   raw: unknown,
   dependencies: ServiceDependencies = {},
 ): Promise<CompleteResult> {
+  const correlationId = dependencies.correlationId;
   const supabase =
     dependencies.supabase !== undefined
       ? dependencies.supabase
-      : getPrivilegedSupabaseClient();
-  if (!supabase) return failure("NOT_CONFIGURED", 503) as CompleteResult;
+      : getPrivilegedSupabaseClient(correlationId);
+  if (!supabase) {
+    log(
+      "privileged supabase client unavailable",
+      { message: "print request storage and database are not configured" },
+      correlationId,
+    );
+    return failure("NOT_CONFIGURED", 503) as CompleteResult;
+  }
 
   const input = raw as Partial<CompleteInput> | null;
   if (
@@ -563,7 +630,7 @@ export async function completePrintRequest(
     .maybeSingle();
 
   if (requestError) {
-    log("completion lookup failed", requestError);
+    log("completion lookup failed", requestError, correlationId);
     return failure("UNKNOWN", 500) as CompleteResult;
   }
 
@@ -582,7 +649,7 @@ export async function completePrintRequest(
     .order("created_at", { ascending: true });
 
   if (fileError) {
-    log("completion file lookup failed", fileError);
+    log("completion file lookup failed", fileError, correlationId);
     return failure("UNKNOWN", 500) as CompleteResult;
   }
 
@@ -594,7 +661,10 @@ export async function completePrintRequest(
       .eq("id", request.id)
       .eq("status", "uploading");
 
-    if (error) return failure("UNKNOWN", 500) as CompleteResult;
+    if (error) {
+      log("request finalize without files failed", error, correlationId);
+      return failure("UNKNOWN", 500) as CompleteResult;
+    }
     return { ok: true, requestNumber: requestNumberOf(request) };
   }
 
@@ -603,7 +673,7 @@ export async function completePrintRequest(
     .list(`requests/${request.id}`, { limit: 100 });
 
   if (listError) {
-    log("storage listing failed", listError);
+    log("storage listing failed", listError, correlationId);
     return failure("UPLOAD_INCOMPLETE", 409) as CompleteResult;
   }
 
@@ -629,6 +699,7 @@ export async function completePrintRequest(
       supabase,
       file.storage_path,
       file.file_extension,
+      correlationId,
     );
 
     // Only a positive signature check counts. A mismatch or an unreadable
@@ -656,7 +727,7 @@ export async function completePrintRequest(
     .in("id", fileIds);
 
   if (markError) {
-    log("file completion update failed", markError);
+    log("file completion update failed", markError, correlationId);
     return failure("UNKNOWN", 500) as CompleteResult;
   }
 
@@ -671,7 +742,7 @@ export async function completePrintRequest(
     .eq("status", "uploading");
 
   if (finalizeError) {
-    log("request finalize failed", finalizeError);
+    log("request finalize failed", finalizeError, correlationId);
     return failure("UNKNOWN", 500) as CompleteResult;
   }
 

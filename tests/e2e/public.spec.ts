@@ -193,6 +193,32 @@ test.describe("public website", () => {
     await expect(page.getByRole("heading", { name: en.notFound.title })).toBeVisible();
     await expect(page.getByRole("link", { name: en.notFound.backHome })).toBeVisible();
   });
+
+  test("returns a real 404 for the removed services routes", async ({ page }) => {
+    // The whole /services segment is gone, so both the former overview pages and
+    // any former detail URL fall through to the localized not-found route.
+    const removedPaths = [
+      "/en/services",
+      "/ar/services",
+      "/en/services/3d-printing",
+      "/ar/services/3d-printing",
+      "/en/services/uv-printing",
+      "/ar/services/document-printing",
+    ];
+
+    for (const path of removedPaths) {
+      const response = await page.goto(path);
+      const messages = path.startsWith("/ar") ? ar : en;
+
+      expect(response?.status()).toBe(404);
+      await expect(
+        page.getByRole("heading", { name: messages.notFound.title }),
+      ).toBeVisible();
+      await expect(
+        page.getByRole("link", { name: messages.notFound.backHome }),
+      ).toBeVisible();
+    }
+  });
 });
 
 test.describe("mobile navigation", () => {
