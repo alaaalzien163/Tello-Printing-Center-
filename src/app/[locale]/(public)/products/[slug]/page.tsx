@@ -11,6 +11,7 @@ import type { Locale } from "@/i18n/routing";
 import { routing } from "@/i18n/routing";
 import { pickLocalized } from "@/lib/format";
 import { localizedAlternates, pageSocialMetadata } from "@/lib/metadata";
+import { buildProductMetaDescription } from "@/lib/seo-description";
 import { buildProductJsonLd, serializeJsonLd } from "@/lib/structured-data";
 import {
   getPublicCatalog,
@@ -46,9 +47,11 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
   }
 
   const name = pickLocalized(product.name, locale);
-  const description =
-    pickLocalized(product.description, locale).slice(0, 160) ||
-    tMeta("productFallbackDescription");
+  const description = buildProductMetaDescription(
+    product.description,
+    locale,
+    tMeta("productFallbackDescription"),
+  );
   const image = product.image.url.trim()
     ? {
         url: product.image.url,

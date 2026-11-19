@@ -5,6 +5,7 @@ import {
   DEFAULT_OG_IMAGE_HEIGHT,
   DEFAULT_OG_IMAGE_PATH,
   DEFAULT_OG_IMAGE_WIDTH,
+  localizedAlternates,
   pageSocialMetadata,
 } from "@/lib/metadata";
 
@@ -20,6 +21,27 @@ function firstImage(metadata: ReturnType<typeof pageSocialMetadata>): SocialImag
   const list = Array.isArray(images) ? images : images ? [images] : [];
   return list[0] as SocialImage;
 }
+
+describe("localizedAlternates", () => {
+  it("keeps canonical, English, Arabic and x-default URLs aligned", () => {
+    expect(localizedAlternates("en", "/products/m1-pro")).toEqual({
+      canonical: "/en/products/m1-pro",
+      languages: {
+        en: "/en/products/m1-pro",
+        ar: "/ar/products/m1-pro",
+        "x-default": "/ar/products/m1-pro",
+      },
+    });
+    expect(localizedAlternates("ar", "/products/category/printers")).toEqual({
+      canonical: "/ar/products/category/printers",
+      languages: {
+        en: "/en/products/category/printers",
+        ar: "/ar/products/category/printers",
+        "x-default": "/ar/products/category/printers",
+      },
+    });
+  });
+});
 
 describe("pageSocialMetadata", () => {
   it("gives every page its own absolute Open Graph URL", () => {

@@ -11,6 +11,7 @@ import { Link } from "@/i18n/navigation";
 import { routing, type Locale } from "@/i18n/routing";
 import { pickLocalized } from "@/lib/format";
 import { localizedAlternates, pageSocialMetadata } from "@/lib/metadata";
+import { buildCategoryMetaDescription } from "@/lib/seo-description";
 import {
   getPublicCategoryBySlug,
   getPublicCategorySlugs,
@@ -43,9 +44,12 @@ export async function generateMetadata({ params }: CategoryPageProps): Promise<M
   }
 
   const name = pickLocalized(category.name, locale);
-  const description =
-    pickLocalized(category.description, locale).slice(0, 160) ||
-    tMeta("categoryDescriptionFallback", { category: name });
+  const description = buildCategoryMetaDescription({
+    name: category.name,
+    description: category.description,
+    locale,
+    fallback: tMeta("categoryDescriptionFallback", { category: name }),
+  });
 
   return {
     title: name,

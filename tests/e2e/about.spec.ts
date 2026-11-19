@@ -9,10 +9,14 @@ test.describe("about section", () => {
 
     const about = page.locator("#about");
     await expect(about.getByRole("heading", { level: 2 })).toHaveText(en.about.title);
-    await expect(
-      about.getByRole("heading", { level: 3, name: en.about.story.title }),
-    ).toBeVisible();
-    await expect(about.getByText(en.about.story.location)).toBeVisible();
+    await expect(about.getByText(en.about.description)).toBeVisible();
+
+    // The story card was removed from the customized layout, so the profile
+    // assertions cover the content that is actually rendered: the heading,
+    // description and the three facts.
+    await expect(about.getByText(en.about.facts.foundedValue, { exact: true })).toBeVisible();
+    await expect(about.getByText(en.about.facts.locationValue, { exact: true })).toBeVisible();
+    await expect(about.getByText(en.about.facts.experienceValue, { exact: true })).toBeVisible();
   });
 
   test("does not render the removed service and why blocks", async ({ page }) => {
@@ -50,7 +54,10 @@ test.describe("about section", () => {
       expect(internalHrefs.every((href) => href.startsWith("/"))).toBe(true);
       expect(internalHrefs.some((href) => href.includes("localhost"))).toBe(false);
       expect(internalHrefs).toContain(`/${locale}`);
-      expect(internalHrefs).toContain(`/${locale}/products`);
+      // The footer link columns were removed from the customized layout, so the
+      // only remaining footer link is the localized brand link. Keep checking
+      // that no removed Services route is advertised.
+      expect(internalHrefs.some((href) => href.includes("/services"))).toBe(false);
 
       const servicesLabel = locale === "en" ? "Services" : "الخدمات";
       await expect(
@@ -66,10 +73,10 @@ test.describe("about section", () => {
 
     const about = page.locator("#about");
     await expect(about.getByRole("heading", { level: 2 })).toHaveText(ar.about.title);
-    await expect(
-      about.getByRole("heading", { level: 3, name: ar.about.story.title }),
-    ).toBeVisible();
-    await expect(about.getByText(ar.about.story.location)).toBeVisible();
+    await expect(about.getByText(ar.about.description)).toBeVisible();
+    await expect(about.getByText(ar.about.facts.foundedValue, { exact: true })).toBeVisible();
+    await expect(about.getByText(ar.about.facts.locationValue, { exact: true })).toBeVisible();
+    await expect(about.getByText(ar.about.facts.experienceValue, { exact: true })).toBeVisible();
   });
 
   test("loads without console or page errors in both locales", async ({ page }) => {

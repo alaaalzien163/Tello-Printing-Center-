@@ -18,6 +18,9 @@ test.describe("technical SEO", () => {
       "/en/foo/bar/baz",
       "/ar/foo/bar/baz",
       "/en/about",
+      "/en/services",
+      "/ar/services",
+      "/en/services/printing",
       "/en/products/m1-pro/extra",
     ];
 
@@ -136,6 +139,45 @@ test.describe("technical SEO", () => {
       expect(ogImage, entry.path).not.toContain("/images/printing-equipment.svg");
       expect(ogLocale, entry.path).toBe(entry.locale);
     }
+  });
+
+  test("product meta descriptions are normalized and never contain raw line breaks", async ({
+    page,
+  }) => {
+    const product = await getFirstPublishedProduct(page);
+    if (!product) {
+      test.skip(true, "No published products in Supabase.");
+      return;
+    }
+
+    await page.goto(product.href);
+
+    const description = await metaContent(page, 'meta[name="description"]');
+    expect(description).toBeTruthy();
+    expect(description).not.toContain("\n");
+    expect(description).not.toContain("\r");
+    expect(description).not.toContain("\t");
+    expect(description).toBe(description!.replace(/\s+/g, " ").trim());
+    expect(description!.length).toBeLessThanOrEqual(160);
+    expect(description).not.toMatch(/\s…$/);
+  });
+
+  test("Arabic category metadata falls back to Arabic text instead of English", async ({
+    page,
+  }) => {
+    const category = await getFirstCategory(page);
+    if (!category) {
+      test.skip(true, "No published categories in Supabase.");
+      return;
+    }
+
+    await page.goto(`/ar/products/category/${category.slug}`);
+
+    const description = await metaContent(page, 'meta[name="description"]');
+    expect(description).toBeTruthy();
+    expect(description).toMatch(/[\u0600-\u06ff]/);
+    expect(description).not.toContain("\n");
+    expect(description!.length).toBeLessThanOrEqual(160);
   });
 
   test("category pages emit complete Open Graph fields", async ({ page }) => {

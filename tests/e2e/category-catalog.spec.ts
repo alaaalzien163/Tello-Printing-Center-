@@ -8,6 +8,7 @@ import {
   getFirstProductInCategory,
   getFirstProductWithVariants,
   getFirstPublishedProduct,
+  getProductWithDistinctVariants,
 } from "./catalog-helpers";
 
 function pathPattern(path: string): RegExp {
@@ -395,9 +396,14 @@ test.describe("category-first catalog", () => {
   });
 
   test("switches variant image, price, label and WhatsApp message", async ({ page }) => {
-    const product = await getFirstProductWithVariants(page);
+    // Variants may share a price or image in the real catalog, so use a product
+    // whose first two variants genuinely differ in every field under test.
+    const product = await getProductWithDistinctVariants(page);
     if (!product) {
-      test.skip(true, "No published product has at least two variants.");
+      test.skip(
+        true,
+        "No published product has two variants with distinct labels, prices and images.",
+      );
       return;
     }
 
