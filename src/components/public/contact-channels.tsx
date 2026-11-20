@@ -93,8 +93,6 @@ export async function ContactChannels() {
           />
         </div>
       ) : null}
-
-      <p className="mt-auto pt-8 text-xs leading-5 text-muted-foreground">{t("responseTime")}</p>
     </div>
   );
 }
