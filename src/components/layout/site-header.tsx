@@ -73,12 +73,12 @@ export function SiteHeader() {
         <div className="hidden items-center gap-1 lg:flex">
           <ThemeSwitcher />
           <LocaleSwitcher />
-          <Link
+          {/* <Link
             href="/admin/login"
             className="rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2"
           >
             {t("login")}
-          </Link>
+          </Link> */}
           {/* <Button asChild size="sm" className="ms-2 h-9 px-4">
             <Link href="/products">{t("products")}</Link>
           </Button> */}
@@ -117,7 +117,7 @@ export function SiteHeader() {
                   </SheetClose>
                 ))}
                 <div className="my-1 border-t border-border" role="presentation" />
-                <SheetClose asChild>
+                {/* <SheetClose asChild>
                   <Link
                     href="/admin/login"
                     aria-current={isActivePath(pathname, "/admin/login") ? "page" : undefined}
@@ -128,7 +128,7 @@ export function SiteHeader() {
                   >
                     {t("login")}
                   </Link>
-                </SheetClose>
+                </SheetClose> */}
               </nav>
               <div className="mt-auto border-t border-border p-4">
                 <SheetClose asChild>
