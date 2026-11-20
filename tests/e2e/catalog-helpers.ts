@@ -138,11 +138,12 @@ function assetUrl(src: string | null): string {
 }
 
 /**
- * Finds the first published product whose first two variants differ in label,
- * price and image. Catalog variants may legitimately share a price or image,
- * so the switching test must not assume every pair differs.
+ * Finds the first published product whose first two variants differ in label
+ * and image, so the switching test can observe those changes. Prices may
+ * legitimately be identical in the real catalog; price correctness is covered
+ * with controlled fixtures in the unit tests.
  */
-export async function getProductWithDistinctVariants(
+export async function getProductWithSwitchableVariants(
   page: Page,
 ): Promise<PublishedProduct | null> {
   const categories = await getPublishedCategories(page);
@@ -185,14 +186,11 @@ export async function getProductWithDistinctVariants(
 
       const firstLabel = (await first.getByTestId("variant-label").innerText()).trim();
       const secondLabel = (await second.getByTestId("variant-label").innerText()).trim();
-      const firstPrice = (await first.getByTestId("variant-price").innerText()).trim();
-      const secondPrice = (await second.getByTestId("variant-price").innerText()).trim();
       const firstSrc = assetUrl(await firstImage.getAttribute("src"));
       const secondSrc = assetUrl(await secondImage.getAttribute("src"));
 
       if (
         firstLabel !== secondLabel &&
-        firstPrice !== secondPrice &&
         firstSrc &&
         secondSrc &&
         firstSrc !== secondSrc

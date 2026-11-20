@@ -8,15 +8,17 @@ test.describe("about section", () => {
     await page.goto("/en");
 
     const about = page.locator("#about");
-    await expect(about.getByRole("heading", { level: 2 })).toHaveText(en.about.title);
-    await expect(about.getByText(en.about.description)).toBeVisible();
+    const heading = about.getByRole("heading", { level: 2 });
+    await expect(heading).toHaveText(en.about.title);
 
-    // The story card was removed from the customized layout, so the profile
-    // assertions cover the content that is actually rendered: the heading,
-    // description and the three facts.
-    await expect(about.getByText(en.about.facts.foundedValue, { exact: true })).toBeVisible();
-    await expect(about.getByText(en.about.facts.locationValue, { exact: true })).toBeVisible();
-    await expect(about.getByText(en.about.facts.experienceValue, { exact: true })).toBeVisible();
+    // The customized layout shows the centered heading and centered description;
+    // the story card and facts are intentionally not rendered.
+    const description = about.getByText(en.about.description);
+    await expect(description).toBeVisible();
+    await expect(description).toHaveCSS("text-align", "center");
+    await expect(about.getByText(en.about.facts.foundedValue, { exact: true })).toHaveCount(0);
+    await expect(about.getByText(en.about.facts.locationValue, { exact: true })).toHaveCount(0);
+    await expect(about.getByText(en.about.facts.experienceValue, { exact: true })).toHaveCount(0);
   });
 
   test("does not render the removed service and why blocks", async ({ page }) => {
@@ -73,10 +75,14 @@ test.describe("about section", () => {
 
     const about = page.locator("#about");
     await expect(about.getByRole("heading", { level: 2 })).toHaveText(ar.about.title);
-    await expect(about.getByText(ar.about.description)).toBeVisible();
-    await expect(about.getByText(ar.about.facts.foundedValue, { exact: true })).toBeVisible();
-    await expect(about.getByText(ar.about.facts.locationValue, { exact: true })).toBeVisible();
-    await expect(about.getByText(ar.about.facts.experienceValue, { exact: true })).toBeVisible();
+
+    // The centered heading and description are the content that remains.
+    const description = about.getByText(ar.about.description);
+    await expect(description).toBeVisible();
+    await expect(description).toHaveCSS("text-align", "center");
+    await expect(about.getByText(ar.about.facts.foundedValue, { exact: true })).toHaveCount(0);
+    await expect(about.getByText(ar.about.facts.locationValue, { exact: true })).toHaveCount(0);
+    await expect(about.getByText(ar.about.facts.experienceValue, { exact: true })).toHaveCount(0);
   });
 
   test("loads without console or page errors in both locales", async ({ page }) => {
