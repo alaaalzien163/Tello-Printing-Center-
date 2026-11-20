@@ -167,7 +167,9 @@ test.describe("brand tokens", () => {
     expect(dark.buttonBackground).toBe(RGB.primary);
   });
 
-  test("logo in the public header opens the localized admin sign-in page", async ({ page }) => {
+  test("login link in the public header opens the localized admin sign-in page", async ({
+    page,
+  }) => {
     await page.goto("/ar");
     await settle(page);
 

@@ -32,10 +32,10 @@ test.describe("public website", () => {
     await expect(page.getByRole("heading", { level: 1 })).toHaveText(en.hero.title);
   });
 
-  test("opens the localized admin sign-in page from the header logo", async ({ page }) => {
+  test("navigates to the localized homepage from the header logo", async ({ page }) => {
     await page.goto("/en/products");
 
-    const logo = page.locator("header").getByRole("link", { name: en.nav.adminLogin });
+    const logo = page.locator("header").getByRole("link", { name: en.common.logoAlt });
     const image = logo.getByRole("img");
     await expect(image).toHaveAttribute("alt", en.common.logoAlt);
     await expect(image).toHaveAttribute("src", /logo-tello\.png/);
@@ -45,18 +45,39 @@ test.describe("public website", () => {
     ).toBeGreaterThan(0);
 
     await logo.click();
+    await expect(page).toHaveURL(/\/en$/);
+    await expect(page.locator("html")).toHaveAttribute("dir", "ltr");
+
+    await page.goto("/ar/products");
+    const arabicLogo = page.locator("header").getByRole("link", { name: ar.common.logoAlt });
+    await expect(arabicLogo.getByRole("img")).toHaveAttribute("alt", ar.common.logoAlt);
+
+    await arabicLogo.click();
+    await expect(page).toHaveURL(/\/ar$/);
+    await expect(page.locator("html")).toHaveAttribute("dir", "rtl");
+  });
+
+  test("opens the localized admin sign-in page from the header login link", async ({ page }) => {
+    await page.goto("/en/products");
+    await page
+      .locator("header")
+      .getByRole("link", { name: en.nav.login, exact: true })
+      .click();
     await expect(page).toHaveURL(/\/en\/admin\/login$/);
     await expect(
       page.getByRole("heading", { level: 1, name: en.admin.login.title }),
     ).toBeVisible();
 
     await page.goto("/ar/products");
-    const arabicLogo = page.locator("header").getByRole("link", { name: ar.nav.adminLogin });
-    await expect(arabicLogo.getByRole("img")).toHaveAttribute("alt", ar.common.logoAlt);
-
-    await arabicLogo.click();
+    await page
+      .locator("header")
+      .getByRole("link", { name: ar.nav.login, exact: true })
+      .click();
     await expect(page).toHaveURL(/\/ar\/admin\/login$/);
     await expect(page.locator("html")).toHaveAttribute("dir", "rtl");
+    await expect(
+      page.getByRole("heading", { level: 1, name: ar.admin.login.title }),
+    ).toBeVisible();
   });
 
   test("does not render the former industry trust bar", async ({ page }) => {
@@ -234,5 +255,27 @@ test.describe("mobile navigation", () => {
     await dialog.getByRole("link", { name: en.nav.products }).first().click();
     await expect(page).toHaveURL(/\/en\/products$/);
     await expect(page.getByRole("heading", { level: 1 })).toHaveText(en.products.title);
+  });
+
+  test("opens the localized login page from the menu", async ({ page }) => {
+    await page.goto("/en");
+    await page.getByRole("button", { name: en.nav.openMenu }).click();
+    const englishDialog = page.getByRole("dialog", { name: en.nav.menuTitle });
+    await englishDialog.getByRole("link", { name: en.nav.login, exact: true }).click();
+    await expect(page).toHaveURL(/\/en\/admin\/login$/);
+
+    await page.goto("/ar");
+    await page.getByRole("button", { name: ar.nav.openMenu }).click();
+    const arabicDialog = page.getByRole("dialog", { name: ar.nav.menuTitle });
+    await expect(arabicDialog).toBeVisible();
+
+    const menuOverflow = await page.evaluate(
+      () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
+    );
+    expect(menuOverflow).toBeLessThanOrEqual(1);
+
+    await arabicDialog.getByRole("link", { name: ar.nav.login, exact: true }).click();
+    await expect(page).toHaveURL(/\/ar\/admin\/login$/);
+    await expect(page.locator("html")).toHaveAttribute("dir", "rtl");
   });
 });

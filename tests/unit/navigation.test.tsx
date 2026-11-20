@@ -95,28 +95,39 @@ describe("ThemeSwitcher", () => {
 });
 
 describe("SiteHeader", () => {
-  it("links the brand logo to the admin sign-in page", () => {
+  it("links the brand logo to the localized homepage", () => {
     render(
       <NextIntlClientProvider locale="en" messages={enMessages}>
         <SiteHeader />
       </NextIntlClientProvider>,
     );
 
-    const logo = screen.getByRole("link", { name: enMessages.nav.adminLogin });
-    expect(logo).toHaveAttribute("href", "/admin/login");
+    const logo = screen.getByRole("link", { name: enMessages.common.logoAlt });
+    expect(logo).toHaveAttribute("href", "/");
     expect(within(logo).getByRole("img", { name: enMessages.common.logoAlt })).toBeInTheDocument();
   });
 
-  it("links the Arabic brand logo to the localized admin sign-in page", () => {
+  it("links the Arabic brand logo to the localized homepage", () => {
     render(
       <NextIntlClientProvider locale="ar" messages={arMessages}>
         <SiteHeader />
       </NextIntlClientProvider>,
     );
 
-    const logo = screen.getByRole("link", { name: arMessages.nav.adminLogin });
-    expect(logo).toHaveAttribute("href", "/admin/login");
+    const logo = screen.getByRole("link", { name: arMessages.common.logoAlt });
+    expect(logo).toHaveAttribute("href", "/");
     expect(within(logo).getByRole("img", { name: arMessages.common.logoAlt })).toBeInTheDocument();
+  });
+
+  it("exposes a separate login link on desktop", () => {
+    render(
+      <NextIntlClientProvider locale="en" messages={enMessages}>
+        <SiteHeader />
+      </NextIntlClientProvider>,
+    );
+
+    const login = screen.getByRole("link", { name: enMessages.nav.login });
+    expect(login).toHaveAttribute("href", "/admin/login");
   });
 
   it("opens the mobile menu and exposes localized navigation links", async () => {
@@ -134,6 +145,7 @@ describe("SiteHeader", () => {
     expect(dialog).toBeInTheDocument();
     expect(withinDialog(dialog, enMessages.nav.products)).toBeInTheDocument();
     expect(withinDialog(dialog, enMessages.nav.contact)).toBeInTheDocument();
+    expect(withinDialog(dialog, enMessages.nav.login)).toHaveAttribute("href", "/admin/login");
   });
 
   it("renders Arabic menu labels when the locale is Arabic", async () => {
@@ -149,6 +161,7 @@ describe("SiteHeader", () => {
 
     const dialog = await screen.findByRole("dialog", { name: arMessages.nav.menuTitle });
     expect(withinDialog(dialog, arMessages.nav.products)).toBeInTheDocument();
+    expect(withinDialog(dialog, arMessages.nav.login)).toHaveAttribute("href", "/admin/login");
   });
 });
 
