@@ -8,6 +8,7 @@ import {
   getFirstProductInCategory,
   getFirstProductWithVariants,
   getFirstPublishedProduct,
+  getProductWithSwitchableVariants,
 } from "./catalog-helpers";
 
 function pathPattern(path: string): RegExp {
@@ -395,9 +396,16 @@ test.describe("category-first catalog", () => {
   });
 
   test("switches variant image, price, label and WhatsApp message", async ({ page }) => {
-    const product = await getFirstProductWithVariants(page);
+    // Variants may share a price or image in the real catalog, so pick a
+    // product whose first two variants genuinely differ in label and image.
+    // Whether identical variant prices render correctly is covered with
+    // controlled fixtures in tests/unit/product-detail.test.tsx.
+    const product = await getProductWithSwitchableVariants(page);
     if (!product) {
-      test.skip(true, "No published product has at least two variants.");
+      test.skip(
+        true,
+        "No published product has two variants with distinct labels and images.",
+      );
       return;
     }
 
@@ -418,6 +426,12 @@ test.describe("category-first catalog", () => {
     const initialPrice = (await page.getByTestId("product-price").innerText()).trim();
     const initialLabel = (await page.getByTestId("selected-variant").innerText()).trim();
 
+    const first = options.nth(0);
+    const firstPrice = (await first.getByTestId("variant-price").innerText()).trim();
+
+    // The headline price always reflects the variant that is currently selected.
+    expect(initialPrice).toBe(firstPrice);
+
     const second = options.nth(1);
     const secondLabel = (await second.getByTestId("variant-label").innerText()).trim();
     const secondPrice = (await second.getByTestId("variant-price").innerText()).trim();
@@ -434,7 +448,6 @@ test.describe("category-first catalog", () => {
       .toBe(secondThumb);
     expect(assetUrl(await mainImage.getAttribute("src"))).not.toBe(initialSrc);
     expect(secondLabel).not.toBe(initialLabel);
-    expect(secondPrice).not.toBe(initialPrice);
 
     const whatsapp = page.locator('a[href*="wa.me/"]').first();
     if ((await whatsapp.count()) > 0) {

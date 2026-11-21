@@ -1,4 +1,4 @@
-import { ArrowRight, Boxes, MessageSquare, Printer, Wrench } from "lucide-react";
+import { ArrowRight, Boxes , Printer, Wrench } from "lucide-react";
 import Image from "next/image";
 import { getTranslations } from "next-intl/server";
 
@@ -50,12 +50,12 @@ export async function HeroSection() {
                 <ArrowRight className="rtl:rotate-180" aria-hidden="true" />
               </Link>
             </Button>
-            <Button asChild variant="outline" size="lg">
+            {/* <Button asChild variant="outline" size="lg">
               <Link href="/contact">
                 <MessageSquare aria-hidden="true" />
                 {t("secondaryCta")}
               </Link>
-            </Button>
+            </Button> */}
           </div>
 
           <ul className="mt-10 grid gap-5 border-t border-border pt-6 sm:grid-cols-3">

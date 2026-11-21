@@ -10,7 +10,9 @@ import { absoluteUrl } from "@/config/site";
 import type { Locale } from "@/i18n/routing";
 import { routing } from "@/i18n/routing";
 import { pickLocalized } from "@/lib/format";
-import { localizedAlternates } from "@/lib/metadata";
+import { localizedAlternates, pageSocialMetadata } from "@/lib/metadata";
+import { buildProductMetaDescription } from "@/lib/seo-description";
+import { buildProductJsonLd, serializeJsonLd } from "@/lib/structured-data";
 import {
   getPublicCatalog,
   getPublicProductBySlug,
@@ -31,32 +33,44 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params }: ProductPageProps): Promise<Metadata> {
   const { locale, slug } = await params;
-  const product = await getPublicProductBySlug(slug);
+  const [product, tMeta, tProducts] = await Promise.all([
+    getPublicProductBySlug(slug),
+    getTranslations({ locale, namespace: "metadata" }),
+    getTranslations({ locale, namespace: "products" }),
+  ]);
 
   if (!product) {
-    const t = await getTranslations({ locale, namespace: "products" });
-    return { title: t("notFoundTitle"), robots: { index: false, follow: false } };
+    return {
+      title: tProducts("notFoundTitle"),
+      robots: { index: false, follow: false },
+    };
   }
 
   const name = pickLocalized(product.name, locale);
-  const description = pickLocalized(product.description, locale).slice(0, 160);
+  const description = buildProductMetaDescription(
+    product.description,
+    locale,
+    tMeta("productFallbackDescription"),
+  );
+  const image = product.image.url.trim()
+    ? {
+        url: product.image.url,
+        alt: pickLocalized(product.image.alt, locale) || name,
+      }
+    : null;
 
   return {
     title: name,
     description,
     alternates: localizedAlternates(locale, `/products/${product.slug}`),
-    openGraph: {
-      type: "website",
+    ...pageSocialMetadata({
+      locale,
       title: name,
       description,
-      url: `${absoluteUrl(`/${locale}/products/${product.slug}`)}`,
-      images: [
-        {
-          url: product.image.url,
-          alt: pickLocalized(product.image.alt, locale),
-        },
-      ],
-    },
+      path: `/products/${product.slug}`,
+      siteName: tMeta("siteName"),
+      image,
+    }),
   };
 }
 
@@ -95,24 +109,12 @@ export default async function ProductPage({ params }: ProductPageProps) {
     { label: name },
   ];
 
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "Product",
-    name,
-    description,
-    sku: product.sku,
-    image: [absoluteUrl(product.image.url)],
-    category: categoryName,
-    offers: {
-      "@type": "Offer",
-      url: absoluteUrl(`/${locale}/products/${product.slug}`),
-      priceCurrency: product.currency,
-      price: product.price,
-      availability: product.active
-        ? "https://schema.org/InStock"
-        : "https://schema.org/OutOfStock",
-    },
-  };
+  const jsonLd = buildProductJsonLd({
+    product,
+    locale,
+    url: absoluteUrl(`/${locale}/products/${product.slug}`),
+    categoryName,
+  });
 
   const specs = [
     { label: t("sku"), value: product.sku },
@@ -124,7 +126,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
     <article>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(jsonLd) }}
       />
 
       <div className="border-b border-border/70 bg-muted/30">

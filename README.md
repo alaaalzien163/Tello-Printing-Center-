@@ -93,11 +93,42 @@ never invents a phone number, email, address or social URL.
 | `SUPABASE_SECRET_KEY`                | Server-only Supabase secret key for the print-request API. Never public. |
 | `PRINT_REQUEST_RATE_LIMIT_SECRET`    | Server-only HMAC salt (16+ chars) for the IP rate limiter.               |
 
-`NEXT_PUBLIC_SITE_URL` defaults to `http://localhost:3000` when absent or invalid.
+`NEXT_PUBLIC_SITE_URL` is optional. The canonical origin used for canonicals, Open Graph,
+JSON-LD, the sitemap, `robots.txt` and WhatsApp messages is resolved per deployment:
+
+| Deployment                        | Canonical origin                                          |
+| --------------------------------- | --------------------------------------------------------- |
+| Local development (`npm run dev`) | `http://localhost:3000`                                   |
+| Local production build (`npm run build` + `npm run start`) | `https://www.telloprintingcenter.com` |
+| Vercel Preview (`VERCEL_ENV=preview`) | `NEXT_PUBLIC_SITE_URL`, otherwise `https://$VERCEL_URL` |
+| Vercel Production (`VERCEL_ENV=production`) | `https://www.telloprintingcenter.com`          |
+
+The origin is resolved once in `next.config.ts` and inlined as
+`NEXT_PUBLIC_RESOLVED_SITE_URL` so server rendering and client hydration always agree. A
+Production build fails when `NEXT_PUBLIC_SITE_URL` is anything other than the canonical
+Production origin; a Preview build fails when it points at the Production origin, an
+`http://` origin or localhost. Never set `NEXT_PUBLIC_SITE_URL` to the Production origin in
+Preview-scoped environment variables.
 
 > Only the publishable key belongs in `NEXT_PUBLIC_*` variables. The `service_role` key and
 > other secrets must never be added to the frontend, `.env.example` or the repository.
 > `.env.local` is gitignored.
+
+### Search indexing and Vercel settings
+
+- `/` returns a permanent `308` redirect to `/ar`; `/en` and `/ar` both keep HTTP 200.
+- Production `robots.txt` allows public content, disallows `/api/` and the admin routes,
+  and advertises `https://www.telloprintingcenter.com/sitemap.xml`.
+- Preview `robots.txt` is `Disallow: /` and advertises no sitemap.
+- `src/proxy.ts` sends `X-Robots-Tag: noindex` on every response whose host is not
+  `www.telloprintingcenter.com`, so Preview aliases, staging domains and raw Vercel hosts
+  cannot be indexed. The canonical Production host is never marked `noindex`.
+- Admin pages keep their own `noindex, nofollow` metadata.
+- Unknown public routes return a real HTTP 404 with the localized not-found page.
+
+Vercel also marks Preview deployments `noindex` itself. Keep **Deployment Protection**
+(Vercel Authentication) enabled for Preview, keep the Production domain attached only to
+the Production branch, and never submit Preview URLs to Search Console.
 
 Optional end-to-end fixtures and opt-in tests, all read from `.env.local`:
 
@@ -121,6 +152,7 @@ Optional end-to-end fixtures and opt-in tests, all read from `.env.local`:
 | `npm test`          | Run Vitest unit and component tests once.              |
 | `npm run test:watch`| Run Vitest in watch mode.                              |
 | `npm run e2e`       | Run Playwright end-to-end tests.                       |
+| `npm run og:image`  | Regenerate `public/images/og-default.png` (1200×630).  |
 
 Before the first Playwright run, install the browser:
 
@@ -375,6 +407,26 @@ key must be an `sb_secret_...` key (never the publishable key) and is never sent
 browser. Add the migrations, the bucket (private) and the variables above to enable the
 feature. Without them the page still renders and the API answers with a clear "not
 configured" error.
+
+### Vercel environment scopes for print requests
+
+The public API needs every variable below in **both** the Production and Preview scopes.
+Vercel keeps those scopes separate, so a Preview deployment can return `503
+NOT_CONFIGURED` even when Production works.
+
+| Variable | Scope | Notes |
+| --- | --- | --- |
+| `NEXT_PUBLIC_SUPABASE_URL` | Production + Preview | Supabase project URL. |
+| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Production + Preview | Publishable key only. |
+| `SUPABASE_SECRET_KEY` | Production + Preview | Server-only `sb_secret_...` key; never `NEXT_PUBLIC_*`. |
+| `PRINT_REQUEST_RATE_LIMIT_SECRET` | Production + Preview | Server-only HMAC salt, at least 16 characters. |
+
+When `PRINT_REQUEST_RATE_LIMIT_SECRET` is missing or too short, the route returns `503`
+with `{ "error": "NOT_CONFIGURED" }` and logs the variable name plus the response
+`x-request-id`. When the privileged Supabase client is not configured, the service logs
+the missing variable names and the same correlation id. Values, customer data, tokens and
+authorization headers are never logged. Add the variable in Vercel, then redeploy; an
+existing deployment does not pick up a new environment variable automatically.
 
 The signed TUS route verifies each `x-signature` token against the exact bucket and object
 path before writing, so uploads succeed with the private bucket's administrator-only

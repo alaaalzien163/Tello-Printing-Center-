@@ -1,20 +1,21 @@
 import type { LocalizedText } from "@/domain/common";
-
-const FALLBACK_SITE_URL = "http://localhost:3000";
+import { normalizeHttpOrigin, resolveSiteUrl } from "@/config/site-url";
 
 function readPublicEnv(value: string | undefined): string | null {
   const trimmed = value?.trim();
   return trimmed ? trimmed : null;
 }
 
-function normalizeSiteUrl(value: string | undefined): string {
-  const candidate = readPublicEnv(value) ?? FALLBACK_SITE_URL;
-  try {
-    const url = new URL(candidate);
-    return url.origin.replace(/\/$/, "");
-  } catch {
-    return FALLBACK_SITE_URL;
-  }
+/**
+ * `next.config.ts` resolves the deployment origin once at build time and
+ * inlines it as `NEXT_PUBLIC_RESOLVED_SITE_URL`. Reading that value keeps
+ * server rendering and client hydration on the same origin, which matters for
+ * Preview deployments where `VERCEL_URL` is not available in the browser.
+ */
+function resolveConfiguredSiteUrl(): string {
+  const inlined = readPublicEnv(process.env.NEXT_PUBLIC_RESOLVED_SITE_URL);
+  const normalized = inlined ? normalizeHttpOrigin(inlined) : null;
+  return normalized ?? resolveSiteUrl();
 }
 
 function isPublicHttpUrl(value: string): boolean {
@@ -52,7 +53,7 @@ const contactAddress: LocalizedText | null =
 
 export const siteConfig = {
   name: "Tello Printing Center",
-  url: normalizeSiteUrl(process.env.NEXT_PUBLIC_SITE_URL),
+  url: resolveConfiguredSiteUrl(),
   whatsappNumber: readPublicEnv(process.env.NEXT_PUBLIC_WHATSAPP_NUMBER),
   contact: {
     email: readPublicEnv(process.env.NEXT_PUBLIC_CONTACT_EMAIL),
@@ -67,6 +68,11 @@ export const siteConfig = {
 
 /** Build an absolute URL for canonical metadata and order messages. */
 export function absoluteUrl(path: string): string {
+  // Catalog images already arrive as absolute Supabase Storage URLs. Prefixing
+  // them again produced malformed values such as
+  // `https://site/https://project.supabase.co/...`.
+  if (isPublicHttpUrl(path)) return path;
+
   const normalizedPath = path.startsWith("/") ? path : `/${path}`;
   return `${siteConfig.url}${normalizedPath}`;
 }

@@ -146,6 +146,36 @@ describe("ProductDetail", () => {
     expect(message).toContain("SKU-SMALL");
   });
 
+  it("keeps the selected variant's price when two variants share the same price", () => {
+    vi.stubEnv("NEXT_PUBLIC_WHATSAPP_NUMBER", "+966551234567");
+
+    // Controlled fixture: identical prices are a valid catalog shape, so the
+    // selector must still display the selected variant's own price and SKU
+    // without assuming the price changes.
+    const samePriceVariants: ProductVariant[] = [
+      variants[0]!,
+      { ...variants[1]!, price: variants[0]!.price },
+    ];
+
+    renderDetail(samePriceVariants);
+
+    const options = screen.getAllByTestId("variant-option");
+    const secondPrice = within(options[1]!).getByTestId("variant-price");
+    expect(secondPrice).toHaveTextContent("$150");
+    expect(screen.getByTestId("product-price")).toHaveTextContent("$150");
+
+    fireEvent.click(screen.getByRole("button", { name: /Small/ }));
+
+    expect(screen.getByTestId("product-price")).toHaveTextContent("$150");
+    expect(screen.getByTestId("selected-variant")).toHaveTextContent("Small");
+    expect(mainImage()).toHaveAttribute("src", smallImage);
+
+    const message = orderMessage();
+    expect(message).toContain("• Option: Small");
+    expect(message).toContain("$150");
+    expect(message).toContain("SKU-SMALL");
+  });
+
   it("marks the selected variant as pressed", () => {
     renderDetail();
 

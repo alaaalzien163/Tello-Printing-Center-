@@ -22,6 +22,9 @@ export const routing = defineRouting({
   locales,
   defaultLocale,
   localePrefix: "always",
+  // HTML metadata and the sitemap already expose complete hreflang links.
+  // Disable next-intl's HTTP Link header so it cannot disagree with them.
+  alternateLinks: false,
   // Arabic is the site's default language. Automatic Accept-Language
   // detection is disabled so unprefixed URLs always resolve to Arabic;
   // visitors can still switch to English explicitly or open /en.

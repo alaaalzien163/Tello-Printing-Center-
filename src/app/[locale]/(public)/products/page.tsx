@@ -3,7 +3,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 
 import { ProductCatalog } from "@/components/public/product-catalog";
 import type { Locale } from "@/i18n/routing";
-import { localizedAlternates } from "@/lib/metadata";
+import { localizedAlternates, pageSocialMetadata } from "@/lib/metadata";
 import { getPublicCatalog } from "@/repositories/public-catalog";
 
 interface ProductsPageProps {
@@ -13,11 +13,20 @@ interface ProductsPageProps {
 export async function generateMetadata({ params }: ProductsPageProps): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "metadata" });
+  const title = t("productsTitle");
+  const description = t("productsDescription");
 
   return {
-    title: t("productsTitle"),
-    description: t("productsDescription"),
+    title,
+    description,
     alternates: localizedAlternates(locale, "/products"),
+    ...pageSocialMetadata({
+      locale,
+      title,
+      description,
+      path: "/products",
+      siteName: t("siteName"),
+    }),
   };
 }
 

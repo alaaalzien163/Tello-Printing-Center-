@@ -1,14 +1,14 @@
 import type { Metadata } from "next";
-import { getTranslations, setRequestLocale } from "next-intl/server";
+import { getTranslations } from "next-intl/server";
 
 import { AboutSection } from "@/components/public/about-section";
 import { CategoriesSection } from "@/components/public/categories-section";
 import { ContactSection } from "@/components/public/contact-section";
-import { FeaturedProductsSection } from "@/components/public/featured-products-section";
+// import { FeaturedProductsSection } from "@/components/public/featured-products-section";
 import { HeroSection } from "@/components/public/hero-section";
 import { PrintRequestCta } from "@/components/public/print-request-cta";
 import type { Locale } from "@/i18n/routing";
-import { localizedAlternates } from "@/lib/metadata";
+import { localizedAlternates, pageSocialMetadata } from "@/lib/metadata";
 import { getPublicCatalog } from "@/repositories/public-catalog";
 
 interface HomePageProps {
@@ -21,19 +21,26 @@ export async function generateMetadata({ params }: HomePageProps): Promise<Metad
 
   return {
     title: { absolute: t("defaultTitle") },
+    description: t("description"),
     alternates: localizedAlternates(locale),
+    ...pageSocialMetadata({
+      locale,
+      title: t("defaultTitle"),
+      description: t("description"),
+      siteName: t("siteName"),
+    }),
   };
 }
 
 export default async function HomePage({ params }: HomePageProps) {
   const { locale } = await params;
-  setRequestLocale(locale);
+  // setRequestLocale(locale);
 
   const catalog = await getPublicCatalog();
-  const featured = [
-    ...catalog.products.filter((product) => product.featured),
-    ...catalog.products.filter((product) => !product.featured),
-  ].slice(0, 4);
+  // const featured = [
+  //   ...catalog.products.filter((product) => product.featured),
+  //   ...catalog.products.filter((product) => !product.featured),
+  // ].slice(0, 4);
 
   return (
     <>
@@ -44,7 +51,7 @@ export default async function HomePage({ params }: HomePageProps) {
         products={catalog.products}
         locale={locale}
       />
-      <FeaturedProductsSection products={featured} categories={catalog.categories} locale={locale} />
+      {/* <FeaturedProductsSection products={featured} categories={catalog.categories} locale={locale} /> */}
       <PrintRequestCta />
       <ContactSection />
     </>

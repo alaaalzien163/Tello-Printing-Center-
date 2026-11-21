@@ -4,7 +4,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { ContactSection } from "@/components/public/contact-section";
 import { ContactWhatsAppButton } from "@/components/public/contact-channels";
 import type { Locale } from "@/i18n/routing";
-import { localizedAlternates } from "@/lib/metadata";
+import { localizedAlternates, pageSocialMetadata } from "@/lib/metadata";
 
 interface ContactPageProps {
   params: Promise<{ locale: Locale }>;
@@ -13,10 +13,20 @@ interface ContactPageProps {
 export async function generateMetadata({ params }: ContactPageProps): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "metadata" });
+  const title = t("contactTitle");
+  const description = t("contactDescription");
 
   return {
-    title: t("contactTitle"),
+    title,
+    description,
     alternates: localizedAlternates(locale, "/contact"),
+    ...pageSocialMetadata({
+      locale,
+      title,
+      description,
+      path: "/contact",
+      siteName: t("siteName"),
+    }),
   };
 }
 

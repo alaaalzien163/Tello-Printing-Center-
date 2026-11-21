@@ -126,6 +126,83 @@ export async function getFirstProductWithVariants(
   return null;
 }
 
+/** Extracts the underlying asset URL from a next/image optimized src. */
+function assetUrl(src: string | null): string {
+  if (!src) return "";
+  try {
+    const url = new URL(src, "http://localhost");
+    return url.searchParams.get("url") ?? src;
+  } catch {
+    return src;
+  }
+}
+
+/**
+ * Finds the first published product whose first two variants differ in label
+ * and image, so the switching test can observe those changes. Prices may
+ * legitimately be identical in the real catalog; price correctness is covered
+ * with controlled fixtures in the unit tests.
+ */
+export async function getProductWithSwitchableVariants(
+  page: Page,
+): Promise<PublishedProduct | null> {
+  const categories = await getPublishedCategories(page);
+
+  for (const category of categories) {
+    await page.goto(category.href);
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText(category.name);
+
+    const links = page.locator('h3 a[href*="/products/"]');
+    const count = await links.count();
+    const entries: CatalogEntry[] = [];
+
+    // Collect hrefs before navigating away: the locator is bound to the
+    // category page and becomes stale once a product detail page is open.
+    for (let index = 0; index < count; index += 1) {
+      const link = links.nth(index);
+      const href = await link.getAttribute("href");
+      if (!href) continue;
+
+      entries.push({
+        name: (await link.innerText()).trim(),
+        href,
+        slug: slugFromHref(href),
+      });
+    }
+
+    for (const entry of entries) {
+      await page.goto(entry.href);
+
+      const options = page.getByTestId("variant-option");
+      if ((await options.count()) < 2) continue;
+
+      const first = options.nth(0);
+      const second = options.nth(1);
+      const firstImage = first.locator("img").first();
+      const secondImage = second.locator("img").first();
+      if ((await firstImage.count()) === 0 || (await secondImage.count()) === 0) {
+        continue;
+      }
+
+      const firstLabel = (await first.getByTestId("variant-label").innerText()).trim();
+      const secondLabel = (await second.getByTestId("variant-label").innerText()).trim();
+      const firstSrc = assetUrl(await firstImage.getAttribute("src"));
+      const secondSrc = assetUrl(await secondImage.getAttribute("src"));
+
+      if (
+        firstLabel !== secondLabel &&
+        firstSrc &&
+        secondSrc &&
+        firstSrc !== secondSrc
+      ) {
+        return { ...entry, category };
+      }
+    }
+  }
+
+  return null;
+}
+
 export async function getEmptyCategory(page: Page): Promise<CatalogEntry | null> {
   await page.goto("/en/products");
 

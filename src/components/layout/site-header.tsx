@@ -22,14 +22,14 @@ import { cn } from "@/lib/utils";
 
 interface NavItem {
   href: string;
-  labelKey: "home" | "products" | "printRequest" | "about" | "contact";
+  labelKey: "home" |"about"  | "products" | "printRequest" | "contact";
 }
 
 const navItems: NavItem[] = [
   { href: "/", labelKey: "home" },
+  { href: "/#about", labelKey: "about" },
   { href: "/products", labelKey: "products" },
   { href: "/print-request", labelKey: "printRequest" },
-  { href: "/#about", labelKey: "about" },
   { href: "/contact", labelKey: "contact" },
 ];
 
@@ -48,8 +48,7 @@ export function SiteHeader() {
     <header className="sticky top-0 z-40 w-full border-b border-border bg-background">
       <div className="container-page flex h-(--header-height) items-center justify-between gap-3">
         <Link
-          href="/admin/login"
-          aria-label={t("adminLogin")}
+          href="/"
           className="shrink-0 rounded-md focus-visible:outline-2 focus-visible:outline-offset-4"
         >
           <BrandLogo priority className="w-[min(45vw,12.5rem)]" />
@@ -74,9 +73,15 @@ export function SiteHeader() {
         <div className="hidden items-center gap-1 lg:flex">
           <ThemeSwitcher />
           <LocaleSwitcher />
-          <Button asChild size="sm" className="ms-2 h-9 px-4">
+          {/* <Link
+            href="/admin/login"
+            className="rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2"
+          >
+            {t("login")}
+          </Link> */}
+          {/* <Button asChild size="sm" className="ms-2 h-9 px-4">
             <Link href="/products">{t("products")}</Link>
-          </Button>
+          </Button> */}
         </div>
 
         <div className="flex items-center gap-0.5 lg:hidden">
@@ -111,6 +116,19 @@ export function SiteHeader() {
                     </Link>
                   </SheetClose>
                 ))}
+                <div className="my-1 border-t border-border" role="presentation" />
+                {/* <SheetClose asChild>
+                  <Link
+                    href="/admin/login"
+                    aria-current={isActivePath(pathname, "/admin/login") ? "page" : undefined}
+                    className={cn(
+                      "rounded-md px-3 py-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2",
+                      isActivePath(pathname, "/admin/login") && "bg-secondary text-foreground",
+                    )}
+                  >
+                    {t("login")}
+                  </Link>
+                </SheetClose> */}
               </nav>
               <div className="mt-auto border-t border-border p-4">
                 <SheetClose asChild>

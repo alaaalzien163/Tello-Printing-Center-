@@ -1,15 +1,12 @@
 import type { MetadataRoute } from "next";
 
 import { siteConfig } from "@/config/site";
+import { resolveDeploymentEnvironment } from "@/config/site-url";
+import { buildRobots } from "@/lib/robots";
 
 export default function robots(): MetadataRoute.Robots {
-  return {
-    rules: {
-      userAgent: "*",
-      allow: "/",
-      disallow: ["/admin", "/en/admin", "/ar/admin"],
-    },
-    sitemap: `${siteConfig.url}/sitemap.xml`,
-    host: siteConfig.url,
-  };
+  return buildRobots({
+    siteUrl: siteConfig.url,
+    isPreview: resolveDeploymentEnvironment() === "preview",
+  });
 }

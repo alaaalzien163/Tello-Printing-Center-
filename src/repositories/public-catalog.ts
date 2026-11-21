@@ -89,6 +89,16 @@ export async function getPublicCatalog(): Promise<PublicCatalog> {
   return { categories, products };
 }
 
+/**
+ * Catalog data for the sitemap. Unlike `getPublicCatalog`, this does not
+ * swallow Supabase failures: an empty sitemap would silently hide every
+ * product and category from crawlers.
+ */
+export async function getPublicSitemapCatalog(): Promise<PublicCatalog> {
+  const { categories, products } = await getCachedSnapshot();
+  return { categories, products };
+}
+
 export async function getPublicCategories(): Promise<Category[]> {
   const { categories } = await getSnapshot();
   return categories;
