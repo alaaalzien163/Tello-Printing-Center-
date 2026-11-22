@@ -11,6 +11,7 @@ import {
   signIn,
   waitForAdminLoginHydration,
 } from "./helpers";
+import { assertAppTargetsStaging, e2eWriteGuard } from "./staging";
 
 test.describe("admin authentication", () => {
   test("redirects unauthenticated visitors to the localized login page", async ({ page }) => {
@@ -77,7 +78,9 @@ test.describe("admin authentication", () => {
   });
 
   test("denies an authenticated non-admin account", async ({ page }) => {
+    test.skip(!e2eWriteGuard.allowed, e2eWriteGuard.reason);
     test.skip(!nonAdminCredentials, nonAdminCredentialsMissing);
+    await assertAppTargetsStaging(page.request);
 
     await page.goto("/en/admin/login");
     await waitForAdminLoginHydration(page);

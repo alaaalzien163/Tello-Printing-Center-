@@ -3,6 +3,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { cookies } from "next/headers";
 
 import { getSupabaseConfig } from "./config";
+import { serverSessionCookieOptions } from "./cookies";
 
 /**
  * Request-scoped server client. Never share the returned client between
@@ -18,6 +19,7 @@ export async function createServerSupabaseClient(): Promise<SupabaseClient> {
   const cookieStore = await cookies();
 
   return createServerClient(config.url, config.publishableKey, {
+    cookieOptions: serverSessionCookieOptions(),
     cookies: {
       getAll() {
         return cookieStore.getAll();

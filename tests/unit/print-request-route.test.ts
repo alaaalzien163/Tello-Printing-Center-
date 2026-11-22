@@ -12,14 +12,22 @@ vi.mock("@/lib/print-requests/service", () => ({
 
 import { POST } from "@/app/api/public/print-requests/route";
 
-function submit() {
+function submit({ trustedIp = "203.0.113.10" }: { trustedIp?: string | null } = {}) {
+  const headers: Record<string, string> = {
+    "content-type": "application/json",
+    "cf-connecting-ip": "198.51.100.2",
+    "x-real-ip": "198.51.100.3",
+    "x-forwarded-for": "198.51.100.1",
+  };
+
+  if (trustedIp !== null) {
+    headers["x-vercel-forwarded-for"] = trustedIp;
+  }
+
   return POST(
     new Request("http://localhost/api/public/print-requests", {
       method: "POST",
-      headers: {
-        "content-type": "application/json",
-        "x-forwarded-for": "203.0.113.10",
-      },
+      headers,
       body: JSON.stringify({
         customerName: "Layla Haddad",
         phone: "+963 944 123 456",
@@ -43,6 +51,25 @@ afterEach(() => {
 });
 
 describe("POST /api/public/print-requests", () => {
+  it("fails closed when a deployed runtime lacks the trusted client IP header", async () => {
+    vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("VERCEL_ENV", "production");
+    vi.stubEnv("PRINT_REQUEST_RATE_LIMIT_SECRET", "a-production-secret-that-is-long-enough");
+    const spy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+    const response = await submit({ trustedIp: null });
+
+    expect(response.status).toBe(503);
+    expect(initiatePrintRequest).not.toHaveBeenCalled();
+    await expect(response.json()).resolves.toEqual({ error: "SERVICE_UNAVAILABLE" });
+
+    const logged = JSON.stringify(spy.mock.calls);
+    expect(logged).toContain("untrusted-request-headers");
+    expect(logged).not.toContain("198.51.100.1");
+    expect(logged).not.toContain("198.51.100.2");
+    expect(logged).not.toContain("198.51.100.3");
+  });
+
   it("returns 503 without upload data when the rate-limit RPC fails", async () => {
     initiatePrintRequest.mockResolvedValue({
       ok: false,

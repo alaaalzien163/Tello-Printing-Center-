@@ -1,11 +1,26 @@
 import { defineConfig, devices } from "@playwright/test";
 
-// Load local Playwright credentials without logging or overriding real
-// environment variables. Real values stay in the gitignored .env.local.
+// E2E must never inherit Production credentials from `.env.local`. Only the
+// dedicated, gitignored `.env.test.local` file is loaded here. Next.js loads
+// `.env.local` on its own, so the variables below are forwarded explicitly to
+// the dev server to make it target the same Staging project the guard checks.
 try {
-  process.loadEnvFile(".env.local");
+  process.loadEnvFile(".env.test.local");
 } catch {
-  // The file is optional; credential-dependent tests skip when it is absent.
+  // The file is optional; write tests skip until Staging is configured.
+}
+
+const TEST_PROJECT_ENV_KEYS = [
+  "NEXT_PUBLIC_SUPABASE_URL",
+  "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY",
+  "SUPABASE_SECRET_KEY",
+  "PRINT_REQUEST_RATE_LIMIT_SECRET",
+] as const;
+
+const testProjectEnv: Record<string, string> = {};
+for (const key of TEST_PROJECT_ENV_KEYS) {
+  const value = process.env[key]?.trim();
+  if (value) testProjectEnv[key] = value;
 }
 
 const baseURL = process.env.PLAYWRIGHT_BASE_URL ?? "http://localhost:3000";
@@ -38,5 +53,8 @@ export default defineConfig({
         url: `${baseURL}/en`,
         reuseExistingServer: true,
         timeout: 180_000,
+        env: {
+          ...testProjectEnv,
+        },
       },
 });

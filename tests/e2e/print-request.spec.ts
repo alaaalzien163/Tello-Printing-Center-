@@ -9,10 +9,13 @@ import {
   goToAdminPage,
   signIn,
 } from "./helpers";
+import { assertAppTargetsStaging, e2eWriteGuard } from "./staging";
 
-const submissionReady = Boolean(process.env.SUPABASE_SECRET_KEY);
-const submissionMissing =
-  "Set SUPABASE_SECRET_KEY, apply supabase/migrations/20261114190000_print_requests.sql, supabase/migrations/20261115090000_print_requests_reconcile.sql and supabase/migrations/20261115130000_print_request_rate_limit_ip_hash.sql, and configure the print-request bucket to run submission tests.";
+const submissionReady =
+  e2eWriteGuard.allowed && Boolean(process.env.SUPABASE_SECRET_KEY);
+const submissionMissing = e2eWriteGuard.allowed
+  ? "Set SUPABASE_SECRET_KEY for the Staging project and apply the reviewed migrations before running submission tests."
+  : e2eWriteGuard.reason;
 
 function uniqueSubmissionId(): string {
   return crypto.randomUUID();
@@ -31,6 +34,8 @@ async function createRequestThroughApi(
   request: import("@playwright/test").APIRequestContext,
   overrides: Record<string, unknown> = {},
 ) {
+  await assertAppTargetsStaging(request);
+
   return request.post("/api/public/print-requests", {
     data: {
       ...basePayload,
@@ -145,6 +150,7 @@ test.describe("public print request page", () => {
 
   test("submits a request without attachments after validation", async ({ page }) => {
     test.skip(!submissionReady, submissionMissing);
+    await assertAppTargetsStaging(page.request);
 
     await page.goto("/en/print-request");
 
@@ -166,12 +172,13 @@ test.describe("public print request page", () => {
       process.env.E2E_PRINT_REQUEST_RATE_LIMIT !== "1" || !submissionReady,
       "Set E2E_PRINT_REQUEST_RATE_LIMIT=1 (plus submission configuration) to run the destructive rate-limit test.",
     );
+    await assertAppTargetsStaging(request);
 
     const statuses: number[] = [];
     const isolatedIp = `198.51.100.${Math.floor(Math.random() * 200) + 1}`;
     for (let attempt = 0; attempt < 4; attempt += 1) {
       const response = await request.post("/api/public/print-requests", {
-        headers: { "x-forwarded-for": isolatedIp },
+        headers: { "x-vercel-forwarded-for": isolatedIp },
         data: {
           ...basePayload,
           customerName: `E2E Rate Limit ${Date.now()}-${attempt}`,
@@ -190,6 +197,7 @@ test.describe("public print request page", () => {
       process.env.E2E_PRINT_REQUEST_LIVE_UPLOAD !== "1" || !submissionReady,
       "Set E2E_PRINT_REQUEST_LIVE_UPLOAD=1 (plus submission configuration) to run the real upload test.",
     );
+    await assertAppTargetsStaging(page.request);
     test.setTimeout(180_000);
 
     const storageRequests: string[] = [];
@@ -234,6 +242,7 @@ test.describe("public print request page", () => {
       process.env.E2E_PRINT_REQUEST_UPLOADS !== "1" || !submissionReady,
       "Set E2E_PRINT_REQUEST_UPLOADS=1 (plus submission configuration) to run the upload retry test.",
     );
+    await assertAppTargetsStaging(page.request);
     test.setTimeout(150_000);
 
     await page.route("**/storage/v1/upload/resumable**", (route) => route.abort());

@@ -4,6 +4,7 @@ import { createBrowserClient } from "@supabase/ssr";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { getSupabaseConfig } from "./config";
+import { browserSessionCookieOptions } from "./cookies";
 
 let browserClient: SupabaseClient | null = null;
 
@@ -17,6 +18,8 @@ export function createBrowserSupabaseClient(): SupabaseClient {
     throw new Error("Supabase is not configured.");
   }
 
-  browserClient ??= createBrowserClient(config.url, config.publishableKey);
+  browserClient ??= createBrowserClient(config.url, config.publishableKey, {
+    cookieOptions: browserSessionCookieOptions(),
+  });
   return browserClient;
 }

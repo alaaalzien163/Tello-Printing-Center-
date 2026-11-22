@@ -3,6 +3,8 @@ import { expect, type Page } from "@playwright/test";
 import ar from "../../messages/ar.json";
 import en from "../../messages/en.json";
 
+import { e2eWriteGuard, assertAppTargetsStaging, requireE2EWriteAccess } from "./staging";
+
 export interface E2ECredentials {
   email: string;
   password: string;
@@ -15,21 +17,23 @@ function readCredentials(
   return email && password ? { email, password } : null;
 }
 
-export const adminCredentials = readCredentials(
-  process.env.E2E_ADMIN_EMAIL,
-  process.env.E2E_ADMIN_PASSWORD,
-);
+// Credentials are only exposed when the Staging write guard passes. This
+// prevents a shell-level Production credential from ever being used by tests.
+export const adminCredentials = e2eWriteGuard.allowed
+  ? readCredentials(process.env.E2E_ADMIN_EMAIL, process.env.E2E_ADMIN_PASSWORD)
+  : null;
 
-export const nonAdminCredentials = readCredentials(
-  process.env.E2E_NON_ADMIN_EMAIL,
-  process.env.E2E_NON_ADMIN_PASSWORD,
-);
+export const nonAdminCredentials = e2eWriteGuard.allowed
+  ? readCredentials(process.env.E2E_NON_ADMIN_EMAIL, process.env.E2E_NON_ADMIN_PASSWORD)
+  : null;
 
-export const adminCredentialsMissing =
-  "Set E2E_ADMIN_EMAIL and E2E_ADMIN_PASSWORD in .env.local to run authenticated tests.";
+export const adminCredentialsMissing = e2eWriteGuard.allowed
+  ? "Set E2E_ADMIN_EMAIL and E2E_ADMIN_PASSWORD in .env.test.local to run authenticated tests."
+  : e2eWriteGuard.reason;
 
-export const nonAdminCredentialsMissing =
-  "Set E2E_NON_ADMIN_EMAIL and E2E_NON_ADMIN_PASSWORD in .env.local to run the non-admin test.";
+export const nonAdminCredentialsMissing = e2eWriteGuard.allowed
+  ? "Set E2E_NON_ADMIN_EMAIL and E2E_NON_ADMIN_PASSWORD in .env.test.local to run the non-admin test."
+  : e2eWriteGuard.reason;
 
 export async function waitForAdminLoginHydration(
   page: Page,
@@ -52,6 +56,8 @@ export async function waitForAdminLoginHydration(
 }
 
 export async function signIn(page: Page, locale: "en" | "ar" = "en"): Promise<void> {
+  requireE2EWriteAccess();
+  await assertAppTargetsStaging(page.request);
   if (!adminCredentials) throw new Error(adminCredentialsMissing);
 
   const messages = locale === "ar" ? ar : en;

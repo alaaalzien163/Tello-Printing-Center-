@@ -34,6 +34,21 @@ function errorResponse(
 
 export async function POST(request: Request) {
   const correlationId = randomUUID();
+
+  const clientIp = getClientIp(request.headers);
+  if (!clientIp.ip) {
+    // A deployed runtime without Vercel's trusted client-IP header must fail
+    // closed instead of giving every request a fresh rate-limit identity.
+    console.error("[print-requests] client identity unavailable", {
+      correlationId,
+      operation: "client-ip",
+      reason: "untrusted-request-headers",
+    });
+    return errorResponse("SERVICE_UNAVAILABLE", 503, correlationId);
+  }
+
+  const clientIpAddress = clientIp.ip;
+
   let body: unknown;
 
   try {
@@ -48,7 +63,6 @@ export async function POST(request: Request) {
     return errorResponse("INVALID_INPUT", 400, correlationId);
   }
 
-  const ip = getClientIp(request.headers);
   const rateLimit = getRateLimitSecretStatus();
   let secret = rateLimit.secret;
 
@@ -72,7 +86,7 @@ export async function POST(request: Request) {
   }
 
   const result = await initiatePrintRequest(body, {
-    clientHash: hashClientIp(ip, secret),
+    clientHash: hashClientIp(clientIpAddress, secret),
     correlationId,
   });
 

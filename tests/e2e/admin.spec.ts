@@ -8,6 +8,7 @@ import {
   goToAdminPage,
   signIn,
 } from "./helpers";
+import { e2eWriteGuard } from "./staging";
 
 test.describe("admin uploads", () => {
   test("rejects unauthenticated image uploads", async ({ request }) => {
@@ -31,6 +32,7 @@ test.describe("admin uploads", () => {
 
 test.describe("admin dashboard", () => {
   test.beforeEach(() => {
+    test.skip(!e2eWriteGuard.allowed, e2eWriteGuard.reason);
     test.skip(!adminCredentials, adminCredentialsMissing);
   });
 

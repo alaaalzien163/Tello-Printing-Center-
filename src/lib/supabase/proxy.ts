@@ -2,6 +2,7 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
 import { getSupabaseConfig } from "./config";
+import { serverSessionCookieOptions } from "./cookies";
 
 /**
  * Refreshes the Supabase session and writes rotated cookies to the response.
@@ -15,6 +16,7 @@ export async function updateSupabaseSession(request: NextRequest): Promise<NextR
   let response = NextResponse.next({ request });
 
   const supabase = createServerClient(config.url, config.publishableKey, {
+    cookieOptions: serverSessionCookieOptions(),
     cookies: {
       getAll() {
         return request.cookies.getAll();

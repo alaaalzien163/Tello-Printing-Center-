@@ -279,12 +279,12 @@ test.describe("technical SEO", () => {
   });
 
   test("admin pages remain noindex and nofollow", async ({ request }) => {
-    const response = await request.get("/en/admin/login", { maxRedirects: 0 });
-    expect(response.status()).toBe(200);
+    for (const locale of ["en", "ar"] as const) {
+      const response = await request.get(`/${locale}/admin/login`, { maxRedirects: 0 });
+      expect(response.status()).toBe(200);
 
-    const html = await response.text();
-    expect(html).toMatch(
-      /<meta name="robots" content="noindex, nofollow"/,
-    );
+      const html = await response.text();
+      expect(html).toMatch(/<meta name="robots" content="noindex, nofollow"/);
+    }
   });
 });

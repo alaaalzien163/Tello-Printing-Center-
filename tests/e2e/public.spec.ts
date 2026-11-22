@@ -57,22 +57,30 @@ test.describe("public website", () => {
     await expect(page.locator("html")).toHaveAttribute("dir", "rtl");
   });
 
-  test("opens the localized admin sign-in page from the header login link", async ({ page }) => {
+  test("does not expose a public login link in the header", async ({ page }) => {
+    const header = page.locator("header");
+
     await page.goto("/en/products");
-    await page
-      .locator("header")
-      .getByRole("link", { name: en.nav.login, exact: true })
-      .click();
+    await expect(
+      header.getByRole("link", { name: en.nav.login, exact: true }),
+    ).toHaveCount(0);
+    await expect(header.locator('a[href*="/admin/login"]')).toHaveCount(0);
+
+    await page.goto("/ar/products");
+    await expect(
+      header.getByRole("link", { name: ar.nav.login, exact: true }),
+    ).toHaveCount(0);
+    await expect(header.locator('a[href*="/admin/login"]')).toHaveCount(0);
+  });
+
+  test("serves the localized admin sign-in page directly", async ({ page }) => {
+    await page.goto("/en/admin/login");
     await expect(page).toHaveURL(/\/en\/admin\/login$/);
     await expect(
       page.getByRole("heading", { level: 1, name: en.admin.login.title }),
     ).toBeVisible();
 
-    await page.goto("/ar/products");
-    await page
-      .locator("header")
-      .getByRole("link", { name: ar.nav.login, exact: true })
-      .click();
+    await page.goto("/ar/admin/login");
     await expect(page).toHaveURL(/\/ar\/admin\/login$/);
     await expect(page.locator("html")).toHaveAttribute("dir", "rtl");
     await expect(
@@ -257,25 +265,26 @@ test.describe("mobile navigation", () => {
     await expect(page.getByRole("heading", { level: 1 })).toHaveText(en.products.title);
   });
 
-  test("opens the localized login page from the menu", async ({ page }) => {
+  test("does not expose the login page in the mobile menu", async ({ page }) => {
     await page.goto("/en");
     await page.getByRole("button", { name: en.nav.openMenu }).click();
     const englishDialog = page.getByRole("dialog", { name: en.nav.menuTitle });
-    await englishDialog.getByRole("link", { name: en.nav.login, exact: true }).click();
-    await expect(page).toHaveURL(/\/en\/admin\/login$/);
+    await expect(englishDialog).toBeVisible();
+    await expect(
+      englishDialog.getByRole("link", { name: en.nav.login, exact: true }),
+    ).toHaveCount(0);
 
     await page.goto("/ar");
     await page.getByRole("button", { name: ar.nav.openMenu }).click();
     const arabicDialog = page.getByRole("dialog", { name: ar.nav.menuTitle });
     await expect(arabicDialog).toBeVisible();
+    await expect(
+      arabicDialog.getByRole("link", { name: ar.nav.login, exact: true }),
+    ).toHaveCount(0);
 
     const menuOverflow = await page.evaluate(
       () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
     );
     expect(menuOverflow).toBeLessThanOrEqual(1);
-
-    await arabicDialog.getByRole("link", { name: ar.nav.login, exact: true }).click();
-    await expect(page).toHaveURL(/\/ar\/admin\/login$/);
-    await expect(page.locator("html")).toHaveAttribute("dir", "rtl");
   });
 });

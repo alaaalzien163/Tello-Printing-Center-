@@ -1,5 +1,7 @@
 import { expect, test, type Page } from "@playwright/test";
 
+import ar from "../../messages/ar.json";
+
 /**
  * Official Tello palette extracted from the logo. These values are brand
  * constants: the tests below fail if a theme or component drifts from them.
@@ -167,13 +169,17 @@ test.describe("brand tokens", () => {
     expect(dark.buttonBackground).toBe(RGB.primary);
   });
 
-  test("login link in the public header opens the localized admin sign-in page", async ({
+  test("public header omits the login link while admin sign-in stays reachable", async ({
     page,
   }) => {
     await page.goto("/ar");
     await settle(page);
 
-    await page.locator("header a[href='/ar/admin/login']").first().click();
+    await expect(
+      page.locator("header").getByRole("link", { name: ar.nav.login, exact: true }),
+    ).toHaveCount(0);
+
+    await page.goto("/ar/admin/login");
     await expect(page).toHaveURL(/\/ar\/admin\/login$/);
     await expect(page.locator("html")).toHaveAttribute("dir", "rtl");
   });
