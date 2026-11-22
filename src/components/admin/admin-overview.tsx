@@ -99,8 +99,7 @@ export function AdminOverview() {
     { key: "totalProducts", label: t("overview.totalProducts"), value: stats.totalProducts, icon: Package },
     { key: "totalCategories", label: t("overview.totalCategories"), value: stats.totalCategories, icon: Tags },
     { key: "activeProducts", label: t("overview.activeProducts"), value: stats.activeProducts, icon: CheckCircle2 },
-    { key: "inactiveProducts", label: t("overview.inactiveProducts"), value: stats.inactiveProducts, icon: Archive },
-    { key: "featuredProducts", label: t("overview.featuredProducts"), value: stats.featuredProducts, icon: Star },
+
   ] as const;
 
   if (loading) {
@@ -225,34 +224,9 @@ export function AdminOverview() {
             </ul>
           )}
         </section>
-
-        <section className="rounded-xl border border-border bg-card shadow-soft" aria-labelledby="activity-title">
-          <div className="border-b border-border px-5 py-4">
-            <h3 id="activity-title" className="text-sm font-semibold text-foreground">
-              {t("overview.recentActivity")}
-            </h3>
-            <p className="mt-0.5 text-xs text-muted-foreground">
-              {t("overview.recentActivityDescription")}
-            </p>
-          </div>
-          {activity.length === 0 ? (
-            <div className="px-5 py-12 text-center text-sm text-muted-foreground">
-              {t("overview.noActivity")}
-            </div>
-          ) : (
-            <ul className="divide-y divide-border px-5">
-              {activity.map((entry) => (
-                <ActivityRow key={entry.id} entry={entry} locale={locale} />
-              ))}
-            </ul>
-          )}
-        </section>
       </div>
 
-      <div className="flex items-start gap-3 rounded-xl border border-border bg-muted/40 p-4 text-xs leading-5 text-muted-foreground">
-        <LayoutGrid className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
-        <p>{t("overview.demoDataNote")}</p>
-      </div>
+      
     </div>
   );
 }

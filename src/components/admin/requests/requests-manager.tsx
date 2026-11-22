@@ -174,12 +174,6 @@ export function RequestsManager() {
         </div>
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-3">
-        <StatsCard label={t("stats.total")} value={stats?.total ?? 0} icon={Inbox} tone="primary" />
-        <StatsCard label={t("stats.unread")} value={stats?.unread ?? 0} icon={BellDot} tone="warning" />
-        <StatsCard label={t("stats.pending")} value={stats?.pending ?? 0} icon={Clock3} />
-      </div>
-
       <Card className="p-4 shadow-soft">
         <div className="grid gap-3 lg:grid-cols-[1fr_13rem_11rem] lg:items-end">
           <div className="grid gap-2">

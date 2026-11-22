@@ -1,10 +1,10 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Check, Languages, Loader2, LogOut, Monitor, Moon, Sun, UserRound } from "lucide-react";
+import { Check, Languages, Loader2, Monitor, Moon, Sun, UserRound } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useTheme } from "next-themes";
-import { useEffect } from "react";
+import { useEffect, useSyncExternalStore } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
@@ -19,8 +19,6 @@ import { usePathname, useRouter } from "@/i18n/navigation";
 import { localeNames, locales, type Locale } from "@/i18n/routing";
 import { getRepositories } from "@/repositories";
 import { createProfileSchema, type ProfileFormValues } from "@/schemas/contact";
-import { signOutAdmin } from "@/lib/actions/admin-auth";
-
 const repositories = getRepositories();
 
 const themeOptions: Array<{ value: ThemePreference; labelKey: "light" | "dark" | "system"; icon: typeof Sun }> = [
@@ -28,6 +26,8 @@ const themeOptions: Array<{ value: ThemePreference; labelKey: "light" | "dark" |
   { value: "dark", labelKey: "dark", icon: Moon },
   { value: "system", labelKey: "system", icon: Monitor },
 ];
+
+const emptySubscribe = () => () => {};
 
 export function AdminProfile() {
   const t = useTranslations("admin.profile");
@@ -38,9 +38,14 @@ export function AdminProfile() {
   const locale = useLocale() as Locale;
   const pathname = usePathname();
   const router = useRouter();
-  const { profile, loading, reload } = useDemoData();
+  const { profile,  reload } = useDemoData();
   const { theme, setTheme } = useTheme();
   const session = useAdminSession();
+  // `next-themes` resolves the stored preference on the client, so the server
+  // and the hydration render must not branch on `theme` or React reports a
+  // hydration mismatch. Render the unselected state until mounted, then sync.
+  const mounted = useSyncExternalStore(emptySubscribe, () => true, () => false);
+  const activeTheme = mounted ? theme : undefined;
 
   const {
     register,
@@ -73,11 +78,6 @@ export function AdminProfile() {
     router.replace(`${pathname}${search}${hash}`, { locale: target, scroll: false });
   }
 
-  async function signOut() {
-    await signOutAdmin();
-    router.replace("/admin/login");
-    router.refresh();
-  }
 
   const initials = profile?.name
     ? profile.name
@@ -199,10 +199,10 @@ export function AdminProfile() {
                     <Button
                       key={value}
                       type="button"
-                      variant={theme === value ? "default" : "outline"}
+                      variant={activeTheme === value ? "default" : "outline"}
                       size="sm"
                       onClick={() => setTheme(value)}
-                      aria-pressed={theme === value}
+                      aria-pressed={mounted ? activeTheme === value : undefined}
                     >
                       <Icon className="size-3.5" aria-hidden="true" />
                       {tt(labelKey)}
@@ -215,26 +215,6 @@ export function AdminProfile() {
           </section>
         </div>
 
-        <div className="space-y-5">
-          <section className="rounded-xl border border-border bg-card p-5 shadow-soft sm:p-6">
-            <div className="flex size-10 items-center justify-center rounded-xl bg-muted text-muted-foreground">
-              <UserRound className="size-5" aria-hidden="true" />
-            </div>
-            <h3 className="mt-4 text-base font-semibold text-foreground">{t("sessionTitle")}</h3>
-            <p className="mt-2 text-sm leading-6 text-muted-foreground">{t("sessionDescription")}</p>
-            {loading ? (
-              <p className="mt-2 text-xs text-muted-foreground">{tc("loading")}</p>
-            ) : null}
-            <Button
-              variant="outline"
-              className="mt-5 w-full text-destructive hover:bg-destructive/10 hover:text-destructive"
-              onClick={() => void signOut()}
-            >
-              <LogOut className="size-4 rtl:rotate-180" aria-hidden="true" />
-              {t("signOut")}
-            </Button>
-          </section>
-        </div>
       </div>
     </div>
   );

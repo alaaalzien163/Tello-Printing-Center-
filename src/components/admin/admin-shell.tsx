@@ -156,14 +156,14 @@ function AdminSidebar({
       <SidebarNav onNavigate={onNavigate} unreadCount={unreadCount} />
 
       <div className="space-y-1 border-t border-sidebar-border p-3">
-        <Button
+        {/* <Button
           variant="ghost"
           className="h-9 w-full justify-start gap-2.5 px-3 text-sm text-muted-foreground"
           onClick={onRequestReset}
         >
           <RotateCcw className="size-4" aria-hidden="true" />
           {t("common.resetDemo")}
-        </Button>
+        </Button> */}
         <Button
           variant="ghost"
           className="h-9 w-full justify-start gap-2.5 px-3 text-sm text-muted-foreground"
